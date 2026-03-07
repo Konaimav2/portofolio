@@ -1,0 +1,228 @@
+:root {
+    --bg-charcoal: #25262a;
+    --bg-charcoal-alt: #1e1e22;
+    --text-main: #f0f0f0;
+    --text-muted: #a0a0a5;
+    --accent-orange: #d95a00;
+    --accent-hover: #ff7300;
+}
+
+/*
+******************************************************
+* ARRAFFI PORTFOLIO: MAIN STYLESHEET
+* Handles dark charcoal/orange theme and layout
+******************************************************
+*/
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--bg-charcoal);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: var(--accent-orange);
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--accent-hover);
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-charcoal-alt);
+    padding: 15px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+.nav-brand span {
+    color: var(--accent-orange);
+    font-size: 1.2rem;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.nav-links a:hover {
+    color: var(--accent-orange);
+}
+
+.btn-contact {
+    background-color: var(--accent-orange);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.btn-contact:hover {
+    background-color: var(--accent-hover);
+    color: #fff;
+}
+
+.section {
+    padding: 80px 0;
+}
+
+.bg-alt {
+    background-color: var(--bg-charcoal-alt);
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    color: var(--accent-orange);
+}
+
+.about-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.about-text h2 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.about-text h3 {
+    color: var(--accent-orange);
+    margin-bottom: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background-color: var(--bg-charcoal);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    border: 1px solid #333;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.card-content h3 {
+    margin-bottom: 5px;
+    margin-top: 0;
+}
+
+.date {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.card-link {
+    display: inline-block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.image-placeholder {
+    width: 100%;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.image-placeholder img {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    object-fit: contain;
+}
+
+.profile-pic {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 4px solid var(--accent-orange);
+    background-color: var(--bg-charcoal);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.profile-pic img {
+    object-fit: cover;
+    max-height: none;
+    height: 100%;
+}
+
+.contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 35px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.contact-links a {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.contact-links a:hover {
+    transform: translateY(-8px);
+}
+
+.contact-icon {
+    width: 45px;
+    height: 45px;
+    filter: invert(1);
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #1a1a1d;
+    color: var(--text-muted);
+}

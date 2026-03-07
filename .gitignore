@@ -1,0 +1,29 @@
+# ── Environment variables (NEVER commit these) ──
+# Matches .env in root AND all subdirectories (e.g. backend/.env, frontend/.env)
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.backup
+
+# ── Wrangler / Cloudflare ──
+.wrangler/
+
+# ── Node (if you ever add tooling) ──
+node_modules/
+npm-debug.log*
+
+# ── OS junk ──
+.DS_Store
+Thumbs.db
+
+# ── Editor ──
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Package manager / dependency junk ──
+package-lock.json.bak
+.npm/
+.pnpm-store/
+.yarn/
