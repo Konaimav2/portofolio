@@ -3,15 +3,10 @@
     --bg-charcoal-alt: #1e1e22;
     --text-main: #f0f0f0;
     --text-muted: #a0a0a5;
-    --accent-orange: #d95a00;
-    --accent-hover: #ff7300;
+    --accent-orange: #d95a00; /* Main dark orange */
+    --accent-hover: #ff7300; /* Brighter dark orange for hover effects */
+    --accent-light-orange: #ffb366; /* Light orange for active sections and underlines */
 }
-
-/* ========================================================================
-   ARRAFFI'S PORTFOLIO CSS
-   Mobile-first, flex/grid based layout for maximum performance.
-======================================================================== 
-*/
 
 html {
     scroll-behavior: smooth;
@@ -42,6 +37,9 @@ a:hover {
     padding: 0 20px;
 }
 
+/* =========================================
+   NAVIGATION BAR
+   ========================================= */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -51,35 +49,50 @@ a:hover {
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-.nav-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--text-main);
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 30px;
 }
 
-.nav-brand span {
-    color: var(--accent-orange);
+.nav-name {
     font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent-light-orange);
+    margin-right: -10px; /* Small pull to the left to align with sections */
 }
 
-.nav-links {
-    list-style: none;
+.nav-links.middle {
     display: flex;
     gap: 30px;
-    margin: 0;
-    padding: 0;
+    justify-content: center;
+    flex-grow: 1; /* Center the links */
 }
 
-.nav-links a {
+.nav-links.middle a {
     color: var(--text-main);
     font-weight: 500;
+    font-size: 1.1rem;
+    position: relative; /* For the underline */
 }
 
-.nav-links a:hover {
-    color: var(--accent-orange);
+/* Style for the active section: text color changes and a light orange underline */
+.nav-links.middle a.active,
+.nav-links.middle a:hover {
+    color: var(--accent-light-orange);
+}
+
+.nav-links.middle a.active::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--accent-light-orange);
+    position: absolute;
+    bottom: -8px;
+    left: 0;
 }
 
 .btn-contact {
@@ -95,6 +108,9 @@ a:hover {
     color: #fff;
 }
 
+/* =========================================
+   SECTIONS & TYPOGRAPHY
+   ========================================= */
 .section {
     padding: 80px 0;
 }
@@ -103,11 +119,15 @@ a:hover {
     background-color: var(--bg-charcoal-alt);
 }
 
+.bg-contact {
+    background-color: #333; /* Very dark charcoal for the fully colored block */
+}
+
 .section-title {
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 40px;
-    color: var(--accent-orange);
+    color: var(--accent-light-orange);
 }
 
 .about-container {
@@ -115,12 +135,6 @@ a:hover {
     align-items: center;
     justify-content: space-between;
     gap: 40px;
-    flex-wrap: wrap;
-}
-
-.about-text {
-    flex: 1;
-    min-width: 300px;
 }
 
 .about-text h2 {
@@ -133,6 +147,9 @@ a:hover {
     margin-bottom: 20px;
 }
 
+/* =========================================
+   CARDS & IMAGES (Uniform, condensed sizing)
+   ========================================= */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -144,7 +161,7 @@ a:hover {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    border: 1px solid #333;
+    border: 1px solid #333; /* Dark border for framing */
 }
 
 .card-content {
@@ -153,7 +170,6 @@ a:hover {
 
 .card-content h3 {
     margin-bottom: 5px;
-    margin-top: 0;
 }
 
 .date {
@@ -170,62 +186,63 @@ a:hover {
 
 .image-placeholder {
     width: 100%;
-    background-color: #f0f0f0;
+    background-color: #333; /* Dark placeholder color */
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 20px;
-    box-sizing: border-box;
 }
 
 .image-placeholder img {
     width: 100%;
-    height: auto;
-    max-height: 200px;
-    object-fit: contain;
+    height: 100%;
+    object-fit: contain; /* Ensures the logo fits within the frame */
+}
+
+/* Smaller uniform size for the cards in projects and experience */
+.project-pic, .exp-pic {
+    height: 150px;
+    width: 100%;
 }
 
 .profile-pic {
-    width: 100%;
-    max-width: 300px;
-    aspect-ratio: 1 / 1;
+    width: 250px; /* Small picture size */
+    height: 250px;
     border-radius: 50%;
     border: 4px solid var(--accent-orange);
-    background-color: var(--bg-charcoal);
-    padding: 0;
-    flex-shrink: 0;
-    margin: 0 auto;
 }
 
-.profile-pic img {
-    object-fit: cover;
-    height: 100%;
-    width: 100%;
-    border-radius: 50%;
+/* =========================================
+   CONTACT SECTION (Fully colored block)
+   ========================================= */
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.contact-text {
+    font-size: 1.1rem;
+    color: var(--text-main);
 }
 
 .contact-links {
     display: flex;
-    justify-content: center;
-    gap: 35px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.contact-item {
+    font-size: 1.1rem;
+    display: flex;
     align-items: center;
+    gap: 15px;
 }
 
-.contact-links a {
-    display: inline-block;
-    transition: transform 0.3s ease;
-}
-
-.contact-links a:hover {
-    transform: translateY(-8px);
-}
-
-.contact-icon {
-    width: 45px;
-    height: 45px;
-    filter: invert(1);
+.icon {
+    font-size: 1.5rem;
+    color: var(--accent-orange);
 }
 
 footer {
@@ -233,17 +250,4 @@ footer {
     padding: 20px;
     background-color: #1a1a1d;
     color: var(--text-muted);
-}
-
-@media (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        gap: 15px;
-        padding: 15px 20px;
-    }
-    
-    .about-container {
-        flex-direction: column-reverse;
-        text-align: center;
-    }
 }
