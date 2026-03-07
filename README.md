@@ -38,10 +38,10 @@ This portfolio is configured for immediate deployment on **Vercel**.
 3. Vercel will automatically detect the static files and deploy them. Any future pushes to the `main` branch will trigger an automatic rebuild and deployment.
 
 ## 📫 Connect with Me
-* **Email:** [your-email@example.com](mailto:your-email@example.com)
-* **Discord:** [Insert Discord Link]
-* **X (Twitter):** [@yourusername](https://x.com/yourusername)
-* **Instagram:** [@yourusername](https://instagram.com/yourusername)
+* **Email:** [kona@konaima.my.id](mailto:kona@konaima.my.id)
+* **Discord:** [@konasgor](https://discordapp.com/users/406852668028616721)
+* **X (Twitter):** [@arraffianakbaik](https://x.com/arraffianakbaik)
+* **Instagram:** [@konasgor](https://instagram.com/konasgor)
 
 ---
 *&copy; 2026 Arraffi (Konaima). All rights reserved.*
