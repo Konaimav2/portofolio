@@ -11,7 +11,7 @@
 /*
 /************************************************************************
  * PORTFOLIO CSS
- * Fixed mobile layout, typography, and responsive grid scaling
+ * Repositioned header, fixed mobile grid alignment, removed mobile highlight
  ************************************************************************/
 */
 
@@ -60,41 +60,39 @@ a:hover {
     position: sticky;
     top: 0;
     z-index: 100;
-    flex-wrap: wrap;
-    gap: 15px;
 }
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-}
-
-.nav-name {
-    font-size: 1.2rem;
-    font-weight: 600;
+.nav-brand {
+    font-size: 1.4rem;
+    font-weight: 700;
     color: var(--accent-light-orange);
 }
 
-.nav-links.middle {
-    display: flex;
-    gap: 30px;
-    flex-grow: 1;
+.nav-brand span {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 1.1rem;
 }
 
-.nav-links.middle a {
+.nav-links {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.nav-links a {
     color: var(--text-main);
     font-weight: 500;
     font-size: 1.05rem;
     position: relative;
 }
 
-.nav-links.middle a.active,
-.nav-links.middle a:hover {
+.nav-links a.active,
+.nav-links a:hover {
     color: var(--accent-light-orange);
 }
 
-.nav-links.middle a.active::after {
+.nav-links a.active::after {
     content: '';
     display: block;
     width: 100%;
@@ -298,28 +296,25 @@ footer {
         flex-direction: column;
         padding: 15px;
         gap: 15px;
+        text-align: center;
     }
     
-    .nav-links.middle {
+    .nav-links {
         width: 100%;
         justify-content: center;
         flex-wrap: wrap;
         gap: 15px;
     }
 
-    .header-right {
-        width: 100%;
-        justify-content: space-between;
-        gap: 15px;
-    }
-
-    .nav-name {
-        font-size: 1.1rem;
+    /* Disable the underline highlight on mobile */
+    .nav-links a.active::after {
+        display: none;
     }
 
     .btn-contact {
-        padding: 8px 15px;
-        font-size: 0.95rem;
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
     }
 
     .about-container {
@@ -331,7 +326,13 @@ footer {
         font-size: 2.2rem;
     }
 
+    /* Force single column on mobile to fix the grid pushing right */
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
     .contact-grid {
+        grid-template-columns: 1fr;
         text-align: center;
     }
 
