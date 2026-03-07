@@ -3,22 +3,35 @@
     --bg-charcoal-alt: #1e1e22;
     --text-main: #f0f0f0;
     --text-muted: #a0a0a5;
-    --accent-orange: #d95a00; /* Main dark orange */
-    --accent-hover: #ff7300; /* Brighter dark orange for hover effects */
-    --accent-light-orange: #ffb366; /* Light orange for active sections and underlines */
+    --accent-orange: #d95a00;
+    --accent-hover: #ff7300;
+    --accent-light-orange: #ffb366;
+}
+
+/*
+/************************************************************************
+ * PORTFOLIO CSS
+ * Fixed mobile layout, typography, and responsive grid scaling
+ ************************************************************************/
+*/
+
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 body {
     background-color: var(--bg-charcoal);
     color: var(--text-main);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 a {
@@ -32,14 +45,12 @@ a:hover {
 }
 
 .container {
+    width: 100%;
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
-/* =========================================
-   NAVIGATION BAR
-   ========================================= */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -49,6 +60,8 @@ a:hover {
     position: sticky;
     top: 0;
     z-index: 100;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .header-right {
@@ -59,26 +72,23 @@ a:hover {
 
 .nav-name {
     font-size: 1.2rem;
-    font-weight: bold;
+    font-weight: 600;
     color: var(--accent-light-orange);
-    margin-right: -10px; /* Small pull to the left to align with sections */
 }
 
 .nav-links.middle {
     display: flex;
     gap: 30px;
-    justify-content: center;
-    flex-grow: 1; /* Center the links */
+    flex-grow: 1;
 }
 
 .nav-links.middle a {
     color: var(--text-main);
     font-weight: 500;
-    font-size: 1.1rem;
-    position: relative; /* For the underline */
+    font-size: 1.05rem;
+    position: relative;
 }
 
-/* Style for the active section: text color changes and a light orange underline */
 .nav-links.middle a.active,
 .nav-links.middle a:hover {
     color: var(--accent-light-orange);
@@ -88,19 +98,21 @@ a:hover {
     content: '';
     display: block;
     width: 100%;
-    height: 2px;
+    height: 3px;
     background-color: var(--accent-light-orange);
     position: absolute;
-    bottom: -8px;
+    bottom: -6px;
     left: 0;
+    border-radius: 2px;
 }
 
 .btn-contact {
     background-color: var(--accent-orange);
     color: #fff;
     padding: 10px 20px;
-    border-radius: 5px;
-    font-weight: bold;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .btn-contact:hover {
@@ -108,9 +120,6 @@ a:hover {
     color: #fff;
 }
 
-/* =========================================
-   SECTIONS & TYPOGRAPHY
-   ========================================= */
 .section {
     padding: 80px 0;
 }
@@ -120,12 +129,13 @@ a:hover {
 }
 
 .bg-contact {
-    background-color: #333; /* Very dark charcoal for the fully colored block */
+    background-color: #1a1a1d;
 }
 
 .section-title {
     text-align: center;
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    font-weight: 700;
     margin-bottom: 40px;
     color: var(--accent-light-orange);
 }
@@ -135,89 +145,107 @@ a:hover {
     align-items: center;
     justify-content: space-between;
     gap: 40px;
+    flex-wrap: wrap;
+}
+
+.about-text {
+    flex: 1 1 300px;
 }
 
 .about-text h2 {
-    font-size: 3rem;
-    margin-bottom: 10px;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
 }
 
 .about-text h3 {
     color: var(--accent-orange);
+    font-weight: 600;
     margin-bottom: 20px;
 }
 
-/* =========================================
-   CARDS & IMAGES (Uniform, condensed sizing)
-   ========================================= */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
 }
 
 .card {
     background-color: var(--bg-charcoal);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    border: 1px solid #333; /* Dark border for framing */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-content {
     padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-content h3 {
     margin-bottom: 5px;
+    font-weight: 600;
 }
 
 .date {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     margin-bottom: 15px;
 }
 
 .card-link {
     display: inline-block;
-    margin-top: 15px;
-    font-weight: bold;
+    margin-top: auto;
+    font-weight: 600;
+    padding-top: 15px;
 }
 
 .image-placeholder {
     width: 100%;
-    background-color: #333; /* Dark placeholder color */
+    background-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    padding: 15px;
 }
 
-.image-placeholder img {
+.project-pic, .exp-pic {
+    height: 140px;
+    width: 100%;
+}
+
+.project-pic img, .exp-pic img {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Ensures the logo fits within the frame */
-}
-
-/* Smaller uniform size for the cards in projects and experience */
-.project-pic, .exp-pic {
-    height: 150px;
-    width: 100%;
+    object-fit: contain;
 }
 
 .profile-pic {
-    width: 250px; /* Small picture size */
-    height: 250px;
+    width: 240px;
+    height: 240px;
     border-radius: 50%;
     border: 4px solid var(--accent-orange);
+    flex-shrink: 0;
+    margin: 0 auto;
+    padding: 0;
 }
 
-/* =========================================
-   CONTACT SECTION (Fully colored block)
-   ========================================= */
+.profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
 .contact-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 40px;
     align-items: center;
 }
@@ -230,24 +258,88 @@ a:hover {
 .contact-links {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-}
-
-.contact-item {
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
     gap: 15px;
 }
 
+.contact-item {
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--text-main);
+    transition: transform 0.2s, color 0.3s;
+}
+
+.contact-item:hover {
+    color: var(--accent-light-orange);
+    transform: translateX(5px);
+}
+
 .icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--accent-orange);
+    width: 30px;
+    text-align: center;
 }
 
 footer {
     text-align: center;
     padding: 20px;
-    background-color: #1a1a1d;
+    background-color: #111;
     color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* =========================================
+   MOBILE RESPONSIVE RULES
+   ========================================= */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        padding: 15px;
+        gap: 15px;
+    }
+    
+    .nav-links.middle {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .nav-name {
+        font-size: 1.1rem;
+    }
+
+    .btn-contact {
+        padding: 8px 15px;
+        font-size: 0.95rem;
+    }
+
+    .about-container {
+        flex-direction: column-reverse;
+        text-align: center;
+    }
+
+    .about-text h2 {
+        font-size: 2.2rem;
+    }
+
+    .contact-grid {
+        text-align: center;
+    }
+
+    .contact-item {
+        justify-content: center;
+    }
+    
+    .contact-item:hover {
+        transform: scale(1.05);
+    }
 }
