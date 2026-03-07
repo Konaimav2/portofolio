@@ -40,17 +40,17 @@
             <div class="grid">
                 <div class="card">
                     <div class="image-placeholder project-pic">
-                        <img src="https://path-to-your-whatsapp-logo.png" alt="WhatsApp Bot Developer">
+                        <img src="https://cdn.discordapp.my.id/cdn/secure/955a6d.png" alt="WhatsApp Bot Developer">
                     </div>
                     <div class="card-content">
                         <h3>WhatsApp Bot Developer</h3>
                         <p class="date">Since 2024</p>
-                        <p>A brief, concise description of your bot development. Explain its key features and what it aims to achieve.</p>
+                        <p>Developing versatile and automated WhatsApp bots to streamline tasks and enhance community engagement.</p>
                     </div>
                 </div>
                 <div class="card">
                     <div class="image-placeholder project-pic">
-                        <img src="path-to-your-simplecdn-logo.png" alt="SimpleCDN Logo">
+                        <img src="https://cdn.discordapp.my.id/cdn/secure/1134f1.png" alt="SimpleCDN Logo">
                     </div>
                     <div class="card-content">
                         <h3>SimpleCDN</h3>
@@ -69,23 +69,23 @@
             <div class="grid">
                 <div class="card">
                     <div class="image-placeholder exp-pic">
-                        <img src="path-to-your-arqonara-logo.png" alt="Arqonara Hosting Logo">
+                        <img src="https://cdn.discordapp.my.id/cdn/secure/ecefc4.png" alt="Arqonara Hosting Logo">
                     </div>
                     <div class="card-content">
-                        <h3>Arqonara Minecraft Hosting</h3>
-                        <p class="date">August 2025 - Present</p>
-                        <p>A concise explanation of your key roles and responsibilities during this time. Keep it consistent in size with the other cards.</p>
+                        <h3>Staff / Manager</h3>
+                        <p class="date">Arqonara Minecraft Hosting | August 2025 - Present</p>
+                        <p>Working to maintain and improve game hosting infrastructure.</p>
                         <a href="https://arqonara.com/" target="_blank" class="card-link">Visit Website</a>
                     </div>
                 </div>
                 <div class="card">
                     <div class="image-placeholder exp-pic">
-                        <img src="path-to-your-heppycloud-logo.png" alt="HeppyCloud Hosting Logo">
+                        <img src="https://cdn.discordapp.my.id/cdn/secure/7295b2.png" alt="HeppyCloud Hosting Logo">
                     </div>
                     <div class="card-content">
-                        <h3>HeppyCloud Minecraft Hosting</h3>
-                        <p class="date">March 2025 - March 2026</p>
-                        <p>A concise explanation of your key roles and responsibilities during this time. Ensure this description is similar in length to the others.</p>
+                        <h3>Customer Services</h3>
+                        <p class="date">HeppyCloud Minecraft Hosting | March 2025 - March 2026</p>
+                        <p>Handled game server maintenance and customer environment stability.</p>
                     </div>
                 </div>
             </div>
@@ -101,16 +101,16 @@
                 </div>
                 <div class="contact-links">
                     <div class="contact-item">
-                        <span class="icon">&#9993;</span> Email: user@example.com
+                        <span class="icon">&#9993;</span> Email: kona@konaima.my.id
                     </div>
                     <div class="contact-item">
-                        <span class="icon">&#128247;</span> Instagram: @user
+                        <span class="icon">&#128247;</span> Instagram: @konasgor
                     </div>
                     <div class="contact-item">
-                        <span class="icon">&#128172;</span> Discord: user
+                        <span class="icon">&#128172;</span> Discord: @konasgor
                     </div>
                     <div class="contact-item">
-                        <span class="icon">&#120143;</span> Twitter (X): @user
+                        <span class="icon">&#120143;</span> Twitter (X): @arraffianakbaik
                     </div>
                 </div>
             </div>
@@ -120,49 +120,45 @@
     <footer>
         <p>&copy; 2026 Arraffi (Konaima). All rights reserved.</p>
     </footer>
-<script>
-    const links = document.querySelectorAll('.nav-links a, .btn-contact');
 
-    /* ========================================================================
-       SCROLL MANAGEMENT & ACTIVE STATE
-       Prevents URL hashing and dynamically updates active nav links
-    ======================================================================== */
-    links.forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            const targetId = this.getAttribute('href');
-            if (targetId && targetId.startsWith('#')) {
-                e.preventDefault();
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+    <script>
+        const links = document.querySelectorAll('.nav-links a, .btn-contact');
+
+        links.forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId.startsWith('#')) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
                 }
-            }
-        });
-    });
-
-    const sections = document.querySelectorAll('section');
-    const navItems = document.querySelectorAll('.nav-links a');
-
-    window.addEventListener('scroll', () => {
-        let current = '';
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            if (pageYOffset >= (sectionTop - 150)) {
-                current = section.getAttribute('id');
-            }
+            });
         });
 
-        navItems.forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('href') === `#${current}`) {
-                item.classList.add('active');
-            }
+        const sections = document.querySelectorAll('section');
+        const navItems = document.querySelectorAll('.nav-links a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= (sectionTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === `#${current}`) {
+                    item.classList.add('active');
+                }
+            });
         });
-    });
-</script>
-    
+    </script>
 </body>
 </html>
