@@ -11,7 +11,7 @@
 /*
 /************************************************************************
  * PORTFOLIO CSS
- * Repositioned header, fixed mobile grid alignment, removed mobile highlight
+ * Sticky header fixed, overflow-x clip applied to prevent shifting
  ************************************************************************/
 */
 
@@ -21,7 +21,6 @@
 
 html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
 }
 
 body {
@@ -31,7 +30,7 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.6;
-    overflow-x: hidden;
+    overflow-x: clip; /* Fixes mobile shift without breaking sticky nav! */
 }
 
 a {
@@ -143,11 +142,11 @@ a:hover {
     align-items: center;
     justify-content: space-between;
     gap: 40px;
-    flex-wrap: wrap;
 }
 
 .about-text {
     flex: 1 1 300px;
+    width: 100%;
 }
 
 .about-text h2 {
@@ -164,7 +163,7 @@ a:hover {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 25px;
 }
 
@@ -227,6 +226,7 @@ a:hover {
 .profile-pic {
     width: 240px;
     height: 240px;
+    max-width: 100%;
     border-radius: 50%;
     border: 4px solid var(--accent-orange);
     flex-shrink: 0;
@@ -306,7 +306,6 @@ footer {
         gap: 15px;
     }
 
-    /* Disable the underline highlight on mobile */
     .nav-links a.active::after {
         display: none;
     }
@@ -320,13 +319,13 @@ footer {
     .about-container {
         flex-direction: column-reverse;
         text-align: center;
+        gap: 20px;
     }
 
     .about-text h2 {
         font-size: 2.2rem;
     }
 
-    /* Force single column on mobile to fix the grid pushing right */
     .grid {
         grid-template-columns: 1fr;
     }
