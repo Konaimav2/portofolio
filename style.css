@@ -255,6 +255,10 @@ a:hover {
     transform: scale(1.7);
 }
 
+.wa-logo {
+    transform: scale(0.9);
+}
+
 .profile-pic {
     width: 240px;
     height: 240px;
