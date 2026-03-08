@@ -144,8 +144,7 @@ a:hover {
 }
 
 .section {
-    /* Reduced the top padding to 40px to pull the title up */
-    padding: 40px 0 80px 0;
+    padding: 20px 0 80px 0;
 }
 
 .bg-alt {
@@ -252,7 +251,7 @@ a:hover {
 }
 
 .simplecdn-logo {
-    transform: scale(2.8);
+    transform: scale(1.7);
 }
 
 .profile-pic {
