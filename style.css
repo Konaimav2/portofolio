@@ -242,6 +242,7 @@ a:hover {
 .project-pic, .exp-pic {
     height: 140px;
     width: 100%;
+    background-color: #101012;
 }
 
 .project-pic img, .exp-pic img {
