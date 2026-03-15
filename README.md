@@ -5,7 +5,7 @@ Welcome to the source code for my personal portfolio website. I am Arraffi (know
 This repository contains the static frontend code for my portfolio, showcasing my projects, professional experience, and technical background.
 
 ## 🚀 Live Demo
-**[Insert your Vercel live link here, e.g., https://arraffi-portfolio.vercel.app]**
+**https://arraffi.my.id/**
 
 ## 🛠️ Tech Stack
 This project is deliberately kept lightweight, fast, and dependency-free:
