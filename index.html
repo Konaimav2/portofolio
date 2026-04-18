@@ -199,6 +199,27 @@
         .hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--orange); }
         .hero-eyebrow em { color: var(--orange2); font-style: normal; }
 
+        .hero-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 2px solid var(--orange);
+            overflow: hidden;
+            margin-bottom: 22px;
+            flex-shrink: 0;
+            opacity: 0;
+            animation: up .5s .1s forwards;
+        }
+        .hero-avatar img {
+            display: block;
+            width: 72px;
+            height: 72px;
+            max-width: 72px;
+            max-height: 72px;
+            object-fit: cover;
+            object-position: center top;
+        }
+
         .hero-name {
             font-family: 'Unbounded', sans-serif;
             font-weight: 900;
@@ -613,7 +634,7 @@
     <div class="hero-avatar">
         <img src="https://cdn.discordapp.my.id/cdn/secure/776153.jpg" alt="Arraffi">
     </div>
-    
+
     <div class="hero-eyebrow">
         Backend Developer &nbsp;—&nbsp; <em>Central Java, Indonesia 🇮🇩</em>
     </div>
