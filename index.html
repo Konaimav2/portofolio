@@ -144,7 +144,7 @@
         /* ── HERO ── */
         #hero {
             min-height: 100vh;
-            padding: 60px 40px 0;
+            padding: 30px 40px 0;
             padding-right: 76px;
             display: flex;
             flex-direction: column;
@@ -199,23 +199,30 @@
         .hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--orange); }
         .hero-eyebrow em { color: var(--orange2); font-style: normal; }
 
+        .hero-identity {
+            display: flex;
+            align-items: center;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 28px;
+            margin-bottom: 36px;
+            opacity: 0;
+            animation: up .6s .3s forwards;
+        }
         .hero-avatar {
-            width: 72px;
-            height: 72px;
+            width: 264px;
+            height: 264px;
             border-radius: 50%;
             border: 2px solid var(--orange);
             overflow: hidden;
-            margin-bottom: 22px;
             flex-shrink: 0;
-            opacity: 0;
-            animation: up .5s .1s forwards;
         }
         .hero-avatar img {
             display: block;
-            width: 72px;
-            height: 72px;
-            max-width: 72px;
-            max-height: 72px;
+            width: 264px;
+            height: 264px;
+            max-width: 264px;
+            max-height: 264px;
             object-fit: cover;
             object-position: center top;
         }
@@ -226,9 +233,7 @@
             font-size: clamp(3.2rem, 7.5vw, 7.5rem);
             line-height: 0.92;
             letter-spacing: -0.04em;
-            margin-bottom: 40px;
-            opacity: 0;
-            animation: up .6s .35s forwards;
+            margin-bottom: 0;
         }
         .hero-name .or { color: var(--orange); }
 
@@ -536,6 +541,9 @@
                 min-height: auto;
             }
             .hero-ruler { display: none; }
+            .hero-identity { gap: 16px; margin-bottom: 24px; }
+            .hero-avatar { width: 120px; height: 120px; }
+            .hero-avatar img { width: 120px; height: 120px; max-width: 120px; max-height: 120px; }
             .hero-bg-num { font-size: 18vw; opacity: 0.6; }
             .hero-eyebrow { font-size: 0.55rem; margin-bottom: 14px; }
             .hero-name { font-size: clamp(2rem, 11vw, 3.2rem); margin-bottom: 24px; }
@@ -631,18 +639,19 @@
 
     <div class="hero-bg-num" aria-hidden="true">KONA</div>
 
-    <div class="hero-avatar">
-        <img src="https://cdn.discordapp.my.id/cdn/secure/776153.jpg" alt="Arraffi">
-    </div>
-
     <div class="hero-eyebrow">
         Backend Developer &nbsp;—&nbsp; <em>Central Java, Indonesia 🇮🇩</em>
     </div>
 
-    <h1 class="hero-name">
-        Arraffi<br>
-        <span class="or">(Konaima)</span>
-    </h1>
+    <div class="hero-identity">
+        <div class="hero-avatar">
+            <img src="https://cdn.discordapp.my.id/cdn/secure/776153.jpg" alt="Arraffi">
+        </div>
+        <h1 class="hero-name">
+            Arraffi<br>
+            <span class="or">(Konaima)</span>
+        </h1>
+    </div>
 
     <div class="hero-bottom">
         <div class="hero-cell">
