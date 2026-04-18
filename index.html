@@ -505,23 +505,72 @@
         @media (max-width: 860px) {
             body { cursor: auto; }
             #cur, #cur-trail, .side-ticker { display: none; }
-            nav { right: 0; padding: 0 20px; grid-template-columns: 1fr auto; }
+
+            nav { right: 0; padding: 0 16px; grid-template-columns: 1fr auto; height: 52px; }
             .nav-links { display: none; }
-            #hero { padding: 80px 20px 0; }
+            .nav-logo { font-size: 0.72rem; }
+
+            #hero {
+                padding: 60px 16px 0;
+                min-height: auto;
+            }
+            .hero-ruler { display: none; }
+            .hero-bg-num { font-size: 18vw; opacity: 0.6; }
+            .hero-eyebrow { font-size: 0.55rem; margin-bottom: 14px; }
+            .hero-name { font-size: clamp(2rem, 11vw, 3.2rem); margin-bottom: 24px; }
             .hero-bottom { grid-template-columns: 1fr; }
-            .hero-cell { border-right: none; border-top: 1px solid var(--line); }
+            .hero-cell {
+                border-right: none;
+                border-top: 1px solid var(--line);
+                padding: 14px 16px;
+                font-size: 0.72rem;
+            }
+            .hero-cell strong { font-size: 0.58rem; margin-bottom: 4px; }
+            .btn-fill, .btn-line { padding: 8px 16px; font-size: 0.62rem; }
+
             .sec { padding-right: 0; }
-            .sec-body { padding: 32px 20px 48px; }
-            .sec-label { padding: 14px 20px; }
-            .about-split { grid-template-columns: 1fr; gap: 32px; }
+            .sec-head { grid-template-columns: 44px 1fr; }
+            .sec-num { font-size: 0.55rem; }
+            .sec-label { padding: 12px 16px; font-size: 0.62rem; }
+            .sec-label span { display: none; }
+            .sec-body { padding: 24px 16px 40px; }
+
+            .about-split { grid-template-columns: 1fr; gap: 24px; }
+            .about-big { font-size: clamp(1.1rem, 5vw, 1.5rem); }
+            .about-block { padding: 16px; }
+            .about-block p { font-size: 0.76rem; }
+            .sk { font-size: 0.6rem; padding: 4px 10px; }
+
             .proj-grid { grid-template-columns: 1fr; }
-            .exp-main { grid-template-columns: 1fr; gap: 8px; }
+            .proj-img { height: 140px; }
+            .proj-body { padding: 18px; }
+            .proj-title { font-size: 0.85rem; }
+            .proj-desc { font-size: 0.74rem; }
+
+            .exp-row { grid-template-columns: 44px 1fr; }
+            .exp-side { padding-top: 18px; }
+            .exp-logo-box { width: 28px; height: 28px; }
+            .exp-main { padding: 18px 16px; grid-template-columns: 1fr; gap: 6px; }
+            .exp-role { font-size: 0.8rem; }
+            .exp-co { font-size: 0.65rem; }
+            .exp-desc { font-size: 0.74rem; }
             .exp-meta { text-align: left; }
+            .exp-date { font-size: 0.6rem; }
+            .exp-ext { display: none !important; }
+
             .contact-wrap { grid-template-columns: 1fr; }
-            .contact-left { padding-right: 0; border-right: none; border-bottom: 1px solid var(--line); padding-bottom: 36px; margin-bottom: 36px; }
+            .contact-left { padding-right: 0; border-right: none; border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 28px; }
+            .contact-headline { font-size: clamp(1.3rem, 7vw, 2rem); }
+            .contact-sub { font-size: 0.76rem; }
+            .email-btn { font-size: 0.68rem; padding: 12px 16px; }
             .contact-right { padding-left: 0; }
+            .soc { padding: 14px 0; }
             .soc::before { left: 0; }
-            footer { padding: 18px 20px; }
+            .soc-icon { width: 34px; height: 34px; font-size: 0.82rem; }
+            .soc-handle { font-size: 0.8rem; }
+
+            footer { padding: 16px; flex-direction: column; gap: 4px; text-align: center; }
+            footer p, footer .fmark { font-size: 0.6rem; }
         }
     </style>
 </head>
@@ -539,7 +588,7 @@
 </aside>
 
 <nav id="nav">
-    <a href="#" class="nav-logo">Arraffi<em>.</em></a>
+    <a href="https://arraffi.my.id" class="nav-logo">Arraffi<em>.</em></a>
     <div class="nav-links">
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
@@ -756,7 +805,7 @@
 
 <footer>
     <p>© 2026 Arraffi (Konaima) — All rights reserved.</p>
-    <div class="fmark">konaima.my.id</div>
+    <div class="fmark">arraffi.my.id</div>
 </footer>
 
 <script>
