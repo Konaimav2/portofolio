@@ -164,18 +164,27 @@
         /* ── HERO ── */
         #hero {
             min-height: 100vh;
-            padding: clamp(60px, 10vh, 100px) min(40px, 4vw) 0;
+            padding: clamp(60px, 8vh, 90px) min(40px, 4vw) 0;
             padding-right: clamp(40px, 6vw, 76px);
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            justify-content: center;
             position: relative;
             border-bottom: 1px solid var(--line);
             overflow: hidden;
         }
 
+        #hero .container {
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+            margin-top: -20px;
+        }
+
         .hero-ruler {
-            position: absolute; top: 60px; left: 0; right: 0;
+            position: absolute; top: 10px; left: 0; right: 0;
             display: flex; height: 24px;
         }
         .ruler-seg {
