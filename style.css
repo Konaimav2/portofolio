@@ -657,3 +657,12 @@
             footer { padding: 16px; flex-direction: column; gap: 4px; text-align: center; }
             footer p, footer .fmark { font-size: 0.6rem; }
         }
+
+/* ── INLINE SVG ICONS ── */
+.svg-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    transition: transform .3s;
+}
+.proj-link:hover .svg-icon { transform: translateX(4px); }
