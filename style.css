@@ -245,6 +245,7 @@
             border: 2px solid var(--orange);
             overflow: hidden;
             flex-shrink: 0;
+            background: var(--bg2);
         }
         .hero-avatar img {
             display: block;
