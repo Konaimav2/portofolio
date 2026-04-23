@@ -5,7 +5,7 @@ Hey, I'm Arraffi — known online as **Konaima** or **konasgor**. I'm a Vibe Cod
 This is the source code for my personal portfolio. Nothing fancy under the hood — just HTML and CSS doing what they do.
 
 ## 🌐 Live
-**https://arraffi.my.id/**
+**https://arraffi.my.id**
 
 ## 🛠️ Stack
 Kept it dead simple on purpose:
@@ -28,7 +28,7 @@ Kept it dead simple on purpose:
 
 ## 💻 Running locally
 No setup needed:
-1. Clone the repo: `git clone https://github.com/yourusername/portfolio-website.git`
+1. Clone the repo: `git clone https://github.com/KonaimaV2/portfolio.git`
 2. Open `index.html` in any browser
 
 That's it.
