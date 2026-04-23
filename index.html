@@ -54,8 +54,9 @@
     <!-- Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
     <link rel="stylesheet" href="./style.css">
 </head>
@@ -73,56 +74,60 @@
 </aside>
 
 <nav id="nav">
-    <a href="https://arraffi.my.id" class="nav-logo">Arraffi<em>.</em></a>
-    <div class="nav-links">
-        <a href="#about">About</a>
-        <a href="#projects">Projects</a>
-        <a href="#experience">Experience</a>
-    </div>
-    <div class="nav-right">
-        <a href="#contact" class="nav-contact">Contact</a>
+    <div class="container" style="display: grid; grid-template-columns: 1fr auto 1fr; width: 100%; align-items: center;">
+        <a href="https://arraffi.my.id" class="nav-logo">Arraffi<em>.</em></a>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#experience">Experience</a>
+        </div>
+        <div class="nav-right">
+            <a href="#contact" class="nav-contact">Contact</a>
+        </div>
     </div>
 </nav>
 
 <section id="hero">
-    <div class="hero-ruler">
-        <div class="ruler-seg" data-n="00"></div>
-        <div class="ruler-seg" data-n="25"></div>
-        <div class="ruler-seg" data-n="50"></div>
-        <div class="ruler-seg" data-n="75"></div>
-        <div class="ruler-seg" data-n="100"></div>
-    </div>
-
-    <div class="hero-bg-num" aria-hidden="true">KONA</div>
-
-    <div class="hero-eyebrow">
-        Vibe Coder &nbsp;—&nbsp; <em>Central Java, Indonesia 🇮🇩</em>
-    </div>
-
-    <div class="hero-identity">
-        <div class="hero-avatar">
-            <img src="https://cdn.discordapp.my.id/cdn/452613.webp" alt="Arraffi" width="264" height="264" decoding="async" fetchpriority="high">
+    <div class="container" style="height: 100%; display: flex; flex-direction: column; justify-content: flex-end; width: 100%;">
+        <div class="hero-ruler">
+            <div class="ruler-seg" data-n="00"></div>
+            <div class="ruler-seg" data-n="25"></div>
+            <div class="ruler-seg" data-n="50"></div>
+            <div class="ruler-seg" data-n="75"></div>
+            <div class="ruler-seg" data-n="100"></div>
         </div>
-        <h1 class="hero-name">
-            Arraffi<br>
-            <span class="or">(Konaima)</span>
-        </h1>
-    </div>
 
-    <div class="hero-bottom">
-        <div class="hero-cell">
-            <strong>Specialization</strong>
-            Node.js · Python · C++ — coding whatever feels right, however it needs to be built.
+        <div class="hero-bg-num" aria-hidden="true">KONA</div>
+
+        <div class="hero-eyebrow">
+            Vibe Coder &nbsp;—&nbsp; <em>Central Java, Indonesia 🇮🇩</em>
         </div>
-        <div class="hero-cell">
-            <strong>Alias</strong>
-            Known online as <span style="color:var(--orange2)">Konaima</span> and <span style="color:var(--orange2)">konasgor</span>. Vibe coder. Community builder.
+
+        <div class="hero-identity">
+            <div class="hero-avatar">
+                <img src="https://cdn.discordapp.my.id/cdn/452613.webp" alt="Arraffi" width="264" height="264" decoding="async" fetchpriority="high">
+            </div>
+            <h1 class="hero-name">
+                Arraffi<br>
+                <span class="or">(Konaima)</span>
+            </h1>
         </div>
-        <div class="hero-cell">
-            <strong>Navigate</strong>
-            <div class="ctas">
-                <a href="#projects" class="btn-fill">My work</a>
-                <a href="#contact" class="btn-line">Get in touch</a>
+
+        <div class="hero-bottom">
+            <div class="hero-cell">
+                <strong>Specialization</strong>
+                Node.js · Python · C++ — coding whatever feels right, however it needs to be built.
+            </div>
+            <div class="hero-cell">
+                <strong>Alias</strong>
+                Known online as <span style="color:var(--orange2)">Konaima</span> and <span style="color:var(--orange2)">konasgor</span>. Vibe coder. Community builder.
+            </div>
+            <div class="hero-cell">
+                <strong>Navigate</strong>
+                <div class="ctas">
+                    <a href="#projects" class="btn-fill">My work</a>
+                    <a href="#contact" class="btn-line">Get in touch</a>
+                </div>
             </div>
         </div>
     </div>
