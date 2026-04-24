@@ -153,7 +153,7 @@
     <link rel="icon"             type="image/png" sizes="32x32"   href="https://cdn.discordapp.my.id/cdn/28a073.webp">
     <link rel="icon"             type="image/png" sizes="192x192" href="https://cdn.discordapp.my.id/cdn/28a073.webp">
     <link rel="apple-touch-icon" sizes="180x180"                  href="https://cdn.discordapp.my.id/cdn/28a073.webp">
-    <meta name="msapplication-TileImage" content="https://cdn.discordapp.my.id/cdn/452613.webp">
+    <meta name="msapplication-TileImage" content="https://cdn.discordapp.my.id/cdn/28a073.webp">
     <meta name="msapplication-TileColor" content="#080809">
     <meta name="theme-color"             content="#080809">
 
@@ -177,14 +177,19 @@
             color: var(--muted);
             background: transparent;
             border: none;
-            border-left: 1px solid var(--line);
+            border-right: 1px solid var(--line);
+            white-space: nowrap;
+            flex-shrink: 0;
             padding: 0 16px;
             height: 60px;
             cursor: pointer;
             transition: color .3s, background .3s;
         }
         #lang-toggle:hover { color: var(--orange2); background: var(--orange3); }
-        @media (max-width: 860px) { #lang-toggle { height: 52px; padding: 0 12px; } }
+        .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 0; }
+        @media (max-width: 860px) {
+            #lang-toggle { height: 52px; padding: 0 10px; font-size: 0.58rem; }
+        }
     </style>
 
     <!-- ── STYLESHEET ── -->
@@ -212,8 +217,8 @@
             <a href="#projects" data-i18n="nav-projects">Projects</a>
             <a href="#experience" data-i18n="nav-experience">Experience</a>
         </div>
-        <div class="nav-right" style="display:flex;align-items:center;gap:0;">
-            <button id="lang-toggle" onclick="toggleLang()" aria-label="Toggle language">EN</button>
+        <div class="nav-right">
+            <button id="lang-toggle" onclick="toggleLang()" aria-label="Toggle language">ID</button>
             <a href="#contact" class="nav-contact" data-i18n="nav-contact">Contact</a>
         </div>
     </div>
@@ -232,12 +237,12 @@
         <div class="hero-bg-num" aria-hidden="true">KONA</div>
 
         <div class="hero-eyebrow">
-            <span data-i18n="hero-eyebrow">Vibe Coder</span> &nbsp;—&nbsp; <em>Central Java, Indonesia 🇮🇩</em>
+            <span data-i18n="hero-eyebrow">Vibe Coder</span> &nbsp;—&nbsp; <em data-i18n="hero-location">Central Java, Indonesia 🇮🇩</em>
         </div>
 
         <div class="hero-identity">
             <div class="hero-avatar">
-                <img src="https://cdn.discordapp.my.id/cdn/28a073.webp" alt="Arraffi" width="264" height="264" decoding="async" fetchpriority="high">
+                <img src="https://cdn.discordapp.my.id/cdn/28a073.webp" alt="Arraffi" width="400" height="400" decoding="async" fetchpriority="high">
             </div>
             <h1 class="hero-name">
                 Arraffi<br>
@@ -294,7 +299,7 @@
                 </div>
                 <div class="status-bar">
                     <div class="dot-green"></div>
-                    <span data-i18n="about-available">Available</span> · Central Java, ID
+                    <span data-i18n="about-available">Available</span> · <span data-i18n="about-location">Central Java, ID</span>
                 </div>
             </div>
         </div>
@@ -310,7 +315,7 @@
         <div class="proj-grid rv">
             <div class="proj">
                 <div class="proj-img">
-                    <img src="https://cdn.discordapp.my.id/cdn/secure/1134f1.png" alt="SimpleCDN" loading="lazy" decoding="async" width="512" height="512">
+                    <img src="https://cdn.discordapp.my.id/cdn/7541df.webp" alt="SimpleCDN" loading="lazy" decoding="async" width="512" height="512">
                 </div>
                 <div class="proj-body">
                     <div class="proj-year" data-i18n="proj-since-2025">Since 2025</div>
@@ -323,7 +328,7 @@
             </div>
             <div class="proj">
                 <div class="proj-img">
-                    <img src="https://cdn.discordapp.my.id/cdn/secure/955a6d.png" alt="WhatsApp Bot" loading="lazy" decoding="async" width="512" height="364">
+                    <img src="https://cdn.discordapp.my.id/cdn/e3dece.webp" alt="WhatsApp Bot" loading="lazy" decoding="async" width="512" height="364">
                 </div>
                 <div class="proj-body">
                     <div class="proj-year" data-i18n="proj-since-2024">Since 2024</div>
@@ -345,7 +350,7 @@
         <a href="https://arqonara.com/" target="_blank" rel="noopener noreferrer" class="exp-row rv">
             <div class="exp-side">
                 <div class="exp-logo-box">
-                    <img src="https://cdn.discordapp.my.id/cdn/secure/ecefc4.png" alt="Arqonara Logo" loading="lazy" decoding="async" width="512" height="288">
+                    <img src="https://cdn.discordapp.my.id/cdn/df7b8d.webp" alt="Arqonara Logo" loading="lazy" decoding="async" width="512" height="288">
                 </div>
             </div>
             <div class="exp-main">
@@ -356,7 +361,7 @@
                 </div>
                 <div class="exp-meta">
                     <div class="exp-date">Aug 2025 — <span data-i18n="exp-present">Present</span></div>
-                    <div class="badge-active">● Active</div>
+                    <div class="badge-active" data-i18n="exp-active">● Active</div>
                     <div class="exp-ext"><svg class="svg-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><path d="M14 2 8 8"/></svg> arqonara.com</div>
                 </div>
             </div>
@@ -365,7 +370,7 @@
         <a href="https://heppycloud.id/" target="_blank" rel="noopener noreferrer" class="exp-row rv d1">
             <div class="exp-side">
                 <div class="exp-logo-box">
-                    <img src="https://cdn.discordapp.my.id/cdn/secure/579463.png" alt="HeppyCloud Logo" loading="lazy" decoding="async" width="500" height="500">
+                    <img src="https://cdn.discordapp.my.id/cdn/028eba.webp" alt="HeppyCloud Logo" loading="lazy" decoding="async" width="500" height="500">
                 </div>
             </div>
             <div class="exp-main">
@@ -376,7 +381,7 @@
                 </div>
                 <div class="exp-meta">
                     <div class="exp-date">Mar 2025 — <span data-i18n="exp-present">Present</span></div>
-                    <div class="badge-active">● Active</div>
+                    <div class="badge-active" data-i18n="exp-active">● Active</div>
                     <div class="exp-ext"><svg class="svg-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><path d="M14 2 8 8"/></svg> heppycloud.id</div>
                 </div>
             </div>
@@ -460,8 +465,9 @@ const t = {
         'about-bio-label': 'bio',
         'about-bio':       "Hey — I'm Arraffi, known online as Konaima. I build stuff that just works: bots, CDNs, game servers, whatever the moment calls for. No overthinking, just vibing through code until it clicks.",
         'about-stack-label':'stack',
-        'about-available': 'Available',
-        'sec-projects':    'Personal Projects',
+        'about-available':  'Available',
+        'about-location':   'Central Java, ID',
+        'sec-projects':     'Personal Projects',
         'proj-since-2025': 'Since 2025',
         'proj-since-2024': 'Since 2024',
         'proj-cdn-desc':   'A fast, no-nonsense CDN I built because existing ones felt like overkill. Serves assets quickly, stays out of the way, gets the job done.',
@@ -470,8 +476,9 @@ const t = {
         'sec-experience':  'Experience',
         'exp-arq-role':    'Staff / Manager',
         'exp-arq-desc':    'Maintaining and improving game hosting infrastructure, ensuring server stability and a reliable player experience across the platform.',
-        'exp-present':     'Present',
-        'exp-hc-role':     'Customer Services',
+        'exp-present':      'Present',
+        'exp-active':       '● Active',
+        'exp-hc-role':      'Customer Services',
         'exp-hc-desc':     'Handling game server maintenance and ensuring customer environment stability across the hosting platform.',
         'sec-contact':     'Get In Touch',
         'contact-headline':"Let's build<br>something <em>real.</em>",
@@ -479,43 +486,46 @@ const t = {
         'footer-rights':   'All rights reserved.',
     },
     id: {
-        'nav-about':       'Tentang',
-        'nav-projects':    'Proyek',
-        'nav-experience':  'Pengalaman',
-        'nav-contact':     'Kontak',
-        'hero-eyebrow':    'Vibe Coder',
-        'hero-spec-label': 'Spesialisasi',
-        'hero-spec-text':  'Node.js · Python · C++ — ngoding apapun yang terasa bener, sesuai kebutuhan.',
-        'hero-alias-label':'Alias',
-        'hero-alias-text': 'Dikenal online sebagai',
-        'hero-alias-and':  'dan',
-        'hero-alias-sub':  'Vibe coder. Community builder.',
-        'hero-nav-label':  'Navigasi',
-        'hero-btn-work':   'Karya saya',
-        'hero-btn-contact':'Hubungi saya',
-        'sec-about':       'Tentang Saya',
-        'about-big':       'Aku ngoding pakai',
-        'about-big-2':     'kalau rasanya bener dan hasilnya oke, langsung ship.',
-        'about-bio-label': 'bio',
-        'about-bio':       'Hei — Saya Arraffi, dikenal online sebagai Konaima. Saya bikin hal-hal yang langsung jalan: bot, CDN, game server, apapun yang dibutuhin. Tanpa overthinking, vibing lewat kode sampai klik.',
+        'nav-about':        'Tentang',
+        'nav-projects':     'Proyek',
+        'nav-experience':   'Pengalaman',
+        'nav-contact':      'Kontak',
+        'hero-eyebrow':     'Vibe Coder',
+        'hero-location':    'Jawa Tengah, Indonesia 🇮🇩',
+        'hero-spec-label':  'Keahlian',
+        'hero-spec-text':   'Node.js · Python · C++ — ngoding apa aja yang feels right, gimana pun caranya.',
+        'hero-alias-label': 'Alias',
+        'hero-alias-text':  'Dikenal online sebagai',
+        'hero-alias-and':   'dan',
+        'hero-alias-sub':   'Vibe coder. Builder komunitas.',
+        'hero-nav-label':   'Menu',
+        'hero-btn-work':    'Karya gue',
+        'hero-btn-contact': 'Hubungi gue',
+        'sec-about':        'Tentang Gue',
+        'about-big':        'Gue ngoding pakai',
+        'about-big-2':      'kalau rasanya bener dan hasilnya oke, langsung gas.',
+        'about-bio-label':  'bio',
+        'about-bio':        'Hei — gue Arraffi, dikenal online sebagai Konaima. Gue bikin hal-hal yang langsung jalan: bot, CDN, game server, apapun yang lagi dibutuhin. Nggak overthinking, tinggal vibe aja sampai klik.',
         'about-stack-label':'teknologi',
-        'about-available': 'Tersedia',
-        'sec-projects':    'Proyek Pribadi',
-        'proj-since-2025': 'Sejak 2025',
-        'proj-since-2024': 'Sejak 2024',
-        'proj-cdn-desc':   'CDN cepat yang saya bangun karena yang sudah ada terlalu ribet. Serve aset dengan cepat, tidak mengganggu, langsung selesai.',
-        'proj-view':       'Lihat proyek',
-        'proj-wa-desc':    'Bot WhatsApp yang dibuat untuk kesenangan dan kegunaan — mengotomatiskan hal membosankan supaya komunitas bisa fokus bersenang-senang.',
-        'sec-experience':  'Pengalaman',
-        'exp-arq-role':    'Staff / Manajer',
-        'exp-arq-desc':    'Memelihara dan meningkatkan infrastruktur game hosting, memastikan stabilitas server dan pengalaman bermain yang andal di seluruh platform.',
-        'exp-present':     'Sekarang',
-        'exp-hc-role':     'Customer Service',
-        'exp-hc-desc':     'Menangani pemeliharaan server game dan memastikan stabilitas lingkungan pelanggan di seluruh platform hosting.',
-        'sec-contact':     'Hubungi Saya',
-        'contact-headline':'Ayo bangun<br>sesuatu yang <em>nyata.</em>',
-        'contact-sub':     'Punya ide keren yang mau dibangun? Atau sekadar mau say hi? Dua-duanya oke — DM aja atau kirim email.',
-        'footer-rights':   'Hak cipta dilindungi.',
+        'about-available':  'Buka kesempatan',
+        'about-location':   'Jawa Tengah, ID',
+        'sec-projects':     'Proyek Pribadi',
+        'proj-since-2025':  'Dari 2025',
+        'proj-since-2024':  'Dari 2024',
+        'proj-cdn-desc':    'CDN cepet yang gue bangun karena yang udah ada terlalu ribet. Serve aset dengan cepet, nggak ganggu-ganggu, langsung beres.',
+        'proj-view':        'Lihat proyek',
+        'proj-wa-desc':     'Bot WhatsApp yang dibuat buat seru-seruan sekaligus berguna — otomatisin hal-hal yang males dikerjain biar komunitas bisa fokus yang penting.',
+        'sec-experience':   'Pengalaman',
+        'exp-arq-role':     'Staff / Manajer',
+        'exp-arq-desc':     'Jagain dan ngembangin infrastruktur game hosting biar server tetap stabil dan pengalaman main pemain selalu oke.',
+        'exp-present':      'Sekarang',
+        'exp-active':       '● Aktif',
+        'exp-hc-role':      'Customer Service',
+        'exp-hc-desc':      'Nanganin maintenance server game dan pastiin lingkungan pelanggan tetap stabil di seluruh platform hosting.',
+        'sec-contact':      'Hubungi Gue',
+        'contact-headline': 'Yuk bikin<br>sesuatu yang <em>beneran.</em>',
+        'contact-sub':      'Ada ide keren yang mau digarap? Atau cuma mau say hi? Dua-duanya santai — DM aja atau kirim email.',
+        'footer-rights':    'Hak cipta dilindungi.',
     }
 };
 
