@@ -604,15 +604,20 @@ footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em
 
 @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
 
-/* ── BerAPI: standard card, full proj-img height ─────────── */
+/* ── BerAPI: full-width horizontal card ─────────────────── */
 .proj--wide {
     grid-column: 1 / -1;
-    justify-self: center;
-    width: calc(50% - 1px); /* match a single column card width exactly */
-    flex-direction: column;
+    flex-direction: row;
 }
-.proj--wide .proj-img { width: 100%; height: 190px; border-bottom: 1px solid var(--line); border-right: none; }
-.proj--wide .proj-body { padding: 26px; }
+.proj--wide .proj-img {
+    width: 260px;
+    flex-shrink: 0;
+    height: auto;
+    min-height: 190px;
+    border-bottom: none;
+    border-right: 1px solid var(--line);
+}
+.proj--wide .proj-body { padding: 32px 40px; flex: 1; }
 
 /* ── Loading screen ──────────────────────────────────────── */
 #loader {
