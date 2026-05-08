@@ -1,0 +1,22 @@
+# ── Environment variables (NEVER commit these) ──
+.env
+.env.local
+.env.*.local
+
+# ── Wrangler / Cloudflare ──
+.wrangler/
+wrangler.toml
+
+# ── Node (if you ever add tooling) ──
+node_modules/
+npm-debug.log*
+
+# ── OS junk ──
+.DS_Store
+Thumbs.db
+
+# ── Editor ──
+.vscode/
+.idea/
+*.swp
+*.swo
