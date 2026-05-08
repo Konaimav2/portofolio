@@ -1,10 +1,11 @@
 /**
- * Cloudflare Pages Function — POST /api/contact
+ * Contact form handler — called by worker.js
+ * Sends email via SMTP2GO HTTP API
  *
- * Environment variables (set in Cloudflare Pages dashboard OR .env for local dev):
- *   SMTP2GO_API_KEY  — your SMTP2GO API key (https://app.smtp2go.com)
- *   FROM_EMAIL       — verified sender email (e.g. portfolio@arraffi.my.id)
- *   TO_EMAIL         — where to receive messages (e.g. kona@konaima.my.id)
+ * Environment variables (set in Cloudflare Worker dashboard → Settings → Variables):
+ *   SMTP2GO_API_KEY  — https://app-us.smtp2go.com/sending/apikeys/
+ *   TO_EMAIL         — kona@konaima.my.id
+ *   FROM_EMAIL       — portfolio@arraffi.my.id
  */
 
 const ALLOWED_ORIGINS = [
@@ -24,14 +25,7 @@ function corsHeaders(origin) {
     };
 }
 
-export async function onRequestOptions({ request }) {
-    return new Response(null, {
-        status: 204,
-        headers: corsHeaders(request.headers.get('Origin')),
-    });
-}
-
-export async function onRequestPost({ request, env }) {
+export async function handleContact(request, env) {
     const origin = request.headers.get('Origin');
     const headers = { 'Content-Type': 'application/json', ...corsHeaders(origin) };
 
@@ -69,9 +63,9 @@ export async function onRequestPost({ request, env }) {
     }
 
     // ── Send via SMTP2GO ──────────────────────────────────────────────────────
-    const apiKey   = env.SMTP2GO_API_KEY;
-    const toEmail  = env.TO_EMAIL   ?? 'kona@konaima.my.id';
-    const fromEmail = env.FROM_EMAIL ?? 'portfolio@arraffi.my.id';
+    const apiKey    = env.SMTP2GO_API_KEY;
+    const toEmail   = env.TO_EMAIL    ?? 'kona@konaima.my.id';
+    const fromEmail = env.FROM_EMAIL  ?? 'portfolio@arraffi.my.id';
 
     if (!apiKey) {
         console.error('SMTP2GO_API_KEY is not set.');
@@ -85,11 +79,11 @@ export async function onRequestPost({ request, env }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            api_key: apiKey,
-            to: [`${escHtml(name)} <${toEmail}>`],
-            sender: `Arraffi Portfolio <${fromEmail}>`,
+            api_key:  apiKey,
+            to:       [`${escHtml(name)} <${toEmail}>`],
+            sender:   `Arraffi Portfolio <${fromEmail}>`,
             reply_to: `${escHtml(name)} <${email}>`,
-            subject: `[Portfolio] New message from ${name}`,
+            subject:  `[Portfolio] New message from ${name}`,
             html_body: `
                 <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
                     <h2 style="color:#ff8c42">New contact from arraffi.my.id</h2>
