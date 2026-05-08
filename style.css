@@ -420,6 +420,8 @@ nav.scrolled {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 1px; background: var(--line);
     border: 1px solid var(--line);
+    /* prevent orphan grey cell from showing when odd card count */
+    align-items: start;
 }
 .proj {
     background: var(--bg);
@@ -603,7 +605,12 @@ footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em
 @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
 
 /* ── BerAPI: standard card, full proj-img height ─────────── */
-.proj--wide { grid-column: unset; flex-direction: column; }
+.proj--wide {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 1px); /* match a single column card width exactly */
+    flex-direction: column;
+}
 .proj--wide .proj-img { width: 100%; height: 190px; border-bottom: 1px solid var(--line); border-right: none; }
 .proj--wide .proj-body { padding: 26px; }
 
@@ -636,14 +643,74 @@ footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em
 }
 
 /* ── New contact layout ──────────────────────────────────── */
-.contact-header { margin-bottom: 40px; }
-.contact-form-wrap { max-width: 680px; margin-bottom: 0; }
+.contact-header { margin-bottom: 40px; text-align: center; }
+.contact-header .email-btn { margin: 16px auto 0; display: inline-flex; }
+.contact-form-wrap { max-width: 680px; margin: 0 auto; }
 /* Horizontal social strip */
 .contact-soc-strip {
-    display: flex; flex-wrap: wrap;
+    display: flex; flex-wrap: wrap; justify-content: center;
     border-top: 1px solid var(--line);
     margin-top: 56px;
 }
+
+/* ── Glitch effect on hero name ──────────────────────────── */
+.glitch {
+    position: relative;
+    display: inline-block;
+}
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+}
+.glitch::before {
+    color: var(--orange);
+    animation: glitch-top 5s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 38%, 0 38%);
+}
+.glitch::after {
+    color: #00cfff;
+    animation: glitch-bot 5s infinite;
+    clip-path: polygon(0 62%, 100% 62%, 100% 100%, 0 100%);
+}
+@keyframes glitch-top {
+    0%,  90%, 100% { opacity: 0; transform: none; }
+    91% { opacity: .9; transform: translate(-4px,  1px) skewX(-3deg); }
+    93% { opacity: .9; transform: translate( 3px, -2px) skewX( 2deg); }
+    95% { opacity: .9; transform: translate(-2px,  1px) skewX(-1deg); }
+    97% { opacity: 0; }
+}
+@keyframes glitch-bot {
+    0%,  90%, 100% { opacity: 0; transform: none; }
+    91% { opacity: .8; transform: translate( 4px, -1px) skewX( 3deg); }
+    93% { opacity: .8; transform: translate(-3px,  2px) skewX(-2deg); }
+    95% { opacity: .8; transform: translate( 2px, -1px) skewX( 1deg); }
+    97% { opacity: 0; }
+}
+
+/* ── Typewriter ───────────────────────────────────────────── */
+.typewriter-text {
+    color: var(--orange2);
+    font-size: 0.52em;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: inline-block;
+    min-height: 1em;
+}
+.tw-cursor {
+    color: var(--orange);
+    font-weight: 300;
+    animation: blink .7s step-end infinite;
+    margin-left: 2px;
+    font-size: 0.52em;
+    vertical-align: middle;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.tw-cursor--about { font-style: normal; font-size: inherit; font-weight: 300; }
 .csoc {
     display: flex; align-items: center; gap: 12px;
     padding: 18px 28px;
