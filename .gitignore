@@ -5,7 +5,6 @@
 
 # ── Wrangler / Cloudflare ──
 .wrangler/
-wrangler.toml
 
 # ── Node (if you ever add tooling) ──
 node_modules/

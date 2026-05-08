@@ -1,0 +1,7 @@
+name = "portofolio"
+main = "worker.js"
+compatibility_date = "2024-05-01"
+
+# Serve all static files from the repo root
+[assets]
+directory = "./"
