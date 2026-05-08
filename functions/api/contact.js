@@ -37,7 +37,7 @@ export async function handleContact(request, env) {
         return Response.json({ ok: false, error: 'Invalid JSON body.' }, { status: 400, headers });
     }
 
-    const { name, email, message } = body ?? {};
+    const { name, email, phone, subject, message } = body ?? {};
 
     // ── Validate ─────────────────────────────────────────────────────────────
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
@@ -90,6 +90,8 @@ export async function handleContact(request, env) {
                     <table style="width:100%;border-collapse:collapse">
                         <tr><td style="padding:8px 0;color:#888;width:80px">Name</td><td style="padding:8px 0"><strong>${escHtml(name)}</strong></td></tr>
                         <tr><td style="padding:8px 0;color:#888">Email</td><td style="padding:8px 0"><a href="mailto:${escHtml(email)}">${escHtml(email)}</a></td></tr>
+                        ${phone ? `<tr><td style="padding:8px 0;color:#888">Phone</td><td style="padding:8px 0">${escHtml(phone)}</td></tr>` : ''}
+                        ${subject ? `<tr><td style="padding:8px 0;color:#888">Subject</td><td style="padding:8px 0">${escHtml(subject)}</td></tr>` : ''}
                     </table>
                     <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
                     <p style="white-space:pre-wrap;line-height:1.6">${escHtml(message)}</p>
