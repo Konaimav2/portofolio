@@ -602,20 +602,63 @@ footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em
 
 @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
 
-/* ── Wide project card (BerAPI) ─────────────────────────── */
-.proj--wide {
-    grid-column: 1 / -1;
-    flex-direction: row;
+/* ── BerAPI: standard card, full proj-img height ─────────── */
+.proj--wide { grid-column: unset; flex-direction: column; }
+.proj--wide .proj-img { width: 100%; height: 190px; border-bottom: 1px solid var(--line); border-right: none; }
+.proj--wide .proj-body { padding: 26px; }
+
+/* ── Loading screen ──────────────────────────────────────── */
+#loader {
+    position: fixed; inset: 0; z-index: 10000;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .6s ease;
 }
-.proj--wide .proj-img {
-    width: 280px;
-    height: auto;
-    min-height: 190px;
-    flex-shrink: 0;
-    border-bottom: none;
+#loader.fade { opacity: 0; pointer-events: none; }
+.loader-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 2.2rem; font-weight: 900;
+    letter-spacing: -0.04em; color: var(--text);
+    margin-bottom: 28px; text-align: center;
+    opacity: 0; animation: up .5s .1s ease forwards;
+}
+.loader-logo em { color: var(--orange); font-style: normal; }
+.loader-track {
+    width: 160px; height: 2px;
+    background: var(--bg3); border-radius: 100px; overflow: hidden;
+    margin: 0 auto;
+}
+#loader-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--orange2));
+    border-radius: 100px; width: 0;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── New contact layout ──────────────────────────────────── */
+.contact-header { margin-bottom: 40px; }
+.contact-form-wrap { max-width: 680px; margin-bottom: 0; }
+/* Horizontal social strip */
+.contact-soc-strip {
+    display: flex; flex-wrap: wrap;
+    border-top: 1px solid var(--line);
+    margin-top: 56px;
+}
+.csoc {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 28px;
     border-right: 1px solid var(--line);
+    text-decoration: none; color: var(--text);
+    transition: background .3s, color .3s;
+    cursor: none;
 }
-.proj--wide .proj-body { padding: 32px 36px; }
+.csoc:last-child { border-right: none; }
+.csoc:hover { background: var(--orange3); color: var(--orange2); }
+.csoc svg { color: var(--orange); flex-shrink: 0; }
+.csoc-label { display: flex; flex-direction: column; gap: 1px; }
+.csoc-plat { font-size: 0.52rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.csoc-handle { font-size: 0.8rem; font-weight: 500; }
+
 .berapi-img {
     background: linear-gradient(135deg, #0f0f11 0%, #1c0a00 60%, #0f0f11 100%);
     position: relative;
