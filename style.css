@@ -602,6 +602,125 @@ footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em
 
 @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
 
+/* ── Wide project card (BerAPI) ─────────────────────────── */
+.proj--wide {
+    grid-column: 1 / -1;
+    flex-direction: row;
+}
+.proj--wide .proj-img {
+    width: 280px;
+    height: auto;
+    min-height: 190px;
+    flex-shrink: 0;
+    border-bottom: none;
+    border-right: 1px solid var(--line);
+}
+.proj--wide .proj-body { padding: 32px 36px; }
+.berapi-img {
+    background: linear-gradient(135deg, #0f0f11 0%, #1c0a00 60%, #0f0f11 100%);
+    position: relative;
+}
+.berapi-img::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(224,92,0,0.18) 0%, transparent 70%);
+}
+.berapi-img span {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.5rem; font-weight: 900;
+    color: var(--orange); letter-spacing: -0.03em;
+    position: relative; z-index: 1; opacity: 0.85;
+}
+
+/* ── Skills section ─────────────────────────────────────── */
+.skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 72px;
+}
+.skill-group { display: flex; flex-direction: column; gap: 32px; }
+.skill-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+}
+.skill-name { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
+.skill-pct { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.1em; }
+.skill-bar {
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 100px;
+    overflow: visible;
+    position: relative;
+}
+.skill-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--orange) 0%, var(--orange2) 100%);
+    width: 0;
+    transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+.skill-item.bar-in .skill-fill { width: var(--pct, 0%); }
+.skill-fill::after {
+    content: '';
+    position: absolute; right: -4px; top: 50%;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    background: var(--orange2);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--orange2), 0 0 20px rgba(255,117,32,0.4);
+    opacity: 0;
+    transition: opacity .3s .9s;
+}
+.skill-item.bar-in .skill-fill::after { opacity: 1; }
+
+/* ── Contact form ────────────────────────────────────────── */
+.contact-form { display: flex; flex-direction: column; gap: 14px; }
+.contact-socials { margin-top: 32px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+    font-size: 0.56rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+}
+.form-input {
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    padding: 11px 14px;
+    transition: border-color .3s, box-shadow .3s;
+    width: 100%; outline: none;
+    border-radius: 0; appearance: none;
+}
+.form-input::placeholder { color: var(--muted); }
+.form-input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px var(--orange3);
+}
+.form-textarea { resize: vertical; min-height: 110px; }
+.form-submit {
+    align-self: flex-start;
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--orange); color: #fff;
+    padding: 12px 24px; min-height: 44px;
+    font-size: 0.8rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    border: none; cursor: pointer;
+    box-shadow: 0 4px 24px rgba(224,92,0,0.25);
+    transition: background .3s, box-shadow .3s, opacity .3s;
+}
+.form-submit:hover { background: var(--orange2); box-shadow: 0 6px 32px rgba(255,117,32,0.35); }
+.form-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.cf-status {
+    font-size: 0.72rem; padding: 10px 14px;
+    letter-spacing: 0.04em; display: none;
+}
+.cf-status.ok  { display: block; color: #81c784; border: 1px solid rgba(76,175,80,0.3); background: rgba(76,175,80,0.07); }
+.cf-status.err { display: block; color: #ef9a9a; border: 1px solid rgba(239,83,80,0.3); background: rgba(239,83,80,0.07); }
+
 @media (max-width: 860px) {
     body { cursor: auto; }
     #cur, #cur-trail, .side-ticker { display: none; }
