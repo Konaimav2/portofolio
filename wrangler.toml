@@ -2,6 +2,13 @@ name = "portofolio"
 main = "worker.js"
 compatibility_date = "2024-05-01"
 
+# Non-sensitive vars — safe to commit
+# SMTP2GO_API_KEY must be set as a SECRET in the Cloudflare dashboard
+# (Secrets → "Add secret") — they are NEVER reset by deployments
+[vars]
+TO_EMAIL   = "kona@konaima.my.id"
+FROM_EMAIL = "portfolio@arraffi.my.id"
+
 # Serve all static files from the repo root
 [assets]
 directory = "./"
