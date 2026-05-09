@@ -540,7 +540,7 @@ nav.scrolled {
     margin-bottom: 18px;
 }
 .contact-headline em { color: var(--orange); font-style: normal; }
-.contact-sub { font-size: 0.85rem; color: var(--mid); line-height: 1.85; margin-bottom: 32px; max-width: 360px; }
+.contact-sub { font-size: 0.85rem; color: var(--mid); line-height: 1.85; margin: 0 auto 32px; max-width: 360px; }
 .email-btn {
     display: inline-flex; align-items: center; gap: 12px;
     border: 1px solid rgba(224, 92, 0, 0.3); padding: 14px 20px;
