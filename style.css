@@ -420,8 +420,6 @@ nav.scrolled {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 1px; background: var(--line);
     border: 1px solid var(--line);
-    /* prevent orphan grey cell from showing when odd card count */
-    align-items: start;
 }
 .proj {
     background: var(--bg);
@@ -816,7 +814,7 @@ footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em
 }
 .form-textarea { resize: vertical; min-height: 110px; }
 .form-submit {
-    align-self: flex-start;
+    align-self: center;
     display: inline-flex; align-items: center; gap: 10px;
     background: var(--orange); color: #fff;
     padding: 12px 24px; min-height: 44px;
@@ -877,6 +875,9 @@ footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em
     .proj-body { padding: 18px; }
     .proj-title { font-size: clamp(0.8rem, 3vw, 0.95rem); }
     .proj-desc { font-size: clamp(0.75rem, 3vw, 0.85rem); }
+    
+    .proj--wide { flex-direction: column; }
+    .proj--wide .proj-img { width: 100%; min-height: 140px; border-right: none; border-bottom: 1px solid var(--line); }
 
     .exp-row { grid-template-columns: 44px 1fr; }
     .exp-side { padding-top: 18px; }
