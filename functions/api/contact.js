@@ -37,7 +37,13 @@ export async function handleContact(request, env) {
         return Response.json({ ok: false, error: 'Invalid JSON body.' }, { status: 400, headers });
     }
 
-    const { name, email, phone, subject, message } = body ?? {};
+    const { name, email, phone, subject, message, website_url } = body ?? {};
+
+    // ── Honeypot ─────────────────────────────────────────────────────────────
+    if (website_url) {
+        // Silently drop bot requests to save API usage
+        return Response.json({ ok: true, message: "Message sent! I'll get back to you soon." }, { headers });
+    }
 
     // ── Validate ─────────────────────────────────────────────────────────────
     if (!name?.trim() || !email?.trim() || !message?.trim()) {

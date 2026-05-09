@@ -4,8 +4,8 @@
     --bg3:     #161618;
     --line:    rgba(255,255,255,0.12);
     --text:    #ece8e1;
-    --muted:   #5a5760;
-    --mid:     #9c98a6;
+    --muted:   #918e9a;
+    --mid:     #a7a3b3;
     --orange:  #e05c00;
     --orange2: #ff7520;
     --orange3: rgba(224,92,0,0.12);
@@ -788,6 +788,7 @@ footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em
 .skill-item.bar-in .skill-fill::after { opacity: 1; }
 
 /* ── Contact form ────────────────────────────────────────── */
+.cf-honeypot { opacity: 0; position: absolute; top: -9999px; left: -9999px; z-index: -1; }
 .contact-form { display: flex; flex-direction: column; gap: 14px; }
 .contact-socials { margin-top: 32px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
