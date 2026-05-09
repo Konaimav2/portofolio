@@ -445,7 +445,7 @@ nav.scrolled {
 .proj:hover .proj-img img { filter: saturate(1); transform: scale(1.05); }
 .proj-body { padding: 26px; flex: 1; display: flex; flex-direction: column; }
 .proj-year {
-    font-size: 0.58rem; letter-spacing: 0.16em; color: var(--orange);
+    font-size: 0.58rem; letter-spacing: 0.16em; color: var(--orange2);
     text-transform: uppercase; margin-bottom: 8px;
 }
 .proj-title {
@@ -592,8 +592,8 @@ footer {
     display: flex; align-items: center; justify-content: space-between;
     padding-right: 76px;
 }
-footer p { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; }
-footer .fmark { font-size: 0.62rem; color: var(--orange); letter-spacing: 0.08em; }
+footer p { font-size: 0.62rem; color: var(--mid); letter-spacing: 0.08em; }
+footer .fmark { font-size: 0.62rem; color: var(--orange2); letter-spacing: 0.08em; }
 
 .rv { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
 .rv.in { opacity: 1; transform: none; }
