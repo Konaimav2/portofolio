@@ -85,7 +85,6 @@ export async function handleContact(request, env) {
 
     // ── Rate Limiting ────────────────────────────────────────────────────────
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-    const now = Date.now();
     const rateLimitWindow = 60 * 1000; // 1 minute
     const maxRequests = 2; // max 2 requests per minute per IP
 
