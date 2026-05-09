@@ -674,6 +674,9 @@
                 </div>
                 <div class="contact-form-wrap rv d1">
                     <form id="contact-form" class="contact-form" novalidate>
+                        <!-- Honeypot field to catch dumb bots -->
+                        <input type="text" name="website_url" class="cf-honeypot" tabindex="-1" autocomplete="off">
+                        
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="cf-name">Name</label>
@@ -909,7 +912,7 @@
                     const res = await fetch('/api/contact', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'), subject: fd.get('subject'), message: fd.get('message') }),
+                        body: JSON.stringify({ name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'), subject: fd.get('subject'), message: fd.get('message'), website_url: fd.get('website_url') }),
                     });
                     const json = await res.json();
                     if (json.ok) {
