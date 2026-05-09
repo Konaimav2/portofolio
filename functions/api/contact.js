@@ -25,6 +25,10 @@ function corsHeaders(origin) {
     };
 }
 
+// Simple in-memory rate limiter and replay protection (per worker isolate)
+const rateLimitMap = new Map();
+const usedTickets = new Set();
+
 export async function handleContact(request, env) {
     const origin = request.headers.get('Origin');
     const headers = { 'Content-Type': 'application/json', ...corsHeaders(origin) };
@@ -37,12 +41,81 @@ export async function handleContact(request, env) {
         return Response.json({ ok: false, error: 'Invalid JSON body.' }, { status: 400, headers });
     }
 
-    const { name, email, phone, subject, message, website_url } = body ?? {};
+    const { name, email, phone, subject, message, website_url, ticket, turnstile } = body ?? {};
+
+    // ── Turnstile Verification ───────────────────────────────────────────────
+    if (!turnstile) {
+        return Response.json({ ok: false, error: 'Anti-spam check failed. Please refresh and try again.' }, { status: 403, headers });
+    }
+    
+    const turnstileSecret = env.TURNSTILE_SECRET;
+    if (turnstileSecret) {
+        const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `secret=${encodeURIComponent(turnstileSecret)}&response=${encodeURIComponent(turnstile)}&remoteip=${encodeURIComponent(request.headers.get('CF-Connecting-IP') || '')}`
+        });
+        const tsOutcome = await tsRes.json();
+        if (!tsOutcome.success) {
+            return Response.json({ ok: false, error: 'Bot verification failed. Please try again.' }, { status: 403, headers });
+        }
+    }
+
+    // ── Ticket Anti-Replay ───────────────────────────────────────────────────
+    const now = Date.now();
+    if (!ticket || typeof ticket !== 'string' || !ticket.includes('_')) {
+        return Response.json({ ok: false, error: 'Invalid submission format.' }, { status: 403, headers });
+    }
+    const [tsStr, rnd] = ticket.split('_');
+    const ts = parseInt(tsStr, 36);
+    // Must be within last 5 minutes
+    if (isNaN(ts) || now - ts > 5 * 60 * 1000 || ts > now + 60000) {
+        return Response.json({ ok: false, error: 'Form session expired. Please refresh the page.' }, { status: 403, headers });
+    }
+    if (usedTickets.has(ticket)) {
+        return Response.json({ ok: false, error: 'Duplicate submission blocked.' }, { status: 403, headers });
+    }
+    usedTickets.add(ticket);
 
     // ── Honeypot ─────────────────────────────────────────────────────────────
     if (website_url) {
         // Silently drop bot requests to save API usage
         return Response.json({ ok: true, message: "Message sent! I'll get back to you soon." }, { headers });
+    }
+
+    // ── Rate Limiting ────────────────────────────────────────────────────────
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const now = Date.now();
+    const rateLimitWindow = 60 * 1000; // 1 minute
+    const maxRequests = 2; // max 2 requests per minute per IP
+
+    if (ip !== 'unknown') {
+        const userRate = rateLimitMap.get(ip) || { count: 0, first: now };
+        if (now - userRate.first > rateLimitWindow) {
+            userRate.count = 1;
+            userRate.first = now;
+        } else {
+            userRate.count++;
+        }
+        rateLimitMap.set(ip, userRate);
+
+        if (userRate.count > maxRequests) {
+            return Response.json(
+                { ok: false, error: 'Too many requests. Please wait a minute before sending another message.' },
+                { status: 429, headers }
+            );
+        }
+    }
+
+    // Cleanup memory occasionally
+    if (Math.random() < 0.05) {
+        for (const [key, val] of rateLimitMap.entries()) {
+            if (now - val.first > rateLimitWindow) rateLimitMap.delete(key);
+        }
+        for (const t of usedTickets) {
+            const tTs = parseInt(t.split('_')[0], 36);
+            if (now - tTs > 5 * 60 * 1000) usedTickets.delete(t);
+        }
     }
 
     // ── Validate ─────────────────────────────────────────────────────────────

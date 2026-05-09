@@ -63,6 +63,7 @@
     <meta name="msapplication-TileImage" content="https://cdn.discordapp.my.id/cdn/79747a.webp">
     <meta name="msapplication-TileColor" content="#080809">
     <meta name="theme-color"             content="#080809">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
     <!-- ── PRELOADS ── -->
     <link rel="preload" href="../style.css" as="style">
@@ -543,6 +544,7 @@
                     <label class="form-label" for="cf-message">Pesan</label>
                     <textarea class="form-input form-textarea" id="cf-message" name="message" placeholder="Pesannya..." required></textarea>
                 </div>
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark"></div>
                 <button type="submit" id="cf-submit" class="form-submit">
                     Kirim pesan <svg class="svg-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
                 </button>
@@ -665,13 +667,14 @@ if (cfForm) {
         cfStatus.className = 'cf-status';
         try {
             const fd = new FormData(cfForm);
+            const ticket = Date.now().toString(36) + '_' + Math.random().toString(36).substring(2);
             const res = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'), subject: fd.get('subject'), message: fd.get('message'), website_url: fd.get('website_url') }),
+                body: JSON.stringify({ name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'), subject: fd.get('subject'), message: fd.get('message'), website_url: fd.get('website_url'), ticket, turnstile: fd.get('cf-turnstile-response') }),
             });
             const json = await res.json();
-            if (json.ok) { cfStatus.className = 'cf-status ok'; cfStatus.textContent = 'Pesan terkirim! Gue bakal balas secepatnya.'; cfForm.reset(); }
+            if (json.ok) { cfStatus.className = 'cf-status ok'; cfStatus.textContent = 'Pesan terkirim! Gue bakal balas secepatnya.'; cfForm.reset(); if (window.turnstile) turnstile.reset(); }
             else { cfStatus.className = 'cf-status err'; cfStatus.textContent = json.error || 'Ada yang error.'; }
         } catch { cfStatus.className = 'cf-status err'; cfStatus.textContent = 'Error jaringan. Coba lagi ya.'; }
         finally { cfSubmit.disabled = false; cfSubmit.innerHTML = 'Kirim pesan <svg class="svg-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>'; }
