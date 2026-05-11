@@ -463,7 +463,7 @@
                     <div class="about-right rv d2">
                         <div class="about-block">
                             <div class="about-block-label">// bio</div>
-                            <p>Hey there, I'm Arraffi (aka Konaima). I build robust systems that are ready for production, including bots, CDNs,
+                            <p>Hey there! I'm Arraffi (aka Konaima). I build robust systems that are ready for production, including bots, CDNs,
                                 game servers, and backend infrastructure. I focus on practical implementation and getting things done
                                 without unnecessary complexity 🛠️</p>
                         </div>
@@ -673,7 +673,7 @@
             <div class="sec-body">
                 <div class="contact-header rv">
                     <h2 class="contact-headline">Let's build<br>something <em>real.</em></h2>
-                    <p class="contact-sub">Got something cool to build? Or just want to say hi? Either works — fill in
+                    <p class="contact-sub">Got something cool to build? Or just want to say hi? Either works. Fill in
                         the form below or slide into my DMs.</p>
                     <a href="mailto:kona@konaima.my.id" class="email-btn">
                         <svg class="svg-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"
@@ -851,40 +851,6 @@
             setTimeout(finish, 3000); // failsafe
         })();
 
-        // ── Typewriter ──────────────────────────────────────────────
-        (function () {
-            const el = document.getElementById('typewriter');
-            if (!el) return;
-            const words = ['Developer', 'Bot Engineer', 'Server Admin', 'Vibe Coder', 'CDN Builder'];
-            let wi = 0, ci = 0, deleting = false;
-            const TYPE_SPEED = 80;
-            const DELETE_SPEED = 45;
-            const PAUSE_AFTER = 1800;
-            const PAUSE_BEFORE = 350;
-
-            function tick() {
-                const word = words[wi];
-                if (deleting) {
-                    el.textContent = word.slice(0, --ci);
-                    if (ci === 0) {
-                        deleting = false;
-                        wi = (wi + 1) % words.length;
-                        setTimeout(tick, PAUSE_BEFORE);
-                    } else {
-                        setTimeout(tick, DELETE_SPEED);
-                    }
-                } else {
-                    el.textContent = word.slice(0, ++ci);
-                    if (ci === word.length) {
-                        deleting = true;
-                        setTimeout(tick, PAUSE_AFTER);
-                    } else {
-                        setTimeout(tick, TYPE_SPEED);
-                    }
-                }
-            }
-            setTimeout(tick, 600);
-        })();
 
         // ── About typewriter ("I code by...") ──────────────────────────
         (function () {

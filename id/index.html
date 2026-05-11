@@ -359,7 +359,7 @@
             <div class="about-right rv d2">
                 <div class="about-block">
                     <div class="about-block-label">// bio</div>
-                    <p>Halo! Saya Arraffi (biasa dipanggil Konaima). Saya biasa bikin sistem backend yang langsung bisa dipakai—kayak bot, CDN, atau game server. Fokus saya ada di implementasi praktis dan hasil yang optimal, tanpa dibikin ribet 🛠️</p>
+                    <p>Halo! Saya Arraffi (dikenal online sebagai Konaima). Saya biasa bikin sistem backend yang langsung bisa dipakai—kayak bot, CDN, atau game server. Fokus saya ada di implementasi praktis dan hasil yang optimal, tanpa dibikin ribet 🛠️</p>
                 </div>
                 <div class="about-block">
                     <div class="about-block-label">// teknologi</div>
@@ -375,7 +375,7 @@
                 </div>
                 <div class="status-bar">
                     <div class="dot-green"></div>
-                    Buka kesempatan · Jawa Tengah, ID
+                    Tersedia · Jawa Tengah, ID
                 </div>
             </div>
         </div>
@@ -522,7 +522,7 @@
     <div class="sec-body">
         <div class="contact-header rv">
             <h2 class="contact-headline">Yuk bikin<br>sesuatu yang <em>beneran.</em></h2>
-            <p class="contact-sub">Ada ide keren yang mau digarap? Atau cuma mau say hi? Dua-duanya santai — isi form di bawah atau DM aja.</p>
+            <p class="contact-sub">Ada ide keren yang mau digarap? Atau cuma mau <i>say hi</i>? Dua-duanya boleh. Isi form di bawah atau DM aja.</p>
             <a href="mailto:kona@konaima.my.id" class="email-btn">
                 <svg class="svg-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 4l7 5 7-5"/></svg>
                 kona@konaima.my.id
@@ -623,32 +623,11 @@ document.querySelectorAll('.rv').forEach(el => obs.observe(el));
     setTimeout(finish, 3000);
 })();
 
-// ── Typewriter
-(function () {
-    const el = document.getElementById('typewriter');
-    if (!el) return;
-    const words = ['Developer', 'Bot Engineer', 'Admin Server', 'Vibe Coder', 'CDN Builder'];
-    let wi = 0, ci = 0, deleting = false;
-    function tick() {
-        const word = words[wi];
-        if (deleting) {
-            el.textContent = word.slice(0, --ci);
-            if (ci === 0) { deleting = false; wi = (wi + 1) % words.length; setTimeout(tick, 350); }
-            else setTimeout(tick, 45);
-        } else {
-            el.textContent = word.slice(0, ++ci);
-            if (ci === word.length) { deleting = true; setTimeout(tick, 1800); }
-            else setTimeout(tick, 80);
-        }
-    }
-    setTimeout(tick, 600);
-})();
-
 // ── About typewriter
 (function () {
     const el = document.getElementById('tw-about');
     if (!el) return;
-    const words = ['vibe', 'insting', 'flow', 'feel', 'rasa'];
+    const words = ['vibe', 'insting', 'flow', 'feeling', 'rasa'];
     let wi = 0, ci = 0, deleting = false;
     const obs2 = new IntersectionObserver(entries => {
         if (!entries[0].isIntersecting) return;
