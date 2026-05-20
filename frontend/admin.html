@@ -151,7 +151,7 @@
                     </button>
                     <div v-if="showAddProj" class="add-form">
                         <div class="divider"></div>
-                        <ProjectForm :data="newProj" />
+                        <project-form :data="newProj" />
                         <button class="btn btn-primary btn-full" @click="addProject">Add Project</button>
                     </div>
                 </div>
@@ -172,7 +172,7 @@
                     <!-- inline edit -->
                     <div v-if="editingProj?.id===p.id" class="edit-panel">
                         <div class="edit-panel-title">✏ Editing "{{ editingProj.title }}"</div>
-                        <ProjectForm :data="editingProj" />
+                        <project-form :data="editingProj" />
                         <div class="btn-row">
                             <button class="btn btn-primary" @click="saveProject">Save Changes</button>
                             <button class="btn btn-ghost" @click="editingProj=null">Cancel</button>
@@ -190,7 +190,7 @@
                     </button>
                     <div v-if="showAddExp" class="add-form">
                         <div class="divider"></div>
-                        <ExpForm :data="newExp" />
+                        <exp-form :data="newExp" />
                         <button class="btn btn-primary btn-full" @click="addExp">Add Experience</button>
                     </div>
                 </div>
@@ -209,7 +209,7 @@
                     </div>
                     <div v-if="editingExp?.id===e.id" class="edit-panel">
                         <div class="edit-panel-title">✏ Editing "{{ editingExp.company }}"</div>
-                        <ExpForm :data="editingExp" />
+                        <exp-form :data="editingExp" />
                         <div class="btn-row">
                             <button class="btn btn-primary" @click="saveExp">Save Changes</button>
                             <button class="btn btn-ghost" @click="editingExp=null">Cancel</button>
