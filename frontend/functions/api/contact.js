@@ -153,14 +153,16 @@ export async function handleContact(request, env) {
         );
     }
 
+    const cleanName = name.replace(/["\\]/g, '');
+
     const res = await fetch('https://api.smtp2go.com/v3/email/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             api_key:  apiKey,
-            to:       [`${escHtml(name)} <${toEmail}>`],
+            to:       [`"${cleanName}" <${toEmail}>`],
             sender:   `Arraffi Portfolio <${fromEmail}>`,
-            reply_to: `${escHtml(name)} <${email}>`,
+            reply_to: `"${cleanName}" <${email}>`,
             subject:  `[Portfolio] New message from ${name}`,
             html_body: `
                 <div style="font-family:sans-serif;max-width:600px;margin:0 auto">

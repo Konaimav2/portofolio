@@ -1,7 +1,8 @@
 # ── Environment variables (NEVER commit these) ──
-.env
-.env.local
-.env.*.local
+# Matches .env in root AND all subdirectories (e.g. backend/.env, frontend/.env)
+**/.env
+**/.env.local
+**/.env.*.local
 
 # ── Wrangler / Cloudflare ──
 .wrangler/
@@ -19,3 +20,11 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# ── AI Agent Skills (never push AI context to public repo) ──
+.agent/
+.agents/
+
+# ── Local deploy helpers ──
+deploy_vps.sh
+backend/test_connections.js
