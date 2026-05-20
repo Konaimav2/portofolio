@@ -26,6 +26,7 @@
     <meta name="twitter:description" content="Membangun sistem backend yang andal, CDN cepat, dan API skalabel dengan Node.js, Python, dan Linux.">
     <meta name="twitter:image" content="https://cdn.discordapp.my.id/cdn/11acaa.webp">
 
+    <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,10 +42,13 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="#" class="nav-brand">Arraffi</a>
-            <div class="nav-links">
-                <a href="#projects">Proyek</a>
-                <a href="#experience">Pengalaman</a>
-                <a href="#contact">Kontak</a>
+            <button class="nav-hamburger" id="nav-toggle" aria-label="Buka menu">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-links" id="nav-links">
+                <a href="#projects" class="nav-close">Proyek</a>
+                <a href="#experience" class="nav-close">Pengalaman</a>
+                <a href="#contact" class="nav-close">Kontak</a>
                 <a href="/" class="lang-toggle">EN</a>
             </div>
         </div>
@@ -130,6 +134,20 @@
             document.getElementById('preloader').classList.add('hidden');
         });
 
+        // Hamburger nav toggle
+        const navToggle = document.getElementById('nav-toggle');
+        const navLinks  = document.getElementById('nav-links');
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('open');
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('.nav-close').forEach(a => {
+            a.addEventListener('click', () => {
+                navToggle.classList.remove('open');
+                navLinks.classList.remove('open');
+            });
+        });
+
         // Scroll Reveal Animation
         const revealElements = document.querySelectorAll('.reveal');
         const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -187,11 +205,16 @@
                 .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // Fetch Dynamic CMS Data
+        // Fetch Dynamic CMS Data — kedua endpoint dimuat secara independen
         async function loadCMSData() {
-            try {
-                const projRes = await fetch(`${API_BASE}/api/projects`);
-                const projects = await projRes.json();
+            const fetchJSON = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+            const [projResult, expResult] = await Promise.allSettled([
+                fetchJSON(`${API_BASE}/api/projects`),
+                fetchJSON(`${API_BASE}/api/experience`),
+            ]);
+
+            if (projResult.status === 'fulfilled') {
+                const projects = projResult.value;
                 const projGrid = document.getElementById('dynamic-projects');
                 if (projGrid && projects.length > 0) {
                     projGrid.innerHTML = projects.map(p => {
@@ -208,9 +231,12 @@
                         }
                     }).join('');
                 }
+            } else {
+                console.error('Gagal memuat proyek:', projResult.reason);
+            }
 
-                const expRes = await fetch(`${API_BASE}/api/experience`);
-                const experiences = await expRes.json();
+            if (expResult.status === 'fulfilled') {
+                const experiences = expResult.value;
                 const expTimeline = document.getElementById('dynamic-experience');
                 if (expTimeline && experiences.length > 0) {
                     expTimeline.innerHTML = experiences.map(e => `
@@ -224,12 +250,12 @@
                             </div>
                             <h4 class="exp-role">${escHtml(e.role)}</h4>
                             <p class="exp-desc">${escHtml(e.description)}</p>
-                            ${e.url ? `<a href="${escHtml(e.url)}" target="_blank" class="submit-btn" style="display:inline-block; margin-top:16px; text-decoration:none; text-align:center;">Kunjungi Website</a>` : ''}
+                            ${e.url ? `<a href="${escHtml(e.url)}" target="_blank" class="submit-btn" style="display:inline-block;margin-top:16px;text-decoration:none;text-align:center;">Kunjungi Website</a>` : ''}
                         </div>
                     `).join('');
                 }
-            } catch (e) {
-                console.error("Failed to load CMS data:", e);
+            } else {
+                console.error('Gagal memuat pengalaman:', expResult.reason);
             }
         }
         loadCMSData();
