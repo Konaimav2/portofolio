@@ -1,6 +1,6 @@
 # Arraffi (Konaima) | Personal Portfolio
 
-Hey, I'm Arraffi — known online as **Konaima** or **konasgor**. I'm a Vibe Coder based in Central Java, Indonesia. I mess around with **Node.js, Python, and C++**, building whatever feels right at the time.
+Hey, I'm Arraffi — known online as **Konaima** or **konasgor**. I'm a Junior Backend Developer based in Central Java, Indonesia. I work with **Node.js, Python, and C++**, building robust backend systems.
 
 This is the source code for my personal portfolio. Nothing fancy under the hood — just HTML and CSS doing what they do.
 

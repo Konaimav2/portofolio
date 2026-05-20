@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Arraffi | Junior Backend Developer</title>
+    <meta name="description" content="Arraffi (Konaima) — Junior Backend Developer from Central Java, Indonesia. Building reliable backend systems, CDNs, and APIs with Node.js, Python, and Linux.">
+    <meta name="author" content="Arraffi">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://arraffi.my.id/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://arraffi.my.id/">
+    <meta property="og:title" content="Arraffi | Junior Backend Developer">
+    <meta property="og:description" content="Building reliable backend systems, CDNs, and APIs with Node.js, Python, and Linux.">
+    <meta property="og:image" content="https://cdn.discordapp.my.id/cdn/11acaa.webp">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="id_ID">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@arraffianakbaik">
+    <meta name="twitter:title" content="Arraffi | Junior Backend Developer">
+    <meta name="twitter:description" content="Building reliable backend systems, CDNs, and APIs with Node.js, Python, and Linux.">
+    <meta name="twitter:image" content="https://cdn.discordapp.my.id/cdn/11acaa.webp">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+
+    <!-- Preloader -->
+    <div id="preloader"><div class="loader-spinner"></div></div>
+
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-brand">Arraffi</a>
+            <div class="nav-links">
+                <a href="#projects">Projects</a>
+                <a href="#experience">Experience</a>
+                <a href="#contact">Contact</a>
+                <a href="/id/" class="lang-toggle">ID</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        
+        <header class="hero reveal">
+            <img src="https://cdn.discordapp.my.id/cdn/11acaa.webp" alt="Arraffi" class="avatar">
+            <h1 class="hero-title">Arraffi</h1>
+            <h2 class="hero-role">Junior Backend Developer</h2>
+            <p class="hero-bio">I build reliable infrastructure, fast CDNs, and scalable systems with Node.js, Python, and Linux. I like keeping things simple, fast, and unbreakable.</p>
+            
+            <div class="social-links">
+                <a href="https://instagram.com/konasgor" target="_blank">Instagram</a>
+                <a href="https://discordapp.com/users/406852668028616721" target="_blank">Discord</a>
+                <a href="https://x.com/arraffianakbaik" target="_blank">Twitter</a>
+                <a href="https://github.com/Konaimav2/" target="_blank">GitHub</a>
+            </div>
+        </header>
+
+        <section id="projects" class="section reveal">
+            <h2 class="section-title">Selected Work</h2>
+            <div class="grid-2" id="dynamic-projects"></div>
+        </section>
+
+        <section id="experience" class="section reveal">
+            <h2 class="section-title">Experience</h2>
+            <div class="timeline" id="dynamic-experience"></div>
+        </section>
+
+        <section id="contact" class="section reveal">
+            <h2 class="section-title">Get In Touch</h2>
+            <p class="contact-desc">Have a question or a project in mind? Send me a message.</p>
+            
+            <form id="contact-form" class="card contact-form">
+                <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
+                
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Name</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" name="email" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Subject</label>
+                    <input type="text" name="subject" required>
+                </div>
+                
+                <div class="input-group">
+                    <label>Message</label>
+                    <textarea name="message" required></textarea>
+                </div>
+                
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark" style="margin-bottom: 20px;"></div>
+                
+                <button type="submit" id="cf-submit" class="btn-submit">Send Message</button>
+                <div id="cf-status" class="cf-status"></div>
+            </form>
+        </section>
+
+    </main>
+    
+    <footer>
+        <p>&copy; 2026 Arraffi.</p>
+    </footer>
+
+    <script>
+        
+                // Prevent scroll position caching on reload
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0,0);
+
+        // Preloader (Wait for all images and resources to load)
+        window.addEventListener('load', () => {
+            document.getElementById('preloader').classList.add('hidden');
+        });
+
+        // Scroll Reveal Animation
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Reveal only once
+                }
+            });
+        }, { rootMargin: "0px 0px -50px 0px", threshold: 0.1 });
+        
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        
+        // Arrow Keys Navigation (Presentation Mode)
+        document.addEventListener('keydown', (e) => {
+            // Do not interfere if user is typing in the contact form
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+            
+            if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp'].includes(e.key) || (e.key === ' ' && !e.shiftKey)) {
+                e.preventDefault();
+                const sections = Array.from(document.querySelectorAll('.hero, .section'));
+                
+                let currentIdx = 0;
+                let minDistance = Infinity;
+                
+                // Find the section currently in view
+                sections.forEach((sec, idx) => {
+                    const rect = sec.getBoundingClientRect();
+                    if (Math.abs(rect.top) < minDistance) {
+                        minDistance = Math.abs(rect.top);
+                        currentIdx = idx;
+                    }
+                });
+
+                const goNext = ['ArrowDown', 'PageDown', ' '].includes(e.key);
+                const goPrev = ['ArrowUp', 'PageUp'].includes(e.key);
+
+                if (goNext && currentIdx < sections.length - 1) {
+                    sections[currentIdx + 1].scrollIntoView({ behavior: 'smooth' });
+                } else if (goPrev && currentIdx > 0) {
+                    sections[currentIdx - 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+
+        
+        // Production API base — update this to your VPS domain before deploying
+        const API_BASE = 'https://api.arraffi.my.id';
+
+        // FIX: HTML escape to prevent XSS from database content
+        function escHtml(s) {
+            return String(s ?? '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Fetch Dynamic CMS Data
+        async function loadCMSData() {
+            try {
+                const projRes = await fetch(`${API_BASE}/api/projects`);
+                const projects = await projRes.json();
+                const projGrid = document.getElementById('dynamic-projects');
+                if (projGrid && projects.length > 0) {
+                    projGrid.innerHTML = projects.map(p => {
+                        const content = `
+                            <img loading="lazy" src="${escHtml(p.image_url)}" alt="${escHtml(p.title)}" class="proj-img ${p.title.includes('Bot') ? 'wa-img' : ''}">
+                            <div class="card-content">
+                                <h3>${escHtml(p.title)}</h3>
+                                <p>${escHtml(p.description)}</p>
+                            </div>`;
+                        if (p.url) {
+                            return `<a href="${escHtml(p.url)}" target="_blank" class="card proj-card ${p.full_width ? 'full-width' : ''}">${content}</a>`;
+                        } else {
+                            return `<div class="card proj-card ${p.full_width ? 'full-width' : ''}">${content}</div>`;
+                        }
+                    }).join('');
+                }
+
+                const expRes = await fetch(`${API_BASE}/api/experience`);
+                const experiences = await expRes.json();
+                const expTimeline = document.getElementById('dynamic-experience');
+                if (expTimeline && experiences.length > 0) {
+                    expTimeline.innerHTML = experiences.map(e => `
+                        <div class="card exp-card">
+                            <div class="exp-header">
+                                <img loading="lazy" src="${escHtml(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo">
+                                <div class="exp-title-box">
+                                    <h3>${escHtml(e.company)}</h3>
+                                    <span class="exp-date">${escHtml(e.date_range)}</span>
+                                </div>
+                            </div>
+                            <h4 class="exp-role">${escHtml(e.role)}</h4>
+                            <p class="exp-desc">${escHtml(e.description)}</p>
+                            ${e.url ? `<a href="${escHtml(e.url)}" target="_blank" class="submit-btn" style="display:inline-block; margin-top:16px; text-decoration:none; text-align:center;">Visit Website</a>` : ''}
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error("Failed to load CMS data:", e);
+            }
+        }
+        loadCMSData();
+
+        const cfForm = document.getElementById('contact-form');
+        const cfSubmit = document.getElementById('cf-submit');
+        const cfStatus = document.getElementById('cf-status');
+        
+        if (cfForm) {
+            cfForm.addEventListener('submit', async e => {
+                e.preventDefault();
+                cfSubmit.disabled = true;
+                cfSubmit.textContent = '...';
+                cfStatus.className = 'cf-status';
+                try {
+                    const fd = new FormData(cfForm);
+                    const ticket = Date.now().toString(36) + '_' + Math.random().toString(36).substring(2);
+                    const res = await fetch(`${API_BASE}/api/contact`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            name: fd.get('name'), 
+                            email: fd.get('email'), 
+                            subject: fd.get('subject'), 
+                            message: fd.get('message'), 
+                            website_url: fd.get('website_url'), 
+                            ticket, 
+                            turnstile: fd.get('cf-turnstile-response') 
+                        }),
+                    });
+                    const json = await res.json();
+                    if (json.ok) {
+                        cfStatus.className = 'cf-status ok';
+                        cfStatus.textContent = json.message || 'Success.';
+                        cfForm.reset();
+                        if (window.turnstile) turnstile.reset();
+                    } else {
+                        cfStatus.className = 'cf-status err';
+                        cfStatus.textContent = json.error || 'Failed.';
+                    }
+                } catch { 
+                    cfStatus.className = 'cf-status err'; 
+                    cfStatus.textContent = 'Error.'; 
+                } finally {
+                    cfSubmit.disabled = false;
+                    cfSubmit.textContent = 'Send Message';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

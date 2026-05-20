@@ -1,0 +1,23 @@
+# _headers — Cloudflare Pages security headers
+# Applies to all routes served from this directory.
+
+# Global headers for all routes
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-XSS-Protection: 1; mode=block
+
+# Specific content types (Cloudflare usually handles MIME types automatically, but we keep them for reliability)
+/*.html
+  Content-Type: text/html; charset=UTF-8
+
+/*.css
+  Content-Type: text/css; charset=UTF-8
+
+/*.js
+  Content-Type: application/javascript; charset=UTF-8
+
+/*.json
+  Content-Type: application/json; charset=UTF-8
