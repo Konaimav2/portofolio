@@ -107,7 +107,7 @@ const contactLimiter = rateLimit({
 
 app.get('/api/projects', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, title, description, url, image_url, full_width FROM projects ORDER BY id ASC');
+        const [rows] = await pool.query('SELECT id, title, title_id, description, description_id, url, image_url, full_width FROM projects ORDER BY id ASC');
         res.json(rows);
     } catch {
         res.status(500).json({ error: 'Failed to load projects.' });
@@ -116,7 +116,7 @@ app.get('/api/projects', async (req, res) => {
 
 app.get('/api/experience', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, company, role, date_range, description, logo_url, url FROM experience ORDER BY id ASC');
+        const [rows] = await pool.query('SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url FROM experience ORDER BY id ASC');
         res.json(rows);
     } catch {
         res.status(500).json({ error: 'Failed to load experience.' });
@@ -190,13 +190,13 @@ app.get('/api/admin/projects', authMiddleware, async (req, res) => {
 
 app.post('/api/admin/projects', authMiddleware, async (req, res) => {
     try {
-        const { title, description, url, image_url, full_width } = req.body ?? {};
+        const { title, title_id, description, description_id, url, image_url, full_width } = req.body ?? {};
         if (!title?.trim() || !description?.trim()) {
             return res.status(422).json({ error: 'Title and description are required.' });
         }
         await pool.query(
-            'INSERT INTO projects (title, description, url, image_url, full_width) VALUES (?, ?, ?, ?, ?)',
-            [title.trim(), description.trim(), url?.trim() ?? null, image_url?.trim() ?? null, full_width ? 1 : 0]
+            'INSERT INTO projects (title, title_id, description, description_id, url, image_url, full_width) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [title.trim(), title_id?.trim() || null, description.trim(), description_id?.trim() || null, url?.trim() ?? null, image_url?.trim() ?? null, full_width ? 1 : 0]
         );
         res.json({ ok: true });
     } catch {
@@ -208,13 +208,13 @@ app.put('/api/admin/projects/:id', authMiddleware, async (req, res) => {
     try {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Invalid project ID.' });
-        const { title, description, url, image_url, full_width } = req.body ?? {};
+        const { title, title_id, description, description_id, url, image_url, full_width } = req.body ?? {};
         if (!title?.trim() || !description?.trim()) {
             return res.status(422).json({ error: 'Title and description are required.' });
         }
         await pool.query(
-            'UPDATE projects SET title=?, description=?, url=?, image_url=?, full_width=? WHERE id=?',
-            [title.trim(), description.trim(), url?.trim() ?? null, image_url?.trim() ?? null, full_width ? 1 : 0, id]
+            'UPDATE projects SET title=?, title_id=?, description=?, description_id=?, url=?, image_url=?, full_width=? WHERE id=?',
+            [title.trim(), title_id?.trim() || null, description.trim(), description_id?.trim() || null, url?.trim() ?? null, image_url?.trim() ?? null, full_width ? 1 : 0, id]
         );
         res.json({ ok: true });
     } catch {
@@ -246,13 +246,13 @@ app.get('/api/admin/experience', authMiddleware, async (req, res) => {
 
 app.post('/api/admin/experience', authMiddleware, async (req, res) => {
     try {
-        const { company, role, date_range, description, logo_url, url } = req.body ?? {};
+        const { company, role, role_id, date_range, description, description_id, logo_url, url } = req.body ?? {};
         if (!company?.trim() || !role?.trim() || !date_range?.trim() || !description?.trim()) {
             return res.status(422).json({ error: 'Company, role, date range, and description are required.' });
         }
         await pool.query(
-            'INSERT INTO experience (company, role, date_range, description, logo_url, url) VALUES (?, ?, ?, ?, ?, ?)',
-            [company.trim(), role.trim(), date_range.trim(), description.trim(), logo_url?.trim() ?? null, url?.trim() ?? null]
+            'INSERT INTO experience (company, role, role_id, date_range, description, description_id, logo_url, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [company.trim(), role.trim(), role_id?.trim() || null, date_range.trim(), description.trim(), description_id?.trim() || null, logo_url?.trim() ?? null, url?.trim() ?? null]
         );
         res.json({ ok: true });
     } catch {
@@ -264,13 +264,13 @@ app.put('/api/admin/experience/:id', authMiddleware, async (req, res) => {
     try {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Invalid experience ID.' });
-        const { company, role, date_range, description, logo_url, url } = req.body ?? {};
+        const { company, role, role_id, date_range, description, description_id, logo_url, url } = req.body ?? {};
         if (!company?.trim() || !role?.trim() || !date_range?.trim() || !description?.trim()) {
             return res.status(422).json({ error: 'Company, role, date range, and description are required.' });
         }
         await pool.query(
-            'UPDATE experience SET company=?, role=?, date_range=?, description=?, logo_url=?, url=? WHERE id=?',
-            [company.trim(), role.trim(), date_range.trim(), description.trim(), logo_url?.trim() ?? null, url?.trim() ?? null, id]
+            'UPDATE experience SET company=?, role=?, role_id=?, date_range=?, description=?, description_id=?, logo_url=?, url=? WHERE id=?',
+            [company.trim(), role.trim(), role_id?.trim() || null, date_range.trim(), description.trim(), description_id?.trim() || null, logo_url?.trim() ?? null, url?.trim() ?? null, id]
         );
         res.json({ ok: true });
     } catch {
