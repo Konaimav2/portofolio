@@ -31,6 +31,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
@@ -63,10 +64,10 @@
             <p class="hero-bio">Saya membangun infrastruktur yang andal, CDN cepat, dan sistem yang skalabel dengan Node.js, Python, dan Linux. Saya suka membuat sistem yang sederhana, cepat, dan tangguh.</p>
             
             <div class="social-links">
-                <a href="https://instagram.com/konasgor" target="_blank" rel="noopener noreferrer">Instagram</a>
-                <a href="https://discordapp.com/users/406852668028616721" target="_blank" rel="noopener noreferrer">Discord</a>
-                <a href="https://x.com/arraffianakbaik" target="_blank" rel="noopener noreferrer">Twitter</a>
-                <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="https://instagram.com/konasgor" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                <a href="https://discordapp.com/users/406852668028616721" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-discord"></i> Discord</a>
+                <a href="https://x.com/arraffianakbaik" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i> Twitter</a>
+                <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> GitHub</a>
             </div>
         </header>
 
@@ -83,6 +84,21 @@
         <section id="contact" class="section reveal">
             <h2 class="section-title">Hubungi Saya</h2>
             <p class="contact-desc">Memiliki pertanyaan atau proyek? Kirimkan pesan di bawah ini.</p>
+
+            <div class="contact-info-row">
+                <div class="contact-info-item">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <a href="https://wa.me/6289500000000" target="_blank" rel="noopener noreferrer">+62 895-0000-0000</a>
+                </div>
+                <div class="contact-info-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <a href="mailto:kona@konaima.my.id">kona@konaima.my.id</a>
+                </div>
+                <div class="contact-info-item">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Jawa Tengah, Indonesia</span>
+                </div>
+            </div>
             
             <form id="contact-form" class="card contact-form">
                 <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
@@ -110,7 +126,7 @@
                 
                 <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark" style="margin-bottom: 20px;"></div>
                 
-                <button type="submit" id="cf-submit" class="btn-submit">Kirim Pesan</button>
+                <button type="submit" id="cf-submit" class="btn-submit"><i class="fa-solid fa-paper-plane"></i> Kirim Pesan</button>
                 <div id="cf-status" class="cf-status"></div>
             </form>
         </section>
