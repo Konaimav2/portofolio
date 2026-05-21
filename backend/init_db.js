@@ -48,9 +48,9 @@ async function init() {
         if (projects[0].count === 0) {
             await connection.query(`
                 INSERT INTO projects (title, description, url, image_url, full_width) VALUES 
-                ('SimpleCDN', 'A fast, lightweight content delivery network built from scratch. Designed to serve static assets with minimal overhead.', 'https://cdn.discordapp.my.id', 'https://cdn.discordapp.my.id/cdn/7541df.webp', false),
-                ('BerAPI', 'A centralized hub of ready-to-use API endpoints designed for rapid prototyping, AI integration, and download utilities.', 'https://berapi.my.id/', 'https://cdn.discordapp.my.id/cdn/secure/1f75f1.webp', false),
-                ('Automated Bot Systems', 'Custom automated WhatsApp bots to handle community engagement, moderate chats, and process repetitive tasks.', '', 'https://cdn.discordapp.my.id/cdn/e3dece.webp', true)
+                ('SimpleCDN', 'I built this fast, lightweight CDN from scratch to serve static assets without the usual overhead.', 'https://cdn.discordapp.my.id', 'https://cdn.discordapp.my.id/cdn/7541df.webp', false),
+                ('BerAPI', 'A collection of API endpoints I put together for quick prototyping, AI integrations, and downloading files.', 'https://berapi.my.id/', 'https://cdn.discordapp.my.id/cdn/secure/1f75f1.webp', false),
+                ('Automated Bot Systems', 'WhatsApp bots I wrote to manage communities, moderate chats, and automate the boring stuff.', '', 'https://cdn.discordapp.my.id/cdn/e3dece.webp', true)
             `);
             console.log('Inserted original projects into database.');
         }
@@ -59,8 +59,8 @@ async function init() {
         if (exp[0].count === 0) {
             await connection.query(`
                 INSERT INTO experience (company, role, date_range, description, logo_url) VALUES 
-                ('Arqonara Hosting', 'Manager & Staff', 'Aug 2025 — Present', 'Managing core backend infrastructure, ensuring game server stability under heavy load, and resolving network issues.', 'https://cdn.discordapp.my.id/cdn/df7b8d.webp'),
-                ('HeppyCloud', 'Customer Service', 'Mar 2025 — Present', 'Providing direct technical support to clients, executing routine server maintenance, and troubleshooting modpacks.', 'https://cdn.discordapp.my.id/cdn/028eba.webp')
+                ('Arqonara Hosting', 'Manager & Staff', 'Aug 2025 — Present', 'I manage the backend infrastructure, keep the game servers running smoothly when player counts spike, and fix network issues.', 'https://cdn.discordapp.my.id/cdn/df7b8d.webp'),
+                ('HeppyCloud', 'Customer Service', 'Mar 2025 — Present', 'I help clients directly with technical problems, handle routine server maintenance, and troubleshoot modpacks.', 'https://cdn.discordapp.my.id/cdn/028eba.webp')
             `);
             console.log('Inserted original experience into database.');
         }
