@@ -60,8 +60,11 @@
         <header class="hero reveal">
             <img src="https://cdn.discordapp.my.id/cdn/11acaa.webp" alt="Arraffi" class="avatar">
             <h1 class="hero-title">Arraffi</h1>
-            <h2 class="hero-role">Junior Backend Developer</h2>
-            <p class="hero-bio">Saya membangun infrastruktur yang andal, CDN cepat, dan sistem yang skalabel dengan Node.js, Python, dan Linux. Saya suka membuat sistem yang sederhana, cepat, dan tangguh.</p>
+            <p class="hero-bio">Saya menulis kode backend menggunakan Node.js, Python, dan Linux. Saya membangun infrastruktur, CDN cepat, dan API yang tidak mudah rusak. Saya lebih suka sistem yang sederhana daripada yang rumit tanpa alasan.</p>
+            
+            <div class="hero-actions">
+                <a href="mailto:kona@konaima.my.id" class="btn-contact"><i class="fa-solid fa-envelope"></i> Hubungi Saya</a>
+            </div>
             
             <div class="social-links">
                 <a href="https://instagram.com/konasgor" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i> Instagram</a>
@@ -84,21 +87,6 @@
         <section id="contact" class="section reveal">
             <h2 class="section-title">Hubungi Saya</h2>
             <p class="contact-desc">Memiliki pertanyaan atau proyek? Kirimkan pesan di bawah ini.</p>
-
-            <div class="contact-info-row">
-                <div class="contact-info-item">
-                    <i class="fa-brands fa-whatsapp"></i>
-                    <a href="https://wa.me/6289500000000" target="_blank" rel="noopener noreferrer">+62 895-0000-0000</a>
-                </div>
-                <div class="contact-info-item">
-                    <i class="fa-solid fa-envelope"></i>
-                    <a href="mailto:kona@konaima.my.id">kona@konaima.my.id</a>
-                </div>
-                <div class="contact-info-item">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <span>Jawa Tengah, Indonesia</span>
-                </div>
-            </div>
             
             <form id="contact-form" class="card contact-form">
                 <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
@@ -106,17 +94,17 @@
                 <div class="form-grid">
                     <div class="input-group">
                         <label for="cf-name">Nama</label>
-                        <input type="text" id="cf-name" name="name" autocomplete="name" required>
+                        <input type="text" id="cf-name" name="name" autocomplete="name" placeholder="Nama" required>
                     </div>
                     <div class="input-group">
                         <label for="cf-email">Email</label>
-                        <input type="email" id="cf-email" name="email" autocomplete="email" required>
+                        <input type="email" id="cf-email" name="email" autocomplete="email" placeholder="Email" required>
                     </div>
                 </div>
                 
                 <div class="input-group">
                     <label for="cf-subject">Subjek</label>
-                    <input type="text" id="cf-subject" name="subject" autocomplete="off" required>
+                    <input type="text" id="cf-subject" name="subject" autocomplete="off" placeholder="Subjek" required>
                 </div>
                 
                 <div class="input-group">
@@ -133,8 +121,11 @@
 
     </main>
     
-    <footer>
-        <p>&copy; 2026 Arraffi.</p>
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 Arraffi.</p>
+            <p class="footer-subtitle">Dibuat dengan <i class="fa-solid fa-heart" style="color:var(--accent);"></i> dan Node.js</p>
+        </div>
     </footer>
 
     <script>
