@@ -28,3 +28,13 @@ Thumbs.db
 # ── Local deploy helpers ──
 deploy_vps.sh
 backend/test_connections.js
+
+# ── One-off / utility scripts (not application code) ──
+test_admin.py
+backend/inject_dynamic.py
+backend/migrate_add_id_columns.js
+frontend/check_urls.py
+
+# ── Old Cloudflare Worker (replaced by Pages Functions) ──
+frontend/worker.js
+frontend/wrangler.toml
