@@ -20,8 +20,11 @@ const allowedOrigins = [
 ];
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (e.g. curl, Postman) only in development
-        if (!origin) return callback(null, true);
+        // Block requests with no Origin header in production (allows curl/Postman only in dev)
+        if (!origin) {
+            if (process.env.NODE_ENV !== 'production') return callback(null, true);
+            return callback(new Error('No Origin header'));
+        }
         if (allowedOrigins.includes(origin)) return callback(null, true);
         return callback(new Error('Not allowed by CORS'));
     },
@@ -74,6 +77,20 @@ function parseId(raw) {
     const n = parseInt(raw, 10);
     if (!Number.isFinite(n) || n <= 0 || String(n) !== raw) return null;
     return n;
+}
+
+// ── Validate URL (allow only http/https, block javascript: data: etc.) ────
+function isValidUrl(str) {
+    if (!str || str.trim() === '') return true; // optional — null is fine
+    try {
+        const u = new URL(str.trim());
+        return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch { return false; }
+}
+
+// ── Sanitize string for email header use (prevent header injection) ────────
+function sanitizeHeader(str) {
+    return String(str ?? '').replace(/[\r\n"\\]/g, '');
 }
 
 // ── Admin auth middleware ──────────────────────────────────────────────────
@@ -151,12 +168,13 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
             [name.trim(), email.trim(), subject?.trim() ?? '', message.trim()]
         );
 
-        // Send Email
+        // Send Email — sanitize name to prevent header injection
+        const safeName = sanitizeHeader(name.trim());
         await transporter.sendMail({
             from: `"Arraffi Portfolio" <${process.env.SMTP_FROM}>`,
             to: 'kona@konaima.my.id',
-            replyTo: `"${name.trim()}" <${email.trim()}>`,
-            subject: `[Portfolio] ${subject?.trim() || 'New message from ' + name.trim()}`,
+            replyTo: `"${safeName}" <${email.trim()}>`,
+            subject: `[Portfolio] ${sanitizeHeader(subject?.trim() || 'New message from ' + name.trim())}`,
             text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subject?.trim() || '(none)'}\n\n${message.trim()}`
         });
 
@@ -181,7 +199,9 @@ app.post('/api/admin/login', loginLimiter, (req, res) => {
 
 app.get('/api/admin/projects', authMiddleware, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM projects ORDER BY id ASC');
+        const [rows] = await pool.query(
+            'SELECT id, title, title_id, description, description_id, url, image_url, full_width, created_at FROM projects ORDER BY id ASC'
+        );
         res.json(rows);
     } catch {
         res.status(500).json({ error: 'Failed to fetch projects.' });
@@ -194,9 +214,14 @@ app.post('/api/admin/projects', authMiddleware, async (req, res) => {
         if (!title?.trim() || !description?.trim()) {
             return res.status(422).json({ error: 'Title and description are required.' });
         }
+        if (title.length > 255 || (title_id && title_id.length > 255)) {
+            return res.status(422).json({ error: 'Title is too long (max 255 characters).' });
+        }
+        if (!isValidUrl(url)) return res.status(422).json({ error: 'Project URL must start with http:// or https://' });
+        if (!isValidUrl(image_url)) return res.status(422).json({ error: 'Image URL must start with http:// or https://' });
         await pool.query(
             'INSERT INTO projects (title, title_id, description, description_id, url, image_url, full_width) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [title.trim(), title_id?.trim() || null, description.trim(), description_id?.trim() || null, url?.trim() ?? null, image_url?.trim() ?? null, full_width ? 1 : 0]
+            [title.trim(), title_id?.trim() || null, description.trim(), description_id?.trim() || null, url?.trim() || null, image_url?.trim() || null, full_width ? 1 : 0]
         );
         res.json({ ok: true });
     } catch {
@@ -212,9 +237,14 @@ app.put('/api/admin/projects/:id', authMiddleware, async (req, res) => {
         if (!title?.trim() || !description?.trim()) {
             return res.status(422).json({ error: 'Title and description are required.' });
         }
+        if (title.length > 255 || (title_id && title_id.length > 255)) {
+            return res.status(422).json({ error: 'Title is too long (max 255 characters).' });
+        }
+        if (!isValidUrl(url)) return res.status(422).json({ error: 'Project URL must start with http:// or https://' });
+        if (!isValidUrl(image_url)) return res.status(422).json({ error: 'Image URL must start with http:// or https://' });
         await pool.query(
             'UPDATE projects SET title=?, title_id=?, description=?, description_id=?, url=?, image_url=?, full_width=? WHERE id=?',
-            [title.trim(), title_id?.trim() || null, description.trim(), description_id?.trim() || null, url?.trim() ?? null, image_url?.trim() ?? null, full_width ? 1 : 0, id]
+            [title.trim(), title_id?.trim() || null, description.trim(), description_id?.trim() || null, url?.trim() || null, image_url?.trim() || null, full_width ? 1 : 0, id]
         );
         res.json({ ok: true });
     } catch {
@@ -237,7 +267,9 @@ app.delete('/api/admin/projects/:id', authMiddleware, async (req, res) => {
 
 app.get('/api/admin/experience', authMiddleware, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM experience ORDER BY id ASC');
+        const [rows] = await pool.query(
+            'SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url, created_at FROM experience ORDER BY id ASC'
+        );
         res.json(rows);
     } catch {
         res.status(500).json({ error: 'Failed to fetch experience.' });
@@ -250,9 +282,14 @@ app.post('/api/admin/experience', authMiddleware, async (req, res) => {
         if (!company?.trim() || !role?.trim() || !date_range?.trim() || !description?.trim()) {
             return res.status(422).json({ error: 'Company, role, date range, and description are required.' });
         }
+        if (role.length > 255 || (role_id && role_id.length > 255) || company.length > 255) {
+            return res.status(422).json({ error: 'Text field is too long (max 255 characters).' });
+        }
+        if (!isValidUrl(url)) return res.status(422).json({ error: 'Company URL must start with http:// or https://' });
+        if (!isValidUrl(logo_url)) return res.status(422).json({ error: 'Logo URL must start with http:// or https://' });
         await pool.query(
             'INSERT INTO experience (company, role, role_id, date_range, description, description_id, logo_url, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [company.trim(), role.trim(), role_id?.trim() || null, date_range.trim(), description.trim(), description_id?.trim() || null, logo_url?.trim() ?? null, url?.trim() ?? null]
+            [company.trim(), role.trim(), role_id?.trim() || null, date_range.trim(), description.trim(), description_id?.trim() || null, logo_url?.trim() || null, url?.trim() || null]
         );
         res.json({ ok: true });
     } catch {
@@ -268,9 +305,14 @@ app.put('/api/admin/experience/:id', authMiddleware, async (req, res) => {
         if (!company?.trim() || !role?.trim() || !date_range?.trim() || !description?.trim()) {
             return res.status(422).json({ error: 'Company, role, date range, and description are required.' });
         }
+        if (role.length > 255 || (role_id && role_id.length > 255) || company.length > 255) {
+            return res.status(422).json({ error: 'Text field is too long (max 255 characters).' });
+        }
+        if (!isValidUrl(url)) return res.status(422).json({ error: 'Company URL must start with http:// or https://' });
+        if (!isValidUrl(logo_url)) return res.status(422).json({ error: 'Logo URL must start with http:// or https://' });
         await pool.query(
             'UPDATE experience SET company=?, role=?, role_id=?, date_range=?, description=?, description_id=?, logo_url=?, url=? WHERE id=?',
-            [company.trim(), role.trim(), role_id?.trim() || null, date_range.trim(), description.trim(), description_id?.trim() || null, logo_url?.trim() ?? null, url?.trim() ?? null, id]
+            [company.trim(), role.trim(), role_id?.trim() || null, date_range.trim(), description.trim(), description_id?.trim() || null, logo_url?.trim() || null, url?.trim() || null, id]
         );
         res.json({ ok: true });
     } catch {

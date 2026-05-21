@@ -1,38 +1,37 @@
 /**
  * migrate_add_id_columns.js
- * Run ONCE on the VPS to add Indonesian translation columns:
- *   node migrate_add_id_columns.js
+ * Compatible with MySQL 5.7+ and MariaDB.
+ * Run ONCE on the VPS: node migrate_add_id_columns.js
  */
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
+const COLUMNS = [
+    { table: 'projects',    column: 'title_id',       def: 'VARCHAR(255) NULL DEFAULT NULL AFTER description' },
+    { table: 'projects',    column: 'description_id',  def: 'TEXT NULL DEFAULT NULL AFTER title_id' },
+    { table: 'experience',  column: 'role_id',         def: 'VARCHAR(255) NULL DEFAULT NULL AFTER description' },
+    { table: 'experience',  column: 'description_id',  def: 'TEXT NULL DEFAULT NULL AFTER role_id' },
+];
+
 (async () => {
     const conn = await mysql.createConnection(process.env.DATABASE_URL);
-    console.log('Connected. Running migration...\n');
+    const [[{ db }]] = await conn.query('SELECT DATABASE() AS db');
+    console.log(`Connected to database: ${db}\nRunning migration...\n`);
 
-    const migrations = [
-        // Projects: title_id (optional Indonesian title), description_id (optional Indonesian description)
-        `ALTER TABLE projects ADD COLUMN IF NOT EXISTS title_id VARCHAR(255) NULL DEFAULT NULL AFTER description`,
-        `ALTER TABLE projects ADD COLUMN IF NOT EXISTS description_id TEXT NULL DEFAULT NULL AFTER title_id`,
-
-        // Experience: role_id (optional Indonesian role), description_id (optional Indonesian description)
-        `ALTER TABLE experience ADD COLUMN IF NOT EXISTS role_id VARCHAR(255) NULL DEFAULT NULL AFTER description`,
-        `ALTER TABLE experience ADD COLUMN IF NOT EXISTS description_id TEXT NULL DEFAULT NULL AFTER role_id`,
-    ];
-
-    for (const sql of migrations) {
-        try {
-            await conn.query(sql);
-            console.log(`✅ ${sql.slice(0, 60)}...`);
-        } catch (e) {
-            if (e.code === 'ER_DUP_FIELDNAME') {
-                console.log(`⚠  Column already exists, skipping.`);
-            } else {
-                console.error(`❌ Failed: ${e.message}`);
-            }
+    for (const { table, column, def } of COLUMNS) {
+        const [rows] = await conn.query(
+            `SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+            [db, table, column]
+        );
+        if (rows.length > 0) {
+            console.log(`⚠  ${table}.${column} — already exists, skipping.`);
+        } else {
+            await conn.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${def}`);
+            console.log(`✅  ${table}.${column} — added.`);
         }
     }
 
     await conn.end();
-    console.log('\nMigration complete.');
-})();
+    console.log('\nMigration complete. Restart portback with: pm2 restart portback');
+})().catch(e => { console.error('Fatal:', e.message); process.exit(1); });

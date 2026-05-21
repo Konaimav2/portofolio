@@ -1,15 +1,14 @@
 # _headers — Cloudflare Pages security headers
-# Applies to all routes served from this directory.
 
-# Global headers for all routes
+# ── Global headers (all routes) ──────────────────────────────────────────────
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  X-XSS-Protection: 1; mode=block
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.arraffi.my.id; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://api.arraffi.my.id;
 
-# Specific content types (Cloudflare usually handles MIME types automatically, but we keep them for reliability)
+# ── MIME type enforcement ─────────────────────────────────────────────────────
 /*.html
   Content-Type: text/html; charset=UTF-8
 
@@ -21,3 +20,8 @@
 
 /*.json
   Content-Type: application/json; charset=UTF-8
+
+# ── Stricter CSP for admin panel ─────────────────────────────────────────────
+/admin.html
+  X-Robots-Tag: noindex, nofollow
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.arraffi.my.id; frame-ancestors 'none'; base-uri 'self';
