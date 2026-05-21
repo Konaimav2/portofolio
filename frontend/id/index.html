@@ -49,7 +49,7 @@
                 <a href="#projects" class="nav-close">Proyek</a>
                 <a href="#experience" class="nav-close">Pengalaman</a>
                 <a href="#contact" class="nav-close">Kontak</a>
-                <a href="/" class="lang-toggle">EN</a>
+                <a href="/" class="lang-toggle nav-close">EN</a>
             </div>
         </div>
     </nav>
@@ -63,10 +63,10 @@
             <p class="hero-bio">Saya membangun infrastruktur yang andal, CDN cepat, dan sistem yang skalabel dengan Node.js, Python, dan Linux. Saya suka membuat sistem yang sederhana, cepat, dan tangguh.</p>
             
             <div class="social-links">
-                <a href="https://instagram.com/konasgor" target="_blank">Instagram</a>
-                <a href="https://discordapp.com/users/406852668028616721" target="_blank">Discord</a>
-                <a href="https://x.com/arraffianakbaik" target="_blank">Twitter</a>
-                <a href="https://github.com/Konaimav2/" target="_blank">GitHub</a>
+                <a href="https://instagram.com/konasgor" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <a href="https://discordapp.com/users/406852668028616721" target="_blank" rel="noopener noreferrer">Discord</a>
+                <a href="https://x.com/arraffianakbaik" target="_blank" rel="noopener noreferrer">Twitter</a>
+                <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
         </header>
 
@@ -202,7 +202,15 @@
         function escHtml(s) {
             return String(s ?? '')
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function safeUrl(url) {
+            try {
+                const u = new URL(url ?? '');
+                return (u.protocol === 'http:' || u.protocol === 'https:') ? escHtml(url) : '#';
+            } catch { return '#'; }
         }
 
         // Fetch Dynamic CMS Data — kedua endpoint dimuat secara independen
@@ -221,13 +229,13 @@
                         const title = p.title_id || p.title;
                         const desc  = p.description_id || p.description;
                         const content = `
-                            <img loading="lazy" src="${escHtml(p.image_url)}" alt="${escHtml(title)}" class="proj-img ${p.title.includes('Bot') ? 'wa-img' : ''}">
+                            <img loading="lazy" src="${safeUrl(p.image_url)}" alt="${escHtml(title)}" class="proj-img ${p.title.includes('Bot') ? 'wa-img' : ''}">
                             <div class="card-content">
                                 <h3>${escHtml(title)}</h3>
                                 <p>${escHtml(desc)}</p>
                             </div>`;
                         if (p.url) {
-                            return `<a href="${escHtml(p.url)}" target="_blank" class="card proj-card ${p.full_width ? 'full-width' : ''}">${content}</a>`;
+                            return `<a href="${safeUrl(p.url)}" target="_blank" rel="noopener noreferrer" class="card proj-card ${p.full_width ? 'full-width' : ''}">${content}</a>`;
                         } else {
                             return `<div class="card proj-card ${p.full_width ? 'full-width' : ''}">${content}</div>`;
                         }
@@ -247,7 +255,7 @@
                         return `
                         <div class="card exp-card">
                             <div class="exp-header">
-                                <img loading="lazy" src="${escHtml(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo">
+                                <img loading="lazy" src="${safeUrl(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo">
                                 <div class="exp-title-box">
                                     <h3>${escHtml(e.company)}</h3>
                                     <span class="exp-date">${escHtml(e.date_range)}</span>
@@ -255,7 +263,7 @@
                             </div>
                             <h4 class="exp-role">${escHtml(role)}</h4>
                             <p class="exp-desc">${escHtml(desc)}</p>
-                            ${e.url ? `<a href="${escHtml(e.url)}" target="_blank" class="submit-btn" style="display:inline-block;margin-top:16px;text-decoration:none;text-align:center;">Kunjungi Website</a>` : ''}
+                            ${e.url ? `<a href="${safeUrl(e.url)}" target="_blank" rel="noopener noreferrer" class="submit-btn" style="display:inline-block;margin-top:16px;text-decoration:none;text-align:center;">Kunjungi Website</a>` : ''}
                         </div>
                     `}).join('');
                 }
