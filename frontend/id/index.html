@@ -218,11 +218,13 @@
                 const projGrid = document.getElementById('dynamic-projects');
                 if (projGrid && projects.length > 0) {
                     projGrid.innerHTML = projects.map(p => {
+                        const title = p.title_id || p.title;
+                        const desc  = p.description_id || p.description;
                         const content = `
-                            <img loading="lazy" src="${escHtml(p.image_url)}" alt="${escHtml(p.title)}" class="proj-img ${p.title.includes('Bot') ? 'wa-img' : ''}">
+                            <img loading="lazy" src="${escHtml(p.image_url)}" alt="${escHtml(title)}" class="proj-img ${p.title.includes('Bot') ? 'wa-img' : ''}">
                             <div class="card-content">
-                                <h3>${escHtml(p.title)}</h3>
-                                <p>${escHtml(p.description)}</p>
+                                <h3>${escHtml(title)}</h3>
+                                <p>${escHtml(desc)}</p>
                             </div>`;
                         if (p.url) {
                             return `<a href="${escHtml(p.url)}" target="_blank" class="card proj-card ${p.full_width ? 'full-width' : ''}">${content}</a>`;
@@ -239,7 +241,10 @@
                 const experiences = expResult.value;
                 const expTimeline = document.getElementById('dynamic-experience');
                 if (expTimeline && experiences.length > 0) {
-                    expTimeline.innerHTML = experiences.map(e => `
+                    expTimeline.innerHTML = experiences.map(e => {
+                        const role = e.role_id || e.role;
+                        const desc = e.description_id || e.description;
+                        return `
                         <div class="card exp-card">
                             <div class="exp-header">
                                 <img loading="lazy" src="${escHtml(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo">
@@ -248,11 +253,11 @@
                                     <span class="exp-date">${escHtml(e.date_range)}</span>
                                 </div>
                             </div>
-                            <h4 class="exp-role">${escHtml(e.role)}</h4>
-                            <p class="exp-desc">${escHtml(e.description)}</p>
+                            <h4 class="exp-role">${escHtml(role)}</h4>
+                            <p class="exp-desc">${escHtml(desc)}</p>
                             ${e.url ? `<a href="${escHtml(e.url)}" target="_blank" class="submit-btn" style="display:inline-block;margin-top:16px;text-decoration:none;text-align:center;">Kunjungi Website</a>` : ''}
                         </div>
-                    `).join('');
+                    `}).join('');
                 }
             } else {
                 console.error('Gagal memuat pengalaman:', expResult.reason);

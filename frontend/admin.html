@@ -103,10 +103,11 @@
         .badge { font-size: 0.7rem; background: var(--accent-dim); color: var(--accent); border-radius: 4px; padding: 2px 6px; font-weight: 600; margin-left: 6px; vertical-align: middle; }
         .empty { text-align: center; color: var(--muted); padding: 32px; font-size: 0.9rem; }
         .divider { height: 1px; background: var(--border); margin: 14px 0; }
-        @media (max-width: 480px) {
-            .item-actions { flex-direction: column; }
-            .item-actions .btn { min-height: 38px; }
-        }
+        .col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+        .col-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 0 6px; border-bottom: 2px solid var(--border); margin-bottom: 14px; }
+        .col-label.en { color: var(--muted); border-color: var(--border); }
+        .col-label.id { color: var(--accent); border-color: var(--accent); }
+        @media (max-width: 600px) { .col-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -248,21 +249,27 @@ const ProjectForm = defineComponent({
     props: ['data'],
     template: `
         <div>
-            <div class="field"><label>Title</label><input v-model="data.title" placeholder="e.g. Discord CDN"></div>
-            <div class="field"><label>Description</label><textarea v-model="data.description" placeholder="What is this project about?"></textarea></div>
-            <div class="field">
-                <label>Project URL <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional)</span></label>
+            <div class="col-grid">
+                <div>
+                    <div class="col-label en">🌐 English</div>
+                    <div class="field"><label>Title (EN)</label><input v-model="data.title" placeholder="e.g. SimpleCDN"></div>
+                    <div class="field"><label>Description (EN)</label><textarea v-model="data.description" placeholder="What is this project about?"></textarea></div>
+                </div>
+                <div>
+                    <div class="col-label id">🇮🇩 Indonesian</div>
+                    <div class="field"><label>Judul (ID) <span style="font-weight:400;text-transform:none">(opsional)</span></label><input v-model="data.title_id" placeholder="e.g. SimpleCDN"></div>
+                    <div class="field"><label>Deskripsi (ID) <span style="font-weight:400;text-transform:none">(opsional)</span></label><textarea v-model="data.description_id" placeholder="Jika kosong, pakai versi EN"></textarea></div>
+                </div>
+            </div>
+            <div class="field"><label>Project URL <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional)</span></label>
                 <input v-model="data.url" placeholder="https://...">
                 <a v-if="data.url" :href="data.url" target="_blank" style="font-size:0.78rem;color:var(--accent);display:block;margin-top:4px;">↗ Test link</a>
             </div>
-            <div class="field">
-                <label>Image URL</label>
+            <div class="field"><label>Image URL</label>
                 <input v-model="data.image_url" placeholder="https://cdn.example.com/image.webp">
                 <img v-if="data.image_url" :src="data.image_url" class="img-preview" alt="Preview">
             </div>
-            <div class="field">
-                <label class="check-label"><input type="checkbox" v-model="data.full_width"> Full-width card (2 columns wide)</label>
-            </div>
+            <div class="field"><label class="check-label"><input type="checkbox" v-model="data.full_width"> Full-width card (2 columns wide)</label></div>
         </div>
     `
 });
@@ -272,16 +279,24 @@ const ExpForm = defineComponent({
     template: `
         <div>
             <div class="field"><label>Company</label><input v-model="data.company" placeholder="e.g. Konaima"></div>
-            <div class="field"><label>Role / Title</label><input v-model="data.role" placeholder="e.g. Junior Backend Developer"></div>
+            <div class="col-grid">
+                <div>
+                    <div class="col-label en">🌐 English</div>
+                    <div class="field"><label>Role (EN)</label><input v-model="data.role" placeholder="e.g. Junior Backend Developer"></div>
+                    <div class="field"><label>Description (EN)</label><textarea v-model="data.description" placeholder="What did you do here?"></textarea></div>
+                </div>
+                <div>
+                    <div class="col-label id">🇮🇩 Indonesian</div>
+                    <div class="field"><label>Peran (ID) <span style="font-weight:400;text-transform:none">(opsional)</span></label><input v-model="data.role_id" placeholder="e.g. Junior Backend Developer"></div>
+                    <div class="field"><label>Deskripsi (ID) <span style="font-weight:400;text-transform:none">(opsional)</span></label><textarea v-model="data.description_id" placeholder="Jika kosong, pakai versi EN"></textarea></div>
+                </div>
+            </div>
             <div class="field"><label>Date Range</label><input v-model="data.date_range" placeholder="e.g. Jan 2024 – Present"></div>
-            <div class="field"><label>Description</label><textarea v-model="data.description" placeholder="What did you do here?"></textarea></div>
-            <div class="field">
-                <label>Company Logo URL</label>
+            <div class="field"><label>Company Logo URL</label>
                 <input v-model="data.logo_url" placeholder="https://...">
                 <img v-if="data.logo_url" :src="data.logo_url" class="img-preview" alt="Logo preview" style="height:64px;object-fit:contain;">
             </div>
-            <div class="field">
-                <label>Company Website <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional)</span></label>
+            <div class="field"><label>Company Website <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional)</span></label>
                 <input v-model="data.url" placeholder="https://...">
                 <a v-if="data.url" :href="data.url" target="_blank" style="font-size:0.78rem;color:var(--accent);display:block;margin-top:4px;">↗ Test link</a>
             </div>
