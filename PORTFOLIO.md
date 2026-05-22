@@ -16,9 +16,10 @@ A bespoke, full-stack professional portfolio for **Arraffi** (Junior Backend Dev
 2. **Iteration Phase**: Went through several designs — SaaS-style, Floating Pill, Hybrid Angga/Anjar, and Stacking Cards.
 3. **Clean Standard Frontend**: Settled on a professional dark theme with glassmorphism (`backdrop-filter: blur`), hover micro-interactions, and gradient typography.
 4. **UX Optimizations**: Added a custom preloader, full-screen `scroll-snap-type` presentation mode, keyboard navigation (Arrow keys / Spacebar), and lazy-loaded assets.
-5. **CMS Upgrade (Completed)**: Transitioned from a static Cloudflare Workers contact form to a full Express.js backend connecting to a custom MySQL database, with a Vue.js Admin Control Panel.
+5. **CMS Upgrade**: Transitioned from a static Cloudflare Workers contact form to a full Express.js backend connecting to a custom MySQL database, with a Vue.js Admin Control Panel.
 6. **Security Hardening**: Full security audit conducted — XSS prevention, rate limiting, input validation, CORS lockdown, security headers, and gitignore fixes applied.
 7. **Project Relocation**: Moved from `/mnt/hdd/dl/portofolio` (NTFS, no symlinks) to `/home/rapi/Project/portofolio` (native Linux ext4) for proper git and npm support.
+8. **UI & UX Polish**: Removed scroll-snapping for better accessibility, redesigned "About Me" section with a 2-column layout and terminal graphic, added native multilingual content (`_id` columns).
 
 ---
 
@@ -33,11 +34,6 @@ portofolio/
 │   ├── admin.html          # Vue.js CMS admin panel
 │   ├── style.css           # Global stylesheet
 │   ├── _headers            # Cloudflare security headers
-│   ├── worker.js           # Cloudflare Worker entrypoint
-│   ├── wrangler.toml       # Cloudflare Pages config
-│   ├── functions/
-│   │   └── api/
-│   │       └── contact.js  # Legacy CF Worker contact handler (SMTP2GO)
 │   ├── sitemap.xml
 │   └── robots.txt
 │
@@ -80,6 +76,7 @@ portofolio/
 ### Database
 - **MySQL**: Self-hosted at `31.56.192.16:3306`, database `portfolio`
 - **Tables**: `projects`, `experience`, `messages`
+- **Translations**: Uses dedicated columns (`title_id`, `description_id`, `role_id`) for Indonesian content directly in the database.
 
 ---
 
@@ -117,6 +114,7 @@ PORT=3001
 | 8 | DB schema | Added missing `url` column to `experience` table in `init_db.js` |
 | 9 | CORS | Locked to `arraffi.my.id`, `31.56.192.16`, and `localhost` only |
 | 10 | Writing quality | Applied Humanizer skill to hero bio (both EN and ID) |
+| 11 | Vue 3 CSP bug | Fixed strict `script-src` policy in `_headers` by adding `unsafe-eval` to `/*` to allow the in-DOM Vue template compiler to run, and avoided self-closing Vue component tags. |
 
 ---
 
@@ -219,8 +217,7 @@ sudo nginx -t && sudo systemctl reload nginx
 1. Connect GitHub repo to Cloudflare Pages
 2. Set **Root directory** to `frontend/`
 3. No build command needed (pure static)
-4. The `worker.js` + `wrangler.toml` handle routing
-5. Set DNS: `A api.arraffi.my.id → 31.56.192.16` (proxied off for direct TCP)
+4. Set DNS: `A api.arraffi.my.id → 31.56.192.16` (proxied off for direct TCP)
 
 ---
 
@@ -275,8 +272,10 @@ The `.agent/` directory contains markdown instruction files for AI assistants wo
 - [x] `trust proxy` set — rate limiting works correctly behind Nginx
 - [x] `**/.env` gitignore fix — all subdirectory .env files protected
 - [x] `.agents/` gitignore fix — AI context never pushed to public repo
-- [x] `backend/.env.example` template created for VPS setup
-- [x] `inject_dynamic.py` neutralized — cannot accidentally corrupt production URLs
+- [x] Database upgraded with multilingual columns (`_id`) for dynamic translation.
+- [x] Scroll snapping removed for unhindered footer access and smooth mobile scrolling.
+- [x] About Me redesigned with a responsive 2-column layout and terminal graphic (`root@arraffi`).
+- [x] Cloudflare `_headers` updated to fix Vue template compiler CSP violations and allow CF Analytics.
+- [x] Cleaned up legacy CF worker files (`worker.js`, `wrangler.toml`, etc) from tracking.
 - [ ] **Edit `backend/.env` on VPS: change `ADMIN_PASSWORD` + `31.56.192.16` → `127.0.0.1` in `DATABASE_URL`**
 - [ ] SCP `backend/` to VPS, run `npm install` then `node init_db.js`
-- [ ] Push frontend to Cloudflare Pages via GitHub
