@@ -5,7 +5,6 @@ const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const path = require('path');
 
 const app = express();
 
@@ -122,34 +121,6 @@ function sanitizeHeader(str) {
     return String(str ?? '').replace(/[\r\n"\\]/g, '');
 }
 
-// ── Admin auth middleware (validates session token, NOT the raw password) ──
-const authMiddleware = (req, res, next) => {
-    const token = req.headers.authorization;
-    if (!validateSessionToken(token)) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-    next();
-};
-
-// ── Rate limiter: login endpoint ──────────────────────────────────────────
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    message: { error: 'Too many login attempts. Please wait 15 minutes and try again.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
-// ── Rate limiter: all admin CRUD routes ───────────────────────────────────
-// Separate from loginLimiter so brute-force on login doesn't exhaust CRUD budget.
-const adminLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 60, // 60 requests per minute is generous for human use
-    message: { error: 'Too many admin requests. Please slow down.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
 // ── Rate limiter: contact form ────────────────────────────────────────────
 const contactLimiter = rateLimit({
     windowMs: 60 * 1000,
@@ -158,6 +129,36 @@ const contactLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
 });
+
+// ── Cloudflare Turnstile verification ─────────────────────────────────────
+// Used on the admin login form. Requires TURNSTILE_SECRET in backend/.env
+async function verifyTurnstile(token) {
+    if (!token || typeof token !== 'string') return false;
+    try {
+        const params = new URLSearchParams({
+            secret: process.env.TURNSTILE_SECRET,
+            response: token,
+        });
+        const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString(),
+        });
+        const data = await r.json();
+        return data.success === true;
+    } catch {
+        return false;
+    }
+}
+
+// ── Admin auth middleware (validates session token, NOT the raw password) ──
+const authMiddleware = (req, res, next) => {
+    const token = req.headers.authorization;
+    if (!validateSessionToken(token)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    next();
+};
 
 /* ── PUBLIC ENDPOINTS ───────────────────────────────────────────────────── */
 
@@ -223,13 +224,16 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
     }
 });
 
-/* ── ADMIN ENDPOINTS ────────────────────────────────────────────────────── */
 
-// Apply admin rate limiter to ALL /api/admin/* routes
-app.use('/api/admin', adminLimiter);
+/* ── ADMIN ENDPOINTS ───────────────────────────────────────────────────── */
 
-app.post('/api/admin/login', loginLimiter, (req, res) => {
-    const { password } = req.body ?? {};
+app.post('/api/admin/login', async (req, res) => {
+    const { password, turnstile } = req.body ?? {};
+    // Verify Turnstile challenge first — stops bots before touching the password
+    const tsOk = await verifyTurnstile(turnstile);
+    if (!tsOk) {
+        return res.status(403).json({ error: 'Turnstile verification failed. Please try again.' });
+    }
     if (typeof password === 'string' && timingSafeEqual(password, process.env.ADMIN_PASSWORD)) {
         const token = createSessionToken();
         res.json({ ok: true, token });
