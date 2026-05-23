@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const path = require('path');
 
 const app = express();
 
