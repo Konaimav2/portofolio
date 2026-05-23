@@ -280,7 +280,7 @@
                     }).join('');
                 }
             } else {
-                console.error('Gagal memuat proyek:', projResult.reason);
+                console.warn('Projects failed to load:', projResult.reason);
             }
 
             if (expResult.status === 'fulfilled') {
@@ -306,7 +306,7 @@
                     `}).join('');
                 }
             } else {
-                console.error('Gagal memuat pengalaman:', expResult.reason);
+                console.warn('Experience failed to load:', expResult.reason);
             }
         }
         loadCMSData();
