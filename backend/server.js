@@ -59,17 +59,46 @@ const transporter = nodemailer.createTransport({
     tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
 });
 
-// ── Timing-safe password comparison (prevents timing attacks) ─────────────
+// ── Timing-safe password comparison (prevents timing attacks + length oracle) ─
 function timingSafeEqual(a, b) {
-    // Both must be strings; pad to the same length to avoid length oracle
-    const bufA = Buffer.from(String(a));
-    const bufB = Buffer.from(String(b));
-    if (bufA.length !== bufB.length) {
-        // Always do a dummy comparison to keep constant time, then return false
-        crypto.timingSafeEqual(bufA, Buffer.alloc(bufA.length));
+    // Pad both inputs to a fixed 256-byte buffer to prevent length oracle:
+    // Without this, an attacker could determine the password length by
+    // measuring response time differences for the early-return branch.
+    const MAX = 256;
+    const bufA = Buffer.alloc(MAX);
+    const bufB = Buffer.alloc(MAX);
+    Buffer.from(String(a)).copy(bufA);
+    Buffer.from(String(b)).copy(bufB);
+    // crypto.timingSafeEqual runs in constant time regardless of content.
+    // The extra length check prevents prefix matches on truncated passwords.
+    return crypto.timingSafeEqual(bufA, bufB) && String(a).length === String(b).length;
+}
+
+// ── Session token store (in-memory, TTL 8 hours) ───────────────────────────
+// Tokens are 32 random bytes (hex), invalidated on logout or after TTL.
+// This avoids sending the raw password on every request after login.
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+const activeSessions = new Map(); // token → expiry timestamp
+
+function createSessionToken() {
+    const token = crypto.randomBytes(32).toString('hex');
+    activeSessions.set(token, Date.now() + SESSION_TTL_MS);
+    return token;
+}
+
+function validateSessionToken(token) {
+    if (!token || typeof token !== 'string') return false;
+    const expiry = activeSessions.get(token);
+    if (!expiry) return false;
+    if (Date.now() > expiry) {
+        activeSessions.delete(token);
         return false;
     }
-    return crypto.timingSafeEqual(bufA, bufB);
+    return true;
+}
+
+function revokeSessionToken(token) {
+    activeSessions.delete(token);
 }
 
 // ── Validate numeric :id param ────────────────────────────────────────────
@@ -93,10 +122,10 @@ function sanitizeHeader(str) {
     return String(str ?? '').replace(/[\r\n"\\]/g, '');
 }
 
-// ── Admin auth middleware ──────────────────────────────────────────────────
+// ── Admin auth middleware (validates session token, NOT the raw password) ──
 const authMiddleware = (req, res, next) => {
-    const pass = req.headers.authorization;
-    if (!pass || !timingSafeEqual(pass, process.env.ADMIN_PASSWORD)) {
+    const token = req.headers.authorization;
+    if (!validateSessionToken(token)) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     next();
@@ -107,6 +136,16 @@ const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,
     message: { error: 'Too many login attempts. Please wait 15 minutes and try again.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// ── Rate limiter: all admin CRUD routes ───────────────────────────────────
+// Separate from loginLimiter so brute-force on login doesn't exhaust CRUD budget.
+const adminLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 60, // 60 requests per minute is generous for human use
+    message: { error: 'Too many admin requests. Please slow down.' },
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -186,13 +225,22 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
 
 /* ── ADMIN ENDPOINTS ────────────────────────────────────────────────────── */
 
+// Apply admin rate limiter to ALL /api/admin/* routes
+app.use('/api/admin', adminLimiter);
+
 app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { password } = req.body ?? {};
     if (typeof password === 'string' && timingSafeEqual(password, process.env.ADMIN_PASSWORD)) {
-        res.json({ ok: true });
+        const token = createSessionToken();
+        res.json({ ok: true, token });
     } else {
         res.status(401).json({ error: 'Invalid password' });
     }
+});
+
+app.post('/api/admin/logout', authMiddleware, (req, res) => {
+    revokeSessionToken(req.headers.authorization);
+    res.json({ ok: true });
 });
 
 // ── Projects CRUD ──────────────────────────────────────────────────────────
@@ -217,6 +265,9 @@ app.post('/api/admin/projects', authMiddleware, async (req, res) => {
         if (title.length > 255 || (title_id && title_id.length > 255)) {
             return res.status(422).json({ error: 'Title is too long (max 255 characters).' });
         }
+        if (description.length > 2000 || (description_id && description_id.length > 2000)) {
+            return res.status(422).json({ error: 'Description is too long (max 2000 characters).' });
+        }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Project URL must start with http:// or https://' });
         if (!isValidUrl(image_url)) return res.status(422).json({ error: 'Image URL must start with http:// or https://' });
         await pool.query(
@@ -239,6 +290,9 @@ app.put('/api/admin/projects/:id', authMiddleware, async (req, res) => {
         }
         if (title.length > 255 || (title_id && title_id.length > 255)) {
             return res.status(422).json({ error: 'Title is too long (max 255 characters).' });
+        }
+        if (description.length > 2000 || (description_id && description_id.length > 2000)) {
+            return res.status(422).json({ error: 'Description is too long (max 2000 characters).' });
         }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Project URL must start with http:// or https://' });
         if (!isValidUrl(image_url)) return res.status(422).json({ error: 'Image URL must start with http:// or https://' });
@@ -285,6 +339,9 @@ app.post('/api/admin/experience', authMiddleware, async (req, res) => {
         if (role.length > 255 || (role_id && role_id.length > 255) || company.length > 255) {
             return res.status(422).json({ error: 'Text field is too long (max 255 characters).' });
         }
+        if (description.length > 2000 || (description_id && description_id.length > 2000)) {
+            return res.status(422).json({ error: 'Description is too long (max 2000 characters).' });
+        }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Company URL must start with http:// or https://' });
         if (!isValidUrl(logo_url)) return res.status(422).json({ error: 'Logo URL must start with http:// or https://' });
         await pool.query(
@@ -307,6 +364,9 @@ app.put('/api/admin/experience/:id', authMiddleware, async (req, res) => {
         }
         if (role.length > 255 || (role_id && role_id.length > 255) || company.length > 255) {
             return res.status(422).json({ error: 'Text field is too long (max 255 characters).' });
+        }
+        if (description.length > 2000 || (description_id && description_id.length > 2000)) {
+            return res.status(422).json({ error: 'Description is too long (max 2000 characters).' });
         }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Company URL must start with http:// or https://' });
         if (!isValidUrl(logo_url)) return res.status(422).json({ error: 'Logo URL must start with http:// or https://' });
@@ -335,7 +395,10 @@ app.delete('/api/admin/experience/:id', authMiddleware, async (req, res) => {
 
 app.get('/api/admin/messages', authMiddleware, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM messages ORDER BY created_at DESC');
+        // Explicit columns — avoids leaking future sensitive fields added to the table
+        const [rows] = await pool.query(
+            'SELECT id, name, email, subject, message, created_at FROM messages ORDER BY created_at DESC'
+        );
         res.json(rows);
     } catch {
         res.status(500).json({ error: 'Failed to fetch messages.' });
