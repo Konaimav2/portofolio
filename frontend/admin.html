@@ -8,6 +8,7 @@
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
@@ -122,6 +123,7 @@
                 <label>Password</label>
                 <input type="password" v-model="password" placeholder="••••••••••••" @keyup.enter="login">
             </div>
+            <div id="admin-turnstile" class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark" style="margin-bottom:16px;"></div>
             <button class="btn btn-primary btn-full" @click="login">Sign In</button>
             <p v-if="error" style="color:var(--danger);margin-top:12px;font-size:0.85rem;text-align:center;">{{ error }}</p>
         </div>
@@ -341,16 +343,17 @@ createApp({
 
         const login = async () => {
             try {
+                const tsToken = document.querySelector('#admin-turnstile [name="cf-turnstile-response"]')?.value || '';
                 const data = await (await fetch(API+'/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: password.value }),
+                    body: JSON.stringify({ password: password.value, turnstile: tsToken }),
                 })).json();
-                if (!data.ok) throw new Error();
+                if (!data.ok) throw new Error(data.error || 'fail');
                 sessionToken.value = data.token;
                 password.value = ''; // clear immediately — never keep in reactive state
                 loggedIn.value = true; error.value = ''; fetchAll();
-            } catch { error.value = 'Wrong password.'; password.value = ''; }
+            } catch (e) { error.value = e.message === 'fail' ? 'Wrong password.' : (e.message || 'Wrong password.'); password.value = ''; if (window.turnstile) turnstile.reset(); }
         };
         const logout = async () => {
             // Revoke the token server-side so it can't be replayed
