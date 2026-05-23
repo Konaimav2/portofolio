@@ -20,16 +20,15 @@ const allowedOrigins = [
 ];
 app.use(cors({
     origin: (origin, callback) => {
-        // Block requests with no Origin header in production (allows curl/Postman only in dev)
-        if (!origin) {
-            if (process.env.NODE_ENV !== 'production') return callback(null, true);
-            return callback(new Error('No Origin header'));
-        }
+        // Allow no-Origin requests (curl/monitoring). Browser security still enforced
+        // by admin-specific origin middleware below.
+        if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
-        return callback(new Error('Not allowed by CORS'));
+        return callback(null, false);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
 }));
 
 app.use(express.json({ limit: '20kb' }));   // Prevent large payload DoS
@@ -101,6 +100,25 @@ function revokeSessionToken(token) {
     activeSessions.delete(token);
 }
 
+// Periodic cleanup to prevent unbounded memory growth from expired tokens.
+setInterval(() => {
+    const now = Date.now();
+    for (const [token, expiry] of activeSessions.entries()) {
+        if (now > expiry) activeSessions.delete(token);
+    }
+}, 60 * 60 * 1000).unref(); // every 1h
+
+const ADMIN_SESSION_COOKIE = 'admin_session';
+function extractAdminSessionToken(req) {
+    const raw = req.headers.cookie || '';
+    const cookie = raw
+        .split(';')
+        .map(v => v.trim())
+        .find(v => v.startsWith(`${ADMIN_SESSION_COOKIE}=`));
+    if (!cookie) return '';
+    return decodeURIComponent(cookie.slice(ADMIN_SESSION_COOKIE.length + 1));
+}
+
 // ── Validate numeric :id param ────────────────────────────────────────────
 function parseId(raw) {
     const n = parseInt(raw, 10);
@@ -133,12 +151,13 @@ const contactLimiter = rateLimit({
 
 // ── Cloudflare Turnstile verification ─────────────────────────────────────
 // Used on the admin login form. Requires TURNSTILE_SECRET in backend/.env
-async function verifyTurnstile(token) {
-    if (!token || typeof token !== 'string') return false;
+async function verifyTurnstile(token, remoteip) {
+    if (!token || typeof token !== 'string' || !process.env.TURNSTILE_SECRET) return false;
     try {
         const params = new URLSearchParams({
             secret: process.env.TURNSTILE_SECRET,
             response: token,
+            remoteip: String(remoteip || ''),
         });
         const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
             method: 'POST',
@@ -152,9 +171,18 @@ async function verifyTurnstile(token) {
     }
 }
 
-// ── Admin auth middleware (validates session token, NOT the raw password) ──
+// ── Rate limiter: admin login endpoint ─────────────────────────────────────
+const loginLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 5,
+    message: { error: 'Too many login attempts. Please wait 10 minutes and try again.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// ── Admin auth middleware (validates HttpOnly cookie session) ─────────────
 const authMiddleware = (req, res, next) => {
-    const token = req.headers.authorization;
+    const token = extractAdminSessionToken(req);
     if (!validateSessionToken(token)) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -228,23 +256,44 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
 
 /* ── ADMIN ENDPOINTS ───────────────────────────────────────────────────── */
 
-app.post('/api/admin/login', async (req, res) => {
+// Admin APIs must originate from approved browser origins in production.
+app.use('/api/admin', (req, res, next) => {
+    if (process.env.NODE_ENV !== 'production') return next();
+    const origin = req.headers.origin;
+    if (!origin || !allowedOrigins.includes(origin)) {
+        return res.status(403).json({ error: 'Forbidden origin' });
+    }
+    next();
+});
+
+app.post('/api/admin/login', loginLimiter, async (req, res) => {
     const { password, turnstile } = req.body ?? {};
     // Verify Turnstile challenge first — stops bots before touching the password
-    const tsOk = await verifyTurnstile(turnstile);
+    const tsOk = await verifyTurnstile(turnstile, req.ip);
     if (!tsOk) {
         return res.status(403).json({ error: 'Turnstile verification failed. Please try again.' });
     }
     if (typeof password === 'string' && timingSafeEqual(password, process.env.ADMIN_PASSWORD)) {
         const token = createSessionToken();
-        res.json({ ok: true, token });
-    } else {
-        res.status(401).json({ error: 'Invalid password' });
+        res.cookie(ADMIN_SESSION_COOKIE, token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: SESSION_TTL_MS,
+            path: '/api/admin',
+        });
+        return res.json({ ok: true });
     }
+    return res.status(401).json({ error: 'Invalid password' });
 });
 
 app.post('/api/admin/logout', authMiddleware, (req, res) => {
-    revokeSessionToken(req.headers.authorization);
+    revokeSessionToken(extractAdminSessionToken(req));
+    res.clearCookie(ADMIN_SESSION_COOKIE, {
+        path: '/api/admin',
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
+    });
     res.json({ ok: true });
 });
 
