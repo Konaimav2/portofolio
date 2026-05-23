@@ -31,13 +31,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="preload" as="image" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-
-    <!-- Preloader -->
-    <div id="preloader"><div class="loader-spinner"></div></div>
 
 
     <nav class="navbar">
@@ -59,7 +57,7 @@
     <main class="container">
         
         <header class="hero reveal">
-            <img src="https://cdn.discordapp.my.id/cdn/11acaa.webp" alt="Arraffi" class="avatar">
+            <img src="https://cdn.discordapp.my.id/cdn/11acaa.webp" alt="Arraffi" class="avatar" width="110" height="110" fetchpriority="high">
             <h1 class="hero-title">Arraffi</h1>
             <p class="hero-bio">Saya menulis kode backend menggunakan Node.js, Python, dan Linux. Saya membangun infrastruktur, CDN cepat, dan API yang tidak mudah rusak. Saya lebih suka sistem yang sederhana daripada yang rumit tanpa alasan.</p>
             
@@ -168,16 +166,11 @@
 
     <script>
         
-                // Prevent scroll position caching on reload
+        // Prevent scroll position caching on reload
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
         window.scrollTo(0,0);
-
-        // Preloader (Wait for all images and resources to load)
-        window.addEventListener('load', () => {
-            document.getElementById('preloader').classList.add('hidden');
-        });
 
         // Hamburger nav toggle
         const navToggle = document.getElementById('nav-toggle');
