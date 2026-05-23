@@ -279,7 +279,7 @@
                     }).join('');
                 }
             } else {
-                console.error('Projects failed to load:', projResult.reason);
+                console.warn('Projects failed to load:', projResult.reason);
             }
 
             if (expResult.status === 'fulfilled') {
@@ -302,7 +302,7 @@
                     `).join('');
                 }
             } else {
-                console.error('Experience failed to load:', expResult.reason);
+                console.warn('Experience failed to load:', expResult.reason);
             }
         }
         loadCMSData();
