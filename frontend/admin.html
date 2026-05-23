@@ -309,10 +309,11 @@ const ExpForm = defineComponent({
 createApp({
     components: { ProjectForm, ExpForm },
     setup() {
-        const password = ref('');
-        const loggedIn = ref(false);
-        const error    = ref('');
-        const tab      = ref('projects');
+        const password     = ref('');
+        const sessionToken = ref(''); // stores opaque token after login, not the raw password
+        const loggedIn     = ref(false);
+        const error        = ref('');
+        const tab          = ref('projects');
 
         const projects   = ref([]);
         const experience = ref([]);
@@ -331,7 +332,7 @@ createApp({
         const api = async (path, method='GET', body=null) => {
             const r = await fetch(API+path, {
                 method,
-                headers: { Authorization: password.value, 'Content-Type': 'application/json' },
+                headers: { Authorization: sessionToken.value, 'Content-Type': 'application/json' },
                 body: body ? JSON.stringify(body) : undefined,
             });
             if (!r.ok) throw new Error(r.status);
@@ -340,11 +341,22 @@ createApp({
 
         const login = async () => {
             try {
-                await api('/admin/login','POST',{ password: password.value });
+                const data = await (await fetch(API+'/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password.value }),
+                })).json();
+                if (!data.ok) throw new Error();
+                sessionToken.value = data.token;
+                password.value = ''; // clear immediately — never keep in reactive state
                 loggedIn.value = true; error.value = ''; fetchAll();
-            } catch { error.value = 'Wrong password.'; }
+            } catch { error.value = 'Wrong password.'; password.value = ''; }
         };
-        const logout = () => { loggedIn.value=false; password.value=''; };
+        const logout = async () => {
+            // Revoke the token server-side so it can't be replayed
+            try { await api('/admin/logout', 'POST'); } catch { /* ignore */ }
+            loggedIn.value = false; sessionToken.value = '';
+        };
 
         const fetchAll = () => {
             api('/admin/projects').then(d => projects.value=d).catch(()=>{});
