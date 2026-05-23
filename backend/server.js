@@ -200,7 +200,7 @@ app.post('/api/admin/login', loginLimiter, (req, res) => {
 app.get('/api/admin/projects', authMiddleware, async (req, res) => {
     try {
         const [rows] = await pool.query(
-            'SELECT id, title, title_id, description, description_id, url, image_url, full_width, created_at FROM projects ORDER BY id ASC'
+            'SELECT id, title, title_id, description, description_id, url, image_url, full_width FROM projects ORDER BY id ASC'
         );
         res.json(rows);
     } catch {
@@ -268,7 +268,7 @@ app.delete('/api/admin/projects/:id', authMiddleware, async (req, res) => {
 app.get('/api/admin/experience', authMiddleware, async (req, res) => {
     try {
         const [rows] = await pool.query(
-            'SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url, created_at FROM experience ORDER BY id ASC'
+            'SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url FROM experience ORDER BY id ASC'
         );
         res.json(rows);
     } catch {
