@@ -15,11 +15,12 @@ A bespoke, full-stack professional portfolio for **Arraffi** (Junior Backend Dev
 1. **Initial State**: Began as a terminal/hacker-themed gimmick layout.
 2. **Iteration Phase**: Went through several designs — SaaS-style, Floating Pill, Hybrid Angga/Anjar, and Stacking Cards.
 3. **Clean Standard Frontend**: Settled on a professional dark theme with glassmorphism (`backdrop-filter: blur`), hover micro-interactions, and gradient typography.
-4. **UX Optimizations**: Added a custom preloader, full-screen `scroll-snap-type` presentation mode, keyboard navigation (Arrow keys / Spacebar), and lazy-loaded assets.
-5. **CMS Upgrade**: Transitioned from a static Cloudflare Workers contact form to a full Express.js backend connecting to a custom MySQL database, with a Vue.js Admin Control Panel.
-6. **Security Hardening**: Full security audit conducted — XSS prevention, rate limiting, input validation, CORS lockdown, security headers, and gitignore fixes applied.
-7. **Project Relocation**: Moved from `/mnt/hdd/dl/portofolio` (NTFS, no symlinks) to `/home/rapi/Project/portofolio` (native Linux ext4) for proper git and npm support.
-8. **UI & UX Polish**: Removed scroll-snapping for better accessibility, redesigned "About Me" section with a 2-column layout and terminal graphic, added native multilingual content (`_id` columns).
+4. **UX Optimizations**: Added and later removed heavy blocking patterns (preloader/scroll-snapping) to improve accessibility and Core Web Vitals.
+5. **CMS Upgrade**: Transitioned from a static contact workflow to a full Express.js backend with MySQL and a Vue.js Admin Control Panel.
+6. **Performance Pass**: Improved LCP/CLS and Lighthouse best-practices (async non-critical CSS, image priority/layout sizing, safer console logging behavior).
+7. **Security Hardening (Latest)**: Migrated admin auth from raw password headers to **Turnstile + HttpOnly cookie sessions**, restored login brute-force limiting, added admin-origin enforcement, and strengthened session lifecycle handling.
+8. **Project Relocation**: Moved from `/mnt/hdd/dl/portofolio` (NTFS, no symlinks) to `/home/rapi/Project/portofolio` (native Linux ext4) for stable git/npm operations.
+
 
 ---
 
@@ -33,7 +34,7 @@ portofolio/
 │   │   └── index.html      # ID homepage (Indonesian translation)
 │   ├── admin.html          # Vue.js CMS admin panel
 │   ├── style.css           # Global stylesheet
-│   ├── _headers            # Cloudflare security headers
+│   ├── _headers            # Cloudflare security headers/CSP
 │   ├── sitemap.xml
 │   └── robots.txt
 │
@@ -43,11 +44,7 @@ portofolio/
 │   ├── package.json
 │   └── .env                # ⚠️ Gitignored — must be created manually on VPS
 │
-├── .agent/             # AI Agent Skills (gitignored — never pushed)
-│   ├── TEMPLATE.md         # Blank skill template
-│   └── deploy_example.md   # Example deploy skill
-│
-├── test_admin.py       # Playwright UI test for admin panel
+├── .agents/            # AI Agent Skills (local tooling context)
 ├── PORTFOLIO.md        # This file
 ├── README.md
 └── .gitignore
@@ -69,14 +66,16 @@ portofolio/
 
 ### Backend (API)
 - **Express.js (Node.js)**: REST API on port `3001`
-- **express-rate-limit**: Brute-force protection on the login endpoint
-- **Nodemailer**: Sends contact form emails via `smail.omori.my.id:587`
-- **CORS**: Locked to `arraffi.my.id` and `31.56.192.16` only
+- **Admin Authentication**: Cloudflare Turnstile challenge + password verification + HttpOnly session cookie
+- **Rate Limiting**: Login limiter (`5 / 10min`) and contact limiter (`3 / min`)
+- **Nodemailer**: Sends contact form emails via SMTP
+- **CORS + Admin Origin Guard**: Browser access constrained to approved origins
 
 ### Database
-- **MySQL**: Self-hosted at `31.56.192.16:3306`, database `portfolio`
+- **MySQL**: Self-hosted on VPS (`127.0.0.1:3306`), database `portfolio`
 - **Tables**: `projects`, `experience`, `messages`
-- **Translations**: Uses dedicated columns (`title_id`, `description_id`, `role_id`) for Indonesian content directly in the database.
+- **Translations**: Dedicated columns (`title_id`, `description_id`, `role_id`) for Indonesian content in same schema.
+
 
 ---
 
@@ -85,16 +84,18 @@ portofolio/
 > ⚠️ This file is **gitignored**. Create it manually on the VPS.
 
 ```env
-DATABASE_URL="mysql://portfolio:<password>@31.56.192.16:3306/portfolio"
+DATABASE_URL="mysql://portfolio:<password>@127.0.0.1:3306/portfolio"
 
 SMTP_HOST="smail.omori.my.id"
-SMTP_PORT="587"
+SMTP_PORT="2525"
 SMTP_USER="smtp@mail.arraffi.my.id"
 SMTP_PASS="<your_smtp_password>"
 SMTP_FROM="portfolio@mail.arraffi.my.id"
 
 ADMIN_PASSWORD="<strong_password_here>"
+TURNSTILE_SECRET="<cloudflare_turnstile_secret>"
 
+NODE_ENV="production"
 PORT=3001
 ```
 
@@ -104,17 +105,19 @@ PORT=3001
 
 | # | Area | Fix |
 |---|---|---|
-| 1 | Frontend fetch URLs | Replaced all `localhost:3000` with `https://api.arraffi.my.id` |
-| 2 | API key leak | Removed real SMTP2GO key from `frontend/.env` |
-| 3 | Contact form | Added server-side validation (required fields, email format, 2000 char limit) |
-| 4 | Admin login | Rate limited to 10 attempts / 15 minutes via `express-rate-limit` |
-| 5 | XSS | Added `escHtml()` to all `innerHTML` renders in both HTML files |
-| 6 | HTTP headers | Added `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` to `_headers` |
-| 7 | Gitignore typo | Fixed `.agents/` → `.agent/` so the folder is actually ignored |
-| 8 | DB schema | Added missing `url` column to `experience` table in `init_db.js` |
-| 9 | CORS | Locked to `arraffi.my.id`, `31.56.192.16`, and `localhost` only |
-| 10 | Writing quality | Applied Humanizer skill to hero bio (both EN and ID) |
-| 11 | Vue 3 CSP bug | Fixed strict `script-src` policy in `_headers` by adding `unsafe-eval` to `/*` to allow the in-DOM Vue template compiler to run, and avoided self-closing Vue component tags. |
+| 1 | Core Web Vitals | Removed blocking preloader behavior, prioritized hero/LCP image, fixed layout sizing to reduce CLS |
+| 2 | Contact flow | Server-side validation + honeypot + rate limit (`3/min`) |
+| 3 | Admin login bot defense | Added Cloudflare Turnstile verification on login |
+| 4 | Admin brute-force | Added login rate limiter (`5 attempts / 10 minutes`) |
+| 5 | Admin auth model | Replaced raw password-per-request with HttpOnly cookie session token |
+| 6 | Session lifecycle | Added logout invalidation + periodic expired-session cleanup |
+| 7 | Query safety | Uses parameterized SQL everywhere (no string-concat queries) |
+| 8 | CORS / origin control | CORS scoped to allowed origins + explicit `/api/admin` origin guard in production |
+| 9 | Header hardening | HSTS, XFO, XCTO, Referrer-Policy, Permissions-Policy, CSP via Cloudflare `_headers` |
+| 10 | Error hygiene | Removed noisy thrown CORS errors from global handler path |
+| 11 | Input constraints | Strict field-length and URL validation for CMS CRUD payloads |
+| 12 | Repo hygiene | `**/.env`, `.env.backup`, and local agent context ignored from git tracking |
+
 
 ---
 
@@ -127,13 +130,21 @@ PORT=3001
 | `GET` | `/api/experience` | List all experience entries |
 | `POST` | `/api/contact` | Submit contact form (sends email + saves to DB) |
 
-### Admin (requires `Authorization: <ADMIN_PASSWORD>` header)
+### Admin (cookie-authenticated session)
+
+**Login flow:**
+1. `POST /api/admin/login` with `password` + `turnstile`
+2. Backend verifies Turnstile and password
+3. Backend sets `admin_session` HttpOnly cookie (`SameSite=Strict`, `Secure` in prod)
+
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/admin/login` | Verify admin password |
-| `GET/POST/PUT/DELETE` | `/api/admin/projects/:id` | Full CRUD for projects |
-| `GET/POST/PUT/DELETE` | `/api/admin/experience/:id` | Full CRUD for experience |
+| `POST` | `/api/admin/login` | Verify Turnstile + password and issue cookie session |
+| `POST` | `/api/admin/logout` | Revoke session and clear cookie |
+| `GET/POST/PUT/DELETE` | `/api/admin/projects` and `/api/admin/projects/:id` | Full CRUD for projects |
+| `GET/POST/PUT/DELETE` | `/api/admin/experience` and `/api/admin/experience/:id` | Full CRUD for experience |
 | `GET` | `/api/admin/messages` | Read all contact messages |
+
 
 ---
 
@@ -261,21 +272,12 @@ The `.agent/` directory contains markdown instruction files for AI assistants wo
 - [x] MySQL database with projects, experience, messages tables
 - [x] Vue.js Admin Control Panel (full CRUD)
 - [x] Dynamic frontend — fetches all content from API on load
-- [x] Security hardening (XSS, rate limit, CORS, headers, input validation)
-- [x] Split frontend (Cloudflare) / backend (VPS) deployment architecture
-- [x] SEO meta tags (description, Open Graph, Twitter Card, canonical) on all pages
-- [x] `admin.html` blocked from search engines (noindex + robots.txt Disallow)
-- [x] Full security audit: timing-safe auth, ID validation, try/catch on all routes, no error leakage
-- [x] Rate limiting on contact form (3 req/min via express-rate-limit)
-- [x] `express.json({ limit: '20kb' })` — large payload DoS protection
-- [x] `app.disable('x-powered-by')` — framework fingerprint removed
-- [x] `trust proxy` set — rate limiting works correctly behind Nginx
-- [x] `**/.env` gitignore fix — all subdirectory .env files protected
-- [x] `.agents/` gitignore fix — AI context never pushed to public repo
-- [x] Database upgraded with multilingual columns (`_id`) for dynamic translation.
-- [x] Scroll snapping removed for unhindered footer access and smooth mobile scrolling.
-- [x] About Me redesigned with a responsive 2-column layout and terminal graphic (`root@arraffi`).
-- [x] Cloudflare `_headers` updated to fix Vue template compiler CSP violations and allow CF Analytics.
-- [x] Cleaned up legacy CF worker files (`worker.js`, `wrangler.toml`, etc) from tracking.
-- [ ] **Edit `backend/.env` on VPS: change `ADMIN_PASSWORD` + `31.56.192.16` → `127.0.0.1` in `DATABASE_URL`**
-- [ ] SCP `backend/` to VPS, run `npm install` then `node init_db.js`
+- [x] Security hardening (XSS, validation, headers, CORS)
+- [x] Core Web Vitals optimization pass (preloader removal, LCP/CLS fixes)
+- [x] Admin login protection with Turnstile + login rate limit
+- [x] Migrated admin auth from plaintext header model to HttpOnly cookie session
+- [x] Added admin-origin enforcement and session cleanup lifecycle
+- [x] SEO meta tags (description, Open Graph, Twitter Card, canonical) on public pages
+- [x] `admin.html` blocked from indexing (`X-Robots-Tag`, robots rules)
+- [ ] Full CSP strict-mode refactor (remove remaining `unsafe-inline` / `unsafe-eval` where feasible)
+
