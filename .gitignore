@@ -39,3 +39,5 @@ frontend/check_urls.py
 # ── Old Cloudflare Worker (replaced by Pages Functions) ──
 frontend/worker.js
 frontend/wrangler.toml
+
+PORTFOLIO.md
