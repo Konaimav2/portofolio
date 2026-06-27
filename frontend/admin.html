@@ -8,13 +8,14 @@
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/sweetalert2@11"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --bg: #0a0a0a; --surface: #141414; --card: #1c1c1c; --border: rgba(255,255,255,0.08);
-            --accent: #ff7520; --accent-dim: rgba(255,117,32,0.12); --text: #f4f4f5;
-            --muted: #71717a; --danger: #ef4444; --danger-dim: rgba(239,68,68,0.1);
+            --bg: #08090d; --surface: #12131a; --card: #161821; --border: #1a1c26;
+            --accent: #ff2a00; --accent-dim: rgba(255,42,0,0.12); --text: #f0f0f2;
+            --muted: #808494; --danger: #ef4444; --danger-dim: rgba(239,68,68,0.1);
             --radius: 12px; --radius-sm: 8px;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
@@ -64,17 +65,18 @@
         /* ── Item list ── */
         .item { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
         .item-row { display: flex; gap: 12px; align-items: center; padding: 12px 14px; background: var(--card); }
-        .item-thumb { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; background: var(--bg); flex-shrink: 0; border: 1px solid var(--border); }
+        .item-thumb { width: 80px; height: 50px; border-radius: 6px; object-fit: contain; background: transparent; flex-shrink: 0; }
         .item-info { flex: 1; min-width: 0; }
         .item-title { font-weight: 600; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .item-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
         .item-actions .btn { padding: 7px 12px; font-size: 0.8rem; min-height: 36px; }
 
-        /* ── Edit panel ── */
-        .edit-panel { padding: 16px; background: var(--bg); border-top: 2px solid var(--accent); }
-        .edit-panel-title { font-size: 0.78rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
-
+        /* ── Edit modal ── */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+        
         /* ── Add panel ── */
         .add-panel { background: var(--surface); border: 1px dashed rgba(255,117,32,0.3); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
         .add-panel-toggle { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(255,117,32,0.2); border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.9rem; font-family: inherit; transition: all 0.2s; margin-bottom: 0; min-height: 44px; }
@@ -173,17 +175,20 @@
                             <button class="btn btn-danger" @click="deleteProject(p.id)">🗑</button>
                         </div>
                     </div>
-                    <!-- inline edit -->
-                    <div v-if="editingProj?.id===p.id" class="edit-panel">
-                        <div class="edit-panel-title">✏ Editing "{{ editingProj.title }}"</div>
+                </div>
+                <div v-if="!projects.length" class="empty">No projects yet. Add one above.</div>
+
+                <!-- Edit Modal -->
+                <div v-if="editingProj" class="modal-overlay" @click.self="editingProj=null">
+                    <div class="modal-card">
+                        <div class="modal-title">Editing "{{ editingProj.title }}"</div>
                         <project-form :data="editingProj"></project-form>
-                        <div class="btn-row">
+                        <div class="btn-row" style="margin-top: 20px;">
                             <button class="btn btn-primary" @click="saveProject">Save Changes</button>
                             <button class="btn btn-ghost" @click="editingProj=null">Cancel</button>
                         </div>
                     </div>
                 </div>
-                <div v-if="!projects.length" class="empty">No projects yet. Add one above.</div>
             </div>
 
             <!-- ═══ EXPERIENCE ═══ -->
@@ -211,16 +216,20 @@
                             <button class="btn btn-danger" @click="deleteExp(e.id)">🗑</button>
                         </div>
                     </div>
-                    <div v-if="editingExp?.id===e.id" class="edit-panel">
-                        <div class="edit-panel-title">✏ Editing "{{ editingExp.company }}"</div>
+                </div>
+                <div v-if="!experience.length" class="empty">No experience yet. Add one above.</div>
+
+                <!-- Edit Modal -->
+                <div v-if="editingExp" class="modal-overlay" @click.self="editingExp=null">
+                    <div class="modal-card">
+                        <div class="modal-title">Editing "{{ editingExp.company }}"</div>
                         <exp-form :data="editingExp"></exp-form>
-                        <div class="btn-row">
+                        <div class="btn-row" style="margin-top: 20px;">
                             <button class="btn btn-primary" @click="saveExp">Save Changes</button>
                             <button class="btn btn-ghost" @click="editingExp=null">Cancel</button>
                         </div>
                     </div>
                 </div>
-                <div v-if="!experience.length" class="empty">No experience yet. Add one above.</div>
             </div>
 
             <!-- ═══ MESSAGES ═══ -->
@@ -249,7 +258,7 @@
 </div>
 
 <script>
-const { createApp, ref, defineComponent } = Vue;
+const { createApp, ref, onMounted, defineComponent } = Vue;
 const API = 'https://api.arraffi.com/api';
 
 // ── Reusable form components ──────────────────────────────────────────────
@@ -332,8 +341,8 @@ createApp({
         const showAddProj = ref(false);
         const showAddExp  = ref(false);
 
-        const blankProj = () => ({ title:'', description:'', url:'', image_url:'', full_width:false });
-        const blankExp  = () => ({ company:'', role:'', date_range:'', description:'', logo_url:'', url:'' });
+        const blankProj = () => ({ title:'', title_id:'', description:'', description_id:'', url:'', image_url:'', full_width:false });
+        const blankExp  = () => ({ company:'', role:'', role_id:'', date_range:'', description:'', description_id:'', logo_url:'', url:'' });
         const newProj   = ref(blankProj());
         const newExp    = ref(blankExp());
 
@@ -372,6 +381,17 @@ createApp({
             loggedIn.value = false;
         };
 
+        // Auto login on mount
+        onMounted(async () => {
+            try {
+                const res = await api('/admin/check');
+                if (res.ok) {
+                    loggedIn.value = true;
+                    fetchAll();
+                }
+            } catch (e) { /* user needs to log in */ }
+        });
+
         const fetchAll = () => {
             api('/admin/projects').then(d => projects.value=d).catch(()=>{});
             api('/admin/experience').then(d => experience.value=d).catch(()=>{});
@@ -390,7 +410,8 @@ createApp({
             editingProj.value=null; fetchAll();
         };
         const deleteProject = async (id) => {
-            if (!confirm('Delete this project?')) return;
+            const { isConfirmed } = await Swal.fire({ title: 'Delete Project?', text: "You won't be able to revert this!", icon: 'warning', showCancelButton: true, confirmButtonColor: 'var(--danger)', background: 'var(--surface)', color: 'var(--text)' });
+            if (!isConfirmed) return;
             await api(`/admin/projects/${id}`,'DELETE'); fetchAll();
         };
 
@@ -406,13 +427,15 @@ createApp({
             editingExp.value=null; fetchAll();
         };
         const deleteExp = async (id) => {
-            if (!confirm('Delete this entry?')) return;
+            const { isConfirmed } = await Swal.fire({ title: 'Delete Experience?', text: "You won't be able to revert this!", icon: 'warning', showCancelButton: true, confirmButtonColor: 'var(--danger)', background: 'var(--surface)', color: 'var(--text)' });
+            if (!isConfirmed) return;
             await api(`/admin/experience/${id}`,'DELETE'); fetchAll();
         };
 
         // Messages
         const deleteMessage = async (id) => {
-            if (!confirm('Permanently delete this message?')) return;
+            const { isConfirmed } = await Swal.fire({ title: 'Delete Message?', text: "Permanently delete this message?", icon: 'warning', showCancelButton: true, confirmButtonColor: 'var(--danger)', background: 'var(--surface)', color: 'var(--text)' });
+            if (!isConfirmed) return;
             await api(`/admin/messages/${id}`, 'DELETE'); fetchAll();
         };
 
