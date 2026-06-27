@@ -338,7 +338,8 @@ body::before {
 }
 .proj-img {
   width: 100%;
-  height: 200px;
+  aspect-ratio: 16/9;
+  height: auto;
   background: #000;
   display: flex;
   align-items: center;
@@ -520,7 +521,7 @@ body::before {
   .hero-visual { justify-content: center; order: 1; margin-bottom: 24px; }
   .about-grid, .contact-wrapper { grid-template-columns: 1fr; }
   .project-card.full-width { flex-direction: column; }
-  .project-card.full-width .proj-img { width: 100%; height: 200px; border-right: none; border-bottom: 1px solid var(--border-color); }
+  .project-card.full-width .proj-img { width: 100%; height: auto; aspect-ratio: 16/9; border-right: none; border-bottom: 1px solid var(--border-color); }
 }
 
 @media (max-width: 768px) {
