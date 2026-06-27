@@ -5,7 +5,7 @@ Hey, I'm Arraffi — known online as **Konaima** or **konasgor**. I'm a Junior B
 This is the source code for my personal portfolio. Nothing fancy under the hood — just HTML and CSS doing what they do.
 
 ## 🌐 Live
-**https://arraffi.my.id**
+**https://arraffi.com**
 
 ## 🛠️ Stack
 Kept it dead simple on purpose:
