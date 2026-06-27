@@ -350,6 +350,7 @@ body::before {
 .project-card.full-width .proj-img {
   width: 40%;
   height: 100%;
+  aspect-ratio: auto;
   border-bottom: none;
   border-right: 1px solid var(--border-color);
 }

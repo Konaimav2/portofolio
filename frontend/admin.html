@@ -287,7 +287,7 @@ const ProjectForm = defineComponent({
                 <input v-model="data.image_url" placeholder="https://cdn.example.com/image.webp">
                 <img v-if="data.image_url" :src="data.image_url" class="img-preview" alt="Preview">
             </div>
-            <div class="field"><label class="check-label"><input type="checkbox" v-model="data.full_width"> Full-width card (2 columns wide)</label></div>
+            <div class="field"><label class="check-label"><input type="checkbox" v-model="data.full_width" :true-value="1" :false-value="0"> Full-width card (2 columns wide)</label></div>
         </div>
     `
 });
@@ -341,7 +341,7 @@ createApp({
         const showAddProj = ref(false);
         const showAddExp  = ref(false);
 
-        const blankProj = () => ({ title:'', title_id:'', description:'', description_id:'', url:'', image_url:'', full_width:false });
+        const blankProj = () => ({ title:'', title_id:'', description:'', description_id:'', url:'', image_url:'', full_width: 0 });
         const blankExp  = () => ({ company:'', role:'', role_id:'', date_range:'', description:'', description_id:'', logo_url:'', url:'' });
         const newProj   = ref(blankProj());
         const newExp    = ref(blankExp());
