@@ -2,41 +2,34 @@
 
 Hey, I'm Arraffi — known online as **Konaima** or **konasgor**. I'm a Junior Backend Developer based in Central Java, Indonesia. I work with **Node.js, Python, and C++**, building robust backend systems.
 
-This is the source code for my personal portfolio. Nothing fancy under the hood — just HTML and CSS doing what they do.
-
 ## 🌐 Live
 **https://arraffi.com**
 
-## 🛠️ Stack
-Kept it dead simple on purpose:
-* **HTML5** — structure and content
-* **CSS3** — custom styling, animations, responsive layout
-* **Vanilla JS** — scroll reveal, cursor, smooth nav. No frameworks, no build step
-* **Deployment** — Vercel, auto-deploys on every push to `main`
+## 🛠️ Stack Architecture
+This portfolio is a fully dynamic, custom-built application utilizing a modern decoupled stack:
 
-## ✨ What's in it
-* Custom diamond cursor with a trailing dot (desktop only)
-* Scroll reveal animations on every section
-* Orange custom scrollbar
-* Fixed side ticker
-* Responsive — works on mobile, collapses nav and resizes everything
-* Dark theme with an orange accent throughout
+### Frontend (Cloudflare Pages)
+* **HTML5/CSS3** — Custom glassmorphism, responsive grid, linear dark theme (Midnight/Ember palette).
+* **Vanilla JS** — Dynamic API fetching, smooth navigation, intersection observers. No heavy frontend frameworks.
+* **Vue 3 (Admin)** — The secure admin panel (`/admin.html`) is powered by Vue 3 via CDN for seamless reactivity.
+* **Security** — Cloudflare Turnstile bot protection, strict Content Security Policy (CSP), and HTTP security headers.
 
-## 📂 Projects featured
-* **SimpleCDN** — a fast, no-nonsense CDN I built because existing ones felt like overkill
-* **WhatsApp Bots** — bots built for fun and utility, automating the boring stuff for communities
+### Backend (VPS)
+* **Node.js + Express.js** — Secure REST API handling projects, experience, and contact messages.
+* **MySQL** — Relational database storing all CMS content and admin session data.
+* **Security** — HttpOnly secure cookie sessions, Turnstile server-side validation, rate limiting (brute-force prevention), and parameterized SQL to prevent injections.
+* **Nodemailer** — Automatically forwards contact form submissions to my private email via SMTP.
 
-## 💻 Running locally
-No setup needed:
-1. Clone the repo: `git clone https://github.com/KonaimaV2/portfolio.git`
-2. Open `index.html` in any browser
+## ✨ Features
+* Sleek, ultra-modern linear UI design optimized for Core Web Vitals.
+* Fully dynamic content — all projects and experience entries are pulled from the database.
+* Integrated CMS (Admin Control Panel) to add, edit, or delete portfolio entries.
+* Inbox system inside the admin panel to read and manage contact messages.
+* Bilingual (English & Indonesian `arraffi.com/id/`).
 
-That's it.
-
-## ☁️ Deploying
-1. Push to GitHub
-2. Import into Vercel
-3. Done — every push to `main` triggers a redeploy automatically
+## ☁️ Deployment
+* **Frontend:** Pushed directly from GitHub to **Cloudflare Pages**.
+* **Backend:** Runs on a dedicated **Ubuntu VPS** via PM2, proxied behind Nginx.
 
 ## 📫 Find me
 * **Email:** [kona@konaima.my.id](mailto:kona@konaima.my.id)
