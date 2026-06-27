@@ -17,6 +17,7 @@
 - [The Admin Control Panel](#-the-admin-control-panel)
 - [Security Posture](#-security-posture)
 - [Technology Stack](#-technology-stack)
+- [Deployment Guide](#-deployment-guide)
 - [Find Me](#-find-me)
 
 ---
@@ -75,8 +76,8 @@ graph TD
     UI -->|Loads Static Assets| Pages
     Admin -->|Loads Static Assets| Pages
     
-    UI -->|Async fetch()| Nginx
-    Admin -->|Cookie-Auth fetch()| Nginx
+    UI -->|Async fetch API| Nginx
+    Admin -->|Cookie-Auth fetch| Nginx
     
     Nginx --> API
     API <--> DB
@@ -131,6 +132,26 @@ Security was a primary focus during the v2 rewrite. The application has passed a
 * **Database:** MySQL
 * **Security:** Cloudflare Turnstile, bcrypt/crypto (timing-safe equivalence), express-rate-limit
 * **Infrastructure:** Cloudflare Pages, Nginx, Ubuntu Server, PM2
+
+---
+
+## 🚀 Deployment Guide
+
+### 1. Frontend (Cloudflare Pages)
+The frontend is designed to be hosted statically on Cloudflare Pages.
+1. Connect this repository to Cloudflare Pages.
+2. Set the build directory to `frontend/`.
+3. No build command is required.
+4. Add your Turnstile Site Key to `frontend/index.html` and `frontend/admin.html`.
+
+### 2. Backend (Ubuntu VPS)
+The backend runs on an Express API managed by PM2.
+1. Clone the repository on your VPS and navigate to `backend/`.
+2. Run `npm install` to install dependencies.
+3. Create a `.env` file based on `.env.example` and fill in your DB, SMTP, Turnstile Secret, and Admin Password.
+4. Run `node init_db.js` to create the MySQL tables.
+5. Start the server using PM2: `pm2 start server.js --name "portofolio-api"`.
+6. Configure Nginx to reverse proxy `api.yourdomain.com` to `http://127.0.0.1:3001`.
 
 ---
 
