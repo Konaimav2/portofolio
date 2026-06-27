@@ -260,7 +260,7 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
         res.json({ ok: true, message: 'Message sent successfully!' });
     } catch (err) {
         console.error('Contact error:', err);
-        res.status(500).json({ ok: false, error: 'Internal Server Error: ' + err.message });
+        res.status(500).json({ ok: false, error: 'Something went wrong. Please try again later.' });
     }
 });
 
