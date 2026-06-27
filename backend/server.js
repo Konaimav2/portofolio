@@ -303,6 +303,11 @@ app.post('/api/admin/logout', authMiddleware, (req, res) => {
     res.json({ ok: true });
 });
 
+// Auto-login check
+app.get('/api/admin/check', authMiddleware, (req, res) => {
+    res.json({ ok: true });
+});
+
 // ── Projects CRUD ──────────────────────────────────────────────────────────
 
 app.get('/api/admin/projects', authMiddleware, async (req, res) => {
