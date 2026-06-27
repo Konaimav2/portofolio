@@ -245,17 +245,22 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
 
         // Send Email — sanitize name to prevent header injection
         const safeName = sanitizeHeader(name.trim());
-        await transporter.sendMail({
-            from: `"Arraffi Portfolio" <${process.env.SMTP_FROM}>`,
-            to: 'kona@konaima.my.id',
-            replyTo: `"${safeName}" <${sanitizeHeader(email.trim())}>`,
-            subject: `[Portfolio] ${sanitizeHeader(subject?.trim() || 'New message from ' + name.trim())}`,
-            text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subject?.trim() || '(none)'}\n\n${message.trim()}`
-        });
+        try {
+            await transporter.sendMail({
+                from: `"Arraffi Portfolio" <${process.env.SMTP_FROM}>`,
+                to: 'kona@konaima.my.id',
+                replyTo: `"${safeName}" <${sanitizeHeader(email.trim())}>`,
+                subject: `[Portfolio] ${sanitizeHeader(subject?.trim() || 'New message from ' + name.trim())}`,
+                text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subject?.trim() || '(none)'}\n\n${message.trim()}`
+            });
+        } catch (emailErr) {
+            console.error('Email notification failed (but message saved to DB):', emailErr);
+        }
 
         res.json({ ok: true, message: 'Message sent successfully!' });
-    } catch {
-        res.status(500).json({ ok: false, error: 'Internal Server Error' });
+    } catch (err) {
+        console.error('Contact error:', err);
+        res.status(500).json({ ok: false, error: 'Internal Server Error: ' + err.message });
     }
 });
 
