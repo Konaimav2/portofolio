@@ -89,6 +89,7 @@
         .msg-date { color: var(--muted); font-size: 0.8rem; }
         .msg-subject { font-weight: 600; font-size: 0.85rem; color: var(--accent); margin-bottom: 10px; }
         .msg-body { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+        .msg-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
 
         /* ── Login ── */
         .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -228,12 +229,18 @@
                     <div class="msg-meta">
                         <div>
                             <div class="msg-name">{{ m.name }}</div>
-                            <div class="msg-email">{{ m.email }}</div>
+                            <div class="msg-email"><a :href="'mailto:'+m.email" style="color:var(--accent);text-decoration:none;">{{ m.email }}</a></div>
                         </div>
                         <div class="msg-date">{{ new Date(m.created_at).toLocaleString() }}</div>
                     </div>
-                    <div class="msg-subject">{{ m.subject || '(No subject)' }}</div>
-                    <div class="msg-body">{{ m.message }}</div>
+                    <div class="msg-subject">Subject: {{ m.subject || '(No subject)' }}</div>
+                    <details style="cursor: pointer;">
+                        <summary style="font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; outline: none;">View Message</summary>
+                        <div class="msg-body">{{ m.message }}</div>
+                    </details>
+                    <div class="msg-actions">
+                        <button class="btn btn-danger" @click="deleteMessage(m.id)">🗑 Delete</button>
+                    </div>
                 </div>
                 <div v-if="!messages.length" class="empty">No messages yet.</div>
             </div>
@@ -403,13 +410,19 @@ createApp({
             await api(`/admin/experience/${id}`,'DELETE'); fetchAll();
         };
 
+        // Messages
+        const deleteMessage = async (id) => {
+            if (!confirm('Permanently delete this message?')) return;
+            await api(`/admin/messages/${id}`, 'DELETE'); fetchAll();
+        };
+
         return {
             password, loggedIn, error, tab,
             projects, experience, messages,
             newProj, newExp, editingProj, editingExp, showAddProj, showAddExp,
             login, logout,
             addProject, toggleEditProj, saveProject, deleteProject,
-            addExp, toggleEditExp, saveExp, deleteExp,
+            addExp, toggleEditExp, saveExp, deleteExp, deleteMessage,
         };
     }
 }).mount('#app');

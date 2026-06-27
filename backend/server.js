@@ -465,6 +465,17 @@ app.get('/api/admin/messages', authMiddleware, async (req, res) => {
     }
 });
 
+app.delete('/api/admin/messages/:id', authMiddleware, async (req, res) => {
+    try {
+        const id = parseId(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Invalid message ID.' });
+        await pool.query('DELETE FROM messages WHERE id=?', [id]);
+        res.json({ ok: true });
+    } catch {
+        res.status(500).json({ error: 'Failed to delete message.' });
+    }
+});
+
 // ── 404 fallback ──────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ error: 'Not found.' });
