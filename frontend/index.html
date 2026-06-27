@@ -4,46 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Arraffi | Junior Backend Developer</title>
-    <meta name="description" content="Arraffi (Konaima) — Junior Backend Developer from Central Java, Indonesia. Building reliable backend systems, CDNs, and APIs with Node.js, Python, and Linux.">
+    <title>Arraffi | Backend Engineer</title>
+    <meta name="description" content="Arraffi (Konaima) — Backend Developer from Central Java, Indonesia. Building reliable backend systems, CDNs, and APIs with Node.js, Python, and Linux.">
     <meta name="author" content="Arraffi">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://arraffi.my.id/">
+    <link rel="canonical" href="https://arraffi.com/">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://arraffi.my.id/">
-    <meta property="og:title" content="Arraffi | Junior Backend Developer">
+    <meta property="og:url" content="https://arraffi.com/">
+    <meta property="og:title" content="Arraffi | Backend Engineer">
     <meta property="og:description" content="Building reliable backend systems, CDNs, and APIs with Node.js, Python, and Linux.">
     <meta property="og:image" content="https://cdn.discordapp.my.id/cdn/11acaa.webp">
     <meta property="og:locale" content="en_US">
     <meta property="og:locale:alternate" content="id_ID">
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@arraffianakbaik">
-    <meta name="twitter:title" content="Arraffi | Junior Backend Developer">
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://arraffi.com/">
+    <meta name="twitter:title" content="Arraffi | Backend Engineer">
     <meta name="twitter:description" content="Building reliable backend systems, CDNs, and APIs with Node.js, Python, and Linux.">
     <meta name="twitter:image" content="https://cdn.discordapp.my.id/cdn/11acaa.webp">
+    <meta name="twitter:site" content="@arraffianakbaik">
+    <meta name="twitter:creator" content="@arraffianakbaik">
+
+    <!-- Language Alternates -->
+    <link rel="alternate" hreflang="x-default" href="https://arraffi.com/">
+    <link rel="alternate" hreflang="en" href="https://arraffi.com/">
+    <link rel="alternate" hreflang="id" href="https://arraffi.com/id/">
+
+    <!-- Performance / Core Web Vitals -->
+    <link rel="preconnect" href="https://api.arraffi.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
 
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
-    <link rel="preload" as="image" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-
-
-    <nav class="navbar">
+    
+    <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="#" class="nav-brand">Arraffi</a>
-            <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu">
-                <span></span><span></span><span></span>
-            </button>
+            <a href="#" class="nav-brand">Arraffi<span>.</span></a>
             <div class="nav-links" id="nav-links">
                 <a href="#about" class="nav-close">About</a>
                 <a href="#projects" class="nav-close">Projects</a>
@@ -51,200 +54,186 @@
                 <a href="#contact" class="nav-close">Contact</a>
                 <a href="/id/" class="lang-toggle nav-close">ID</a>
             </div>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
     </nav>
 
     <main class="container">
         
-        <header class="hero reveal">
-            <img src="https://cdn.discordapp.my.id/cdn/11acaa.webp" alt="Arraffi" class="avatar" width="110" height="110" fetchpriority="high">
-            <h1 class="hero-title">Arraffi</h1>
-            <p class="hero-bio">I write backend code using Node.js, Python, and Linux. I build infrastructure, fast CDNs, and APIs that don't break. I prefer keeping things simple over adding unnecessary complexity.</p>
-            
-            <div class="hero-actions">
-                <a href="mailto:kona@konaima.my.id" class="btn-contact"><i class="fa-solid fa-envelope"></i> Contact Me</a>
+        <!-- Hero Section -->
+        <section id="home" class="hero reveal">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <span class="hero-greeting">root@arraffi:~# ./start.sh</span>
+                    <h1 class="hero-title gradient-text">ARRAFFI</h1>
+                    <p class="hero-desc">I engineer backend systems using Node.js, Python, and Linux. I build scalable infrastructure, fast CDNs, and reliable APIs that just work.</p>
+                    <div class="hero-actions">
+                        <a href="#projects" class="btn-primary">View Work</a>
+                        <div class="social-links">
+                            <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                            <a href="https://discordapp.com/users/406852668028616721" target="_blank" rel="noopener noreferrer" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+                            <a href="https://x.com/arraffianakbaik" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <img src="https://cdn.discordapp.my.id/cdn/11acaa.webp" alt="Arraffi" fetchpriority="high">
+                </div>
             </div>
-            
-            <div class="social-links">
-                <a href="https://instagram.com/konasgor" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i> Instagram</a>
-                <a href="https://discordapp.com/users/406852668028616721" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-discord"></i> Discord</a>
-                <a href="https://x.com/arraffianakbaik" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i> Twitter</a>
-                <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> GitHub</a>
-            </div>
-        </header>
+        </section>
 
+        <!-- About Section -->
         <section id="about" class="section reveal">
-            <h2 class="section-title">About Me</h2>
+            <h2 class="section-title"><span class="gradient-text">About</span> Me</h2>
             <div class="about-grid">
                 <div class="about-text">
-                    <p>Hello! I'm Arraffi, a backend developer based in Central Java, Indonesia. I specialize in building robust server-side applications and managing cloud infrastructure. My journey in tech started with a fascination for how things work under the hood, which led me to dive deep into Node.js, Python, and Linux systems.</p>
-                    <br>
-                    <p>When I'm not writing code or configuring servers, I enjoy exploring new technologies and building tools that solve real-world problems. I believe in writing clean, maintainable code and building systems that scale effortlessly.</p>
-                    
-                    <div class="skills-container">
-                        <span class="skill-tag"><i class="fa-brands fa-node-js"></i> Node.js</span>
-                        <span class="skill-tag"><i class="fa-brands fa-python"></i> Python</span>
-                        <span class="skill-tag"><i class="fa-brands fa-linux"></i> Linux</span>
-                        <span class="skill-tag"><i class="fa-solid fa-database"></i> SQL</span>
-                        <span class="skill-tag"><i class="fa-solid fa-network-wired"></i> APIs</span>
+                    <p>I'm a backend developer based in Central Java, Indonesia. I specialize in crafting robust server-side architectures, optimizing databases, and deploying high-availability services.</p>
+                    <p>When I'm not coding, I'm usually exploring new Linux distributions, tinkering with servers, or learning about network security.</p>
+                    <div class="skills-wrapper">
+                        <span class="skill-badge"><i class="fa-brands fa-node-js"></i> Node.js</span>
+                        <span class="skill-badge"><i class="fa-brands fa-python"></i> Python</span>
+                        <span class="skill-badge"><i class="fa-brands fa-linux"></i> Linux</span>
+                        <span class="skill-badge"><i class="fa-solid fa-database"></i> SQL</span>
+                        <span class="skill-badge"><i class="fa-solid fa-server"></i> Nginx</span>
                     </div>
                 </div>
-                
-                <div class="terminal-card card">
+                <div class="terminal-card">
                     <div class="terminal-header">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
-                        <span class="term-title">root@arraffi:~</span>
+                        <span class="term-dot red"></span>
+                        <span class="term-dot yellow"></span>
+                        <span class="term-dot green"></span>
                     </div>
                     <div class="terminal-body">
-                        <p><span class="prompt">root@arraffi:~$</span> whoami</p>
-                        <p class="output">arraffi</p>
-                        <p><span class="prompt">root@arraffi:~$</span> uptime</p>
-                        <p class="output">up 3 years, highly available</p>
-                        <p><span class="prompt">root@arraffi:~$</span> ./show_passion.sh</p>
-                        <p class="output">Building unbreakable backends...</p>
-                        <p><span class="prompt blink">_</span></p>
+                        <div><span class="prompt">arraffi@server:</span><span class="path">~</span>$ <span class="command">whoami</span></div>
+                        <div style="color: #a1a1aa; margin-bottom: 8px;">arraffi - backend engineer</div>
+                        <div><span class="prompt">arraffi@server:</span><span class="path">~</span>$ <span class="command">uptime</span></div>
+                        <div style="color: #a1a1aa; margin-bottom: 8px;">up 3 years, 0 downtime</div>
+                        <div><span class="prompt">arraffi@server:</span><span class="path">~</span>$ <span class="cursor"></span></div>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- Projects Section -->
         <section id="projects" class="section reveal">
-            <h2 class="section-title">Selected Work</h2>
-            <div class="grid-2" id="dynamic-projects"></div>
+            <h2 class="section-title"><span class="gradient-text">Selected</span> Work</h2>
+            <div id="dynamic-projects" class="projects-grid">
+                <!-- Injected via JS -->
+            </div>
         </section>
 
+        <!-- Experience Section -->
         <section id="experience" class="section reveal">
-            <h2 class="section-title">Experience</h2>
-            <div class="timeline" id="dynamic-experience"></div>
+            <h2 class="section-title"><span class="gradient-text">Career</span> Path</h2>
+            <div id="dynamic-experience" class="exp-timeline">
+                <!-- Injected via JS -->
+            </div>
         </section>
 
+        <!-- Contact Section -->
         <section id="contact" class="section reveal">
-            <h2 class="section-title">Get In Touch</h2>
-            <p class="contact-desc">Have a question or a project in mind? Send me a message.</p>
-            
-            <form id="contact-form" class="card contact-form">
-                <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
-                
-                <div class="form-grid">
-                    <div class="input-group">
-                        <label for="cf-name">Name</label>
-                        <input type="text" id="cf-name" name="name" autocomplete="name" placeholder="Name" required>
+            <h2 class="section-title"><span class="gradient-text">Get In</span> Touch</h2>
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <h3>Let's build something.</h3>
+                    <p>Have a project in mind or need a reliable backend engineer? Drop me a message and I'll get back to you as soon as possible.</p>
+                </div>
+                <form id="contact-form" class="contact-form">
+                    <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <div class="input-group" style="flex: 1; min-width: 200px;">
+                            <label for="cf-name">Name</label>
+                            <input type="text" id="cf-name" name="name" required maxlength="100">
+                        </div>
+                        <div class="input-group" style="flex: 1; min-width: 200px;">
+                            <label for="cf-email">Email</label>
+                            <input type="email" id="cf-email" name="email" required>
+                        </div>
                     </div>
                     <div class="input-group">
-                        <label for="cf-email">Email</label>
-                        <input type="email" id="cf-email" name="email" autocomplete="email" placeholder="Email" required>
+                        <label for="cf-subject">Subject</label>
+                        <input type="text" id="cf-subject" name="subject" required maxlength="200">
                     </div>
-                </div>
-                
-                <div class="input-group">
-                    <label for="cf-subject">Subject</label>
-                    <input type="text" id="cf-subject" name="subject" autocomplete="off" placeholder="Subject" required>
-                </div>
-                
-                <div class="input-group">
-                    <label for="cf-message">Message</label>
-                    <textarea id="cf-message" name="message" required placeholder="Your message..."></textarea>
-                </div>
-                
-                <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark" style="margin-bottom: 20px;"></div>
-                
-                <button type="submit" id="cf-submit" class="btn-submit"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
-                <div id="cf-status" class="cf-status"></div>
-            </form>
+                    <div class="input-group">
+                        <label for="cf-message">Message</label>
+                        <textarea id="cf-message" name="message" required maxlength="2000"></textarea>
+                    </div>
+                    <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark"></div>
+                    <button type="submit" id="cf-submit" class="btn-submit">Send Message</button>
+                    <div id="cf-status" style="font-family: 'Minecraft', monospace; text-align: center; margin-top: 10px; display: none;"></div>
+                </form>
+            </div>
         </section>
 
     </main>
     
     <footer class="footer">
-        <div class="footer-content">
-            <p>&copy; 2026 Arraffi.</p>
-            <p class="footer-subtitle">Built with <i class="fa-solid fa-heart" style="color:var(--accent);"></i> and Node.js</p>
-        </div>
+        <p>&copy; 2026 Arraffi.</p>
+        <p>Built with <i class="fa-solid fa-heart heart"></i> and Node.js</p>
     </footer>
 
     <script>
-        // Prevent scroll position caching on reload
-        if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
-        }
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
         window.scrollTo(0,0);
-        const navToggle = document.getElementById('nav-toggle');
-        const navLinks  = document.getElementById('nav-links');
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('open');
-            navLinks.classList.toggle('open');
-        });
-        // Close drawer on link click
-        navLinks.querySelectorAll('.nav-close').forEach(a => {
-            a.addEventListener('click', () => {
-                navToggle.classList.remove('open');
-                navLinks.classList.remove('open');
+
+        // Smooth scroll without changing URL hash
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
 
-        // Scroll Reveal Animation
+        // Navbar Scroll
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+
+        // Mobile Nav
+        const navToggle = document.getElementById('nav-toggle');
+        const navLinks  = document.getElementById('nav-links');
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            const icon = navToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        });
+        navLinks.querySelectorAll('.nav-close').forEach(a => {
+            a.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                const icon = navToggle.querySelector('i');
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+            });
+        });
+
+        // Reveal
         const revealElements = document.querySelectorAll('.reveal');
         const revealObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
-                    observer.unobserve(entry.target); // Reveal only once
+                    observer.unobserve(entry.target);
                 }
             });
-        }, { rootMargin: "0px 0px -50px 0px", threshold: 0.1 });
-        
+        }, { rootMargin: "0px 0px -50px 0px", threshold: 0.15 });
         revealElements.forEach(el => revealObserver.observe(el));
 
-        
-        // Arrow Keys Navigation (Presentation Mode)
-        document.addEventListener('keydown', (e) => {
-            // Do not interfere if user is typing in the contact form
-            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
-            
-            if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp'].includes(e.key) || (e.key === ' ' && !e.shiftKey)) {
-                e.preventDefault();
-                const sections = Array.from(document.querySelectorAll('.hero, .section'));
-                
-                let currentIdx = 0;
-                let minDistance = Infinity;
-                
-                // Find the section currently in view
-                sections.forEach((sec, idx) => {
-                    const rect = sec.getBoundingClientRect();
-                    if (Math.abs(rect.top) < minDistance) {
-                        minDistance = Math.abs(rect.top);
-                        currentIdx = idx;
-                    }
-                });
+        // API
+        const API_BASE = 'https://api.arraffi.com';
 
-                const goNext = ['ArrowDown', 'PageDown', ' '].includes(e.key);
-                const goPrev = ['ArrowUp', 'PageUp'].includes(e.key);
-
-                if (goNext && currentIdx < sections.length - 1) {
-                    e.preventDefault();
-                    sections[currentIdx + 1].scrollIntoView({ behavior: 'smooth' });
-                } else if (goPrev && currentIdx > 0) {
-                    e.preventDefault();
-                    sections[currentIdx - 1].scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        });
-
-        
-        // Production API base — update this to your VPS domain before deploying
-        const API_BASE = 'https://api.arraffi.my.id';
-
-        // FIX: HTML escape to prevent XSS from database content
         function escHtml(s) {
-            return String(s ?? '')
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
-
-        // FIX: Validate URL before using in href — block javascript:, data: etc.
         function safeUrl(url) {
             try {
                 const u = new URL(url ?? '');
@@ -252,7 +241,6 @@
             } catch { return '#'; }
         }
 
-        // Fetch Dynamic CMS Data — both endpoints load independently
         async function loadCMSData() {
             const fetchJSON = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
             const [projResult, expResult] = await Promise.allSettled([
@@ -266,20 +254,19 @@
                 if (projGrid && projects.length > 0) {
                     projGrid.innerHTML = projects.map(p => {
                         const content = `
-                            <img loading="lazy" src="${safeUrl(p.image_url)}" alt="${escHtml(p.title)}" class="proj-img ${p.title.includes('Bot') ? 'wa-img' : ''}">
-                            <div class="card-content">
-                                <h3>${escHtml(p.title)}</h3>
-                                <p>${escHtml(p.description)}</p>
+                            <div class="proj-img">
+                                <img loading="lazy" src="${safeUrl(p.image_url)}" alt="${escHtml(p.title)}">
+                            </div>
+                            <div class="proj-content">
+                                <h3 class="proj-title">${escHtml(p.title)}</h3>
+                                <p class="proj-desc">${escHtml(p.description)}</p>
+                                ${p.url ? `<span class="btn-outline">View Project</span>` : ''}
                             </div>`;
-                        if (p.url) {
-                            return `<a href="${safeUrl(p.url)}" target="_blank" rel="noopener noreferrer" class="card proj-card ${p.full_width ? 'full-width' : ''}">${content}</a>`;
-                        } else {
-                            return `<div class="card proj-card ${p.full_width ? 'full-width' : ''}">${content}</div>`;
-                        }
+                        const classes = `project-card ${p.full_width ? 'full-width' : ''}`;
+                        return p.url ? `<a href="${safeUrl(p.url)}" target="_blank" rel="noopener noreferrer" class="${classes}">${content}</a>` 
+                                     : `<div class="${classes}">${content}</div>`;
                     }).join('');
                 }
-            } else {
-                console.warn('Projects failed to load:', projResult.reason);
             }
 
             if (expResult.status === 'fulfilled') {
@@ -287,26 +274,23 @@
                 const expTimeline = document.getElementById('dynamic-experience');
                 if (expTimeline && experiences.length > 0) {
                     expTimeline.innerHTML = experiences.map(e => `
-                        <div class="card exp-card">
-                            <div class="exp-header">
-                                <img loading="lazy" src="${safeUrl(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo">
-                                <div class="exp-title-box">
-                                    <h3>${escHtml(e.company)}</h3>
-                                    <span class="exp-date">${escHtml(e.date_range)}</span>
-                                </div>
+                        <div class="exp-card">
+                            <img loading="lazy" src="${safeUrl(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo">
+                            <div class="exp-info">
+                                <h3 class="exp-title">${escHtml(e.company)}</h3>
+                                <div class="exp-role">${escHtml(e.role)}</div>
+                                <div class="exp-date">${escHtml(e.date_range)}</div>
+                                <p class="exp-desc">${escHtml(e.description)}</p>
+                                ${e.url ? `<a href="${safeUrl(e.url)}" target="_blank" rel="noopener noreferrer" class="btn-outline" style="margin-top: 12px; display: inline-block;">Link</a>` : ''}
                             </div>
-                            <h4 class="exp-role">${escHtml(e.role)}</h4>
-                            <p class="exp-desc">${escHtml(e.description)}</p>
-                            ${e.url ? `<a href="${safeUrl(e.url)}" target="_blank" rel="noopener noreferrer" class="submit-btn" style="display:inline-block;margin-top:16px;text-decoration:none;text-align:center;">Visit Website</a>` : ''}
                         </div>
                     `).join('');
                 }
-            } else {
-                console.warn('Experience failed to load:', expResult.reason);
             }
         }
         loadCMSData();
 
+        // Form
         const cfForm = document.getElementById('contact-form');
         const cfSubmit = document.getElementById('cf-submit');
         const cfStatus = document.getElementById('cf-status');
@@ -315,37 +299,36 @@
             cfForm.addEventListener('submit', async e => {
                 e.preventDefault();
                 cfSubmit.disabled = true;
-                cfSubmit.textContent = '...';
-                cfStatus.className = 'cf-status';
+                cfSubmit.textContent = 'Processing...';
+                cfStatus.style.display = 'block';
+                cfStatus.style.color = '#fff';
+                cfStatus.textContent = 'Sending...';
                 try {
                     const fd = new FormData(cfForm);
-                    const ticket = Date.now().toString(36) + '_' + Math.random().toString(36).substring(2);
                     const res = await fetch(`${API_BASE}/api/contact`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
-                            name: fd.get('name'), 
-                            email: fd.get('email'), 
-                            subject: fd.get('subject'), 
-                            message: fd.get('message'), 
+                            name: fd.get('name'), email: fd.get('email'), 
+                            subject: fd.get('subject'), message: fd.get('message'), 
                             website_url: fd.get('website_url'), 
-                            ticket, 
+                            ticket: Date.now().toString(36), 
                             turnstile: fd.get('cf-turnstile-response') 
                         }),
                     });
                     const json = await res.json();
                     if (json.ok) {
-                        cfStatus.className = 'cf-status ok';
+                        cfStatus.style.color = '#22c55e';
                         cfStatus.textContent = json.message || 'Success.';
                         cfForm.reset();
                         if (window.turnstile) turnstile.reset();
                     } else {
-                        cfStatus.className = 'cf-status err';
+                        cfStatus.style.color = '#ef4444';
                         cfStatus.textContent = json.error || 'Failed.';
                     }
                 } catch { 
-                    cfStatus.className = 'cf-status err'; 
-                    cfStatus.textContent = 'Error.'; 
+                    cfStatus.style.color = '#ef4444'; 
+                    cfStatus.textContent = 'Network Error.'; 
                 } finally {
                     cfSubmit.disabled = false;
                     cfSubmit.textContent = 'Send Message';

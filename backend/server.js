@@ -14,7 +14,7 @@ app.set('trust proxy', 1);
 
 // ── CORS: locked to production domain only ────────────────────────────────
 const allowedOrigins = [
-    'https://arraffi.my.id',
+    'https://arraffi.com',
     'http://localhost:3001',
     'http://127.0.0.1:3001',
 ];
@@ -211,10 +211,16 @@ app.get('/api/experience', async (req, res) => {
 
 app.post('/api/contact', contactLimiter, async (req, res) => {
     try {
-        const { name, email, subject, message, website_url } = req.body;
+        const { name, email, subject, message, website_url, turnstile } = req.body;
 
         // Spam protection: honeypot field
         if (website_url) return res.json({ ok: true, message: 'Message sent!' });
+
+        // Verify Turnstile
+        const tsOk = await verifyTurnstile(turnstile, req.ip);
+        if (!tsOk) {
+            return res.status(403).json({ ok: false, error: 'Bot verification failed. Please try again.' });
+        }
 
         // Server-side input validation
         if (!name?.trim() || !email?.trim() || !message?.trim()) {
@@ -242,7 +248,7 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
         await transporter.sendMail({
             from: `"Arraffi Portfolio" <${process.env.SMTP_FROM}>`,
             to: 'kona@konaima.my.id',
-            replyTo: `"${safeName}" <${email.trim()}>`,
+            replyTo: `"${safeName}" <${sanitizeHeader(email.trim())}>`,
             subject: `[Portfolio] ${sanitizeHeader(subject?.trim() || 'New message from ' + name.trim())}`,
             text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subject?.trim() || '(none)'}\n\n${message.trim()}`
         });
