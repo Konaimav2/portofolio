@@ -41,3 +41,9 @@ frontend/worker.js
 frontend/wrangler.toml
 
 PORTFOLIO.md
+
+# ── Generated reports / tool output ──
+lh-report.json
+
+# ── AI / Gemini agent data ──
+.gemini/
