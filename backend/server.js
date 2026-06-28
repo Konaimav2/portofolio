@@ -20,11 +20,9 @@ const allowedOrigins = [
 ];
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow no-Origin requests (curl/monitoring). Browser security still enforced
-        // by admin-specific origin middleware below.
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        return callback(null, false);
+        // Echo the origin to allow any site to read public APIs (e.g. PageSpeed bots).
+        // Admin endpoints are separately protected by strict origin-checking middleware later.
+        return callback(null, origin || '*');
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
