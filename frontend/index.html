@@ -10,7 +10,6 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://arraffi.com/">
 
-    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://arraffi.com/">
     <meta property="og:title" content="Arraffi | Backend Engineer">
@@ -19,7 +18,6 @@
     <meta property="og:locale" content="en_US">
     <meta property="og:locale:alternate" content="id_ID">
 
-    <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://arraffi.com/">
     <meta name="twitter:title" content="Arraffi | Backend Engineer">
@@ -28,22 +26,19 @@
     <meta name="twitter:site" content="@arraffianakbaik">
     <meta name="twitter:creator" content="@arraffianakbaik">
 
-    <!-- Language Alternates -->
     <link rel="alternate" hreflang="x-default" href="https://arraffi.com/">
     <link rel="alternate" hreflang="en" href="https://arraffi.com/">
     <link rel="alternate" hreflang="id" href="https://arraffi.com/id/">
 
-    <!-- Performance / Core Web Vitals -->
     <link rel="preconnect" href="https://api.arraffi.com" crossorigin>
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
 
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./style.css?v=section-fix-11">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-    
+
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="#" class="nav-brand">Arraffi<span>.</span></a>
@@ -51,7 +46,7 @@
                 <a href="#about" class="nav-close">About</a>
                 <a href="#projects" class="nav-close">Projects</a>
                 <a href="#experience" class="nav-close">Experience</a>
-                <a href="#contact" class="nav-close">Contact</a>
+                <a href="#comments" class="nav-close">Comments</a>
                 <a href="/id/" class="lang-toggle nav-close">ID</a>
             </div>
             <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
@@ -61,14 +56,13 @@
     </nav>
 
     <main class="container">
-        
-        <!-- Hero Section -->
+
         <section id="home" class="hero reveal">
             <div class="hero-content">
                 <div class="hero-text">
                     <span class="hero-greeting">root@arraffi:~# ./start.sh</span>
                     <h1 class="hero-title gradient-text">ARRAFFI</h1>
-                    <p class="hero-desc">I engineer backend systems using Node.js, Python, and Linux. I build scalable infrastructure, fast CDNs, and reliable APIs that just work.</p>
+                    <p class="hero-desc">I build backend systems, APIs, and Linux servers that stay boring in production. Node.js, Python, Linux, and practical server work kept fast.</p>
                     <div class="hero-actions">
                         <a href="#projects" class="btn-primary">View Work</a>
                         <div class="social-links">
@@ -84,19 +78,18 @@
             </div>
         </section>
 
-        <!-- About Section -->
         <section id="about" class="section reveal">
             <h2 class="section-title"><span class="gradient-text">About</span> Me</h2>
             <div class="about-grid">
                 <div class="about-text">
-                    <p>I'm a backend developer based in Central Java, Indonesia. I specialize in crafting robust server-side architectures, optimizing databases, and deploying high-availability services.</p>
-                    <p>When I'm not coding, I'm usually exploring new Linux distributions, tinkering with servers, or learning about network security.</p>
+                    <p>I'm a backend developer from Central Java, Indonesia. Most of my work sits behind the page: APIs, backend scripts, Linux setups, and the small fixes that keep a server calm.</p>
+                    <p>Outside client work, I usually end up testing Linux distros, poking at VPS setups, or reading about network security until something breaks and I learn from it.</p>
                     <div class="skills-wrapper">
                         <span class="skill-badge"><i class="fa-brands fa-node-js"></i> Node.js</span>
                         <span class="skill-badge"><i class="fa-brands fa-python"></i> Python</span>
                         <span class="skill-badge"><i class="fa-brands fa-linux"></i> Linux</span>
-                        <span class="skill-badge"><i class="fa-solid fa-database"></i> SQL</span>
-                        <span class="skill-badge"><i class="fa-solid fa-server"></i> Nginx</span>
+                        <span class="skill-badge"><i class="fa-solid fa-code"></i> JavaScript</span>
+                        <span class="skill-badge"><i class="fa-solid fa-server"></i> VPS</span>
                     </div>
                 </div>
                 <div class="terminal-card">
@@ -116,62 +109,97 @@
             </div>
         </section>
 
-        <!-- Projects Section -->
         <section id="projects" class="section reveal">
-            <h2 class="section-title"><span class="gradient-text">Selected</span> Work</h2>
+            <h2 class="section-title"><span class="gradient-text">Project</span></h2>
             <div id="dynamic-projects" class="projects-grid">
-                <!-- Injected via JS -->
             </div>
         </section>
 
-        <!-- Experience Section -->
         <section id="experience" class="section reveal">
-            <h2 class="section-title"><span class="gradient-text">Career</span> Path</h2>
+            <h2 class="section-title"><span class="gradient-text">Experience</span></h2>
             <div id="dynamic-experience" class="exp-timeline">
-                <!-- Injected via JS -->
             </div>
         </section>
 
-        <!-- Contact Section -->
-        <section id="contact" class="section reveal">
-            <h2 class="section-title"><span class="gradient-text">Get In</span> Touch</h2>
-            <div class="contact-wrapper">
-                <div class="contact-info">
-                    <h3>Let's build something.</h3>
-                    <p>Have a project in mind or need a reliable backend engineer? Drop me a message and I'll get back to you as soon as possible.</p>
+        <section id="comments" class="section reveal">
+            <div class="comment-shell compact">
+                <div class="comment-box">
+                    <div class="comment-head">
+                        <p class="eyebrow">Contact</p>
+                        <h2><span class="gradient-text">Leave</span> a note</h2>
+                        <p>Drop feedback, ask for help, or leave a quick note. Login adds your avatar; anonymous posts still work.</p>
+                        <div class="contact-shortcuts" aria-label="Contact shortcuts">
+                            <a href="mailto:kona@konaima.my.id"><i class="fa-solid fa-envelope"></i><span>Email</span></a>
+                            <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i><span>GitHub</span></a>
+                            <a href="https://instagram.com/konasgor" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i><span>Instagram</span></a>
+                        </div>
+                    </div>
+                    <form id="comment-form" class="comment-form compact-form">
+                        <input type="text" name="website_url" class="hp-field" tabindex="-1" autocomplete="off">
+                        <div class="input-group"><label for="comment-body">Comment</label><textarea id="comment-body" name="body" maxlength="1200" required placeholder="Say hi. Ask something. No spam."></textarea></div>
+                        <div class="anon-fields" id="anon-fields">
+                            <div class="input-group"><label for="comment-name">Name</label><input id="comment-name" name="anonymous_name" maxlength="120" placeholder="Anonymous"></div>
+                            <div class="input-group"><label for="comment-email">Email <span>(hidden)</span></label><input id="comment-email" type="email" name="anonymous_email" placeholder="optional"></div>
+                        </div>
+                        <div class="comment-actions-row">
+                            <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark"></div>
+                            <button type="submit" id="comment-submit" class="btn-submit">Post</button>
+                        </div>
+                        <div id="comment-status" class="form-status" role="status"></div>
+                    </form>
+                    <details class="comment-auth" id="comment-auth">
+                        <summary>Login for instant posts and avatar</summary>
+                        <div id="comment-user-card" class="comment-user-card hidden"></div>
+                        <div id="comment-login-card" class="comment-login-card">
+                            <div class="auth-tabs" role="tablist" aria-label="Comment account mode"><button type="button" class="auth-tab active" data-auth-mode="login">Login</button><button type="button" class="auth-tab" data-auth-mode="register">Create account</button></div>
+                            <form id="comment-auth-form" class="mini-form">
+                                <input type="hidden" name="mode" value="login">
+                                <div class="input-group register-only hidden"><label for="comment-auth-name">Name</label><input id="comment-auth-name" name="name" maxlength="120" autocomplete="name"></div>
+                                <div class="input-group"><label for="comment-auth-email">Email</label><input id="comment-auth-email" type="email" name="email" autocomplete="email"></div>
+                                <div class="input-group"><label for="comment-auth-password">Password</label><input id="comment-auth-password" type="password" name="password" minlength="8" autocomplete="current-password"></div>
+                                <div class="input-group register-only hidden"><label for="comment-avatar">Avatar <span>(2MB max)</span></label><input id="comment-avatar" type="file" name="avatar" accept="image/jpeg,image/png,image/webp"></div>
+                                <button type="submit" class="btn-submit small" id="comment-auth-submit">Login</button>
+                            </form>
+                        </div>
+                    </details>
                 </div>
-                <form id="contact-form" class="contact-form">
-                    <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
-                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                        <div class="input-group" style="flex: 1; min-width: 200px;">
-                            <label for="cf-name">Name</label>
-                            <input type="text" id="cf-name" name="name" required maxlength="100">
-                        </div>
-                        <div class="input-group" style="flex: 1; min-width: 200px;">
-                            <label for="cf-email">Email</label>
-                            <input type="email" id="cf-email" name="email" required>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label for="cf-subject">Subject</label>
-                        <input type="text" id="cf-subject" name="subject" required maxlength="200">
-                    </div>
-                    <div class="input-group">
-                        <label for="cf-message">Message</label>
-                        <textarea id="cf-message" name="message" required maxlength="2000"></textarea>
-                    </div>
-                    <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark"></div>
-                    <button type="submit" id="cf-submit" class="btn-submit">Send Message</button>
-                    <div id="cf-status" style="font-family: 'Minecraft', monospace; text-align: center; margin-top: 10px; display: none;"></div>
-                </form>
+                <div class="comment-feed">
+                    <div class="comment-list-head"><h3>Notes</h3><button type="button" id="refresh-comments" class="btn-ghost">Refresh</button></div>
+                    <div id="comment-list" class="comment-list"></div>
+                </div>
             </div>
         </section>
 
     </main>
-    
+
     <footer class="footer">
-        <p>&copy; 2026 Arraffi.</p>
-        <p>Built with <i class="fa-solid fa-heart heart"></i> and Node.js</p>
+        <div class="footer-main">
+            <div class="footer-brand">
+                <a href="#home" class="footer-logo">Arraffi<span>.</span></a>
+                <p>Backend systems, APIs, and Linux servers that stay boring in production.</p>
+                <div class="footer-socials" aria-label="Social links">
+                    <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://discord.gg/5mxJF4Uh" target="_blank" rel="noopener noreferrer" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+                    <a href="https://x.com/konasgor" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+            <nav class="footer-links" aria-label="Footer navigation">
+                <span>Quick Links</span>
+                <a href="#about">About</a>
+                <a href="#projects">Projects</a>
+                <a href="#experience">Experience</a>
+                <a href="#comments">Comments</a>
+            </nav>
+            <div class="footer-stack" aria-label="Tech stack">
+                <span>Stack</span>
+                <div><b>Node.js</b><b>Python</b><b>Linux</b><b>VPS</b></div>
+            </div>
+            <a href="#comments" class="footer-cta">Start Project <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Arraffi.</p>
+            <p>Built with <i class="fa-solid fa-heart heart"></i> and Node.js</p>
+        </div>
     </footer>
 
     <script>
@@ -229,7 +257,18 @@
         revealElements.forEach(el => revealObserver.observe(el));
 
         // API
-        const API_BASE = 'https://api.arraffi.com';
+        const API_BASE = ['localhost', '127.0.0.1'].includes(location.hostname)
+            ? `${location.protocol}//${location.hostname}:3001`
+            : 'https://api.arraffi.com';
+        const TURNSTILE_SITE_KEY = ['localhost', '127.0.0.1'].includes(location.hostname)
+            ? '1x00000000000000000000AA'
+            : '0x4AAAAAADMAtXOh4MijdApa';
+        document.querySelectorAll('.cf-turnstile').forEach(el => { el.dataset.sitekey = TURNSTILE_SITE_KEY; });
+        const turnstileScript = document.createElement('script');
+        turnstileScript.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+        turnstileScript.async = true;
+        turnstileScript.defer = true;
+        document.head.appendChild(turnstileScript);
 
         function escHtml(s) {
             return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -240,101 +279,309 @@
                 return (u.protocol === 'http:' || u.protocol === 'https:') ? escHtml(url) : '#';
             } catch { return '#'; }
         }
+        function installImageTimeouts(root = document, timeoutMs = 2600) {
+            root.querySelectorAll('img[src]:not([data-timeout-bound])').forEach(img => {
+                img.dataset.timeoutBound = '1';
+                const fail = () => {
+                    if (img.complete && img.naturalWidth > 0) return;
+                    img.classList.add('img-timeout');
+                    img.closest('.proj-img')?.classList.add('image-timeout');
+                    img.closest('.hero-visual')?.classList.add('image-timeout');
+                    img.closest('.exp-logo-frame')?.classList.add('image-timeout');
+                    img.removeAttribute('src');
+                };
+                const timer = setTimeout(fail, timeoutMs);
+                img.addEventListener('load', () => clearTimeout(timer), { once: true });
+                img.addEventListener('error', fail, { once: true });
+            });
+        }
+        installImageTimeouts(document);
+
+        const fallbackProjects = [
+            {
+                title: 'SimpleCDN',
+                description: 'A fast, lightweight content delivery network built from scratch. Designed to serve static assets with minimal overhead.',
+                url: 'https://cdn.discordapp.my.id',
+                image_url: 'https://cdn.discordapp.my.id/cdn/7541df.webp',
+                full_width: 0,
+                category: 'Edge delivery',
+                chips: ['CDN', 'Static files', 'Caching']
+            },
+            {
+                title: 'BerAPI',
+                description: 'A centralized hub of ready-to-use API endpoints designed for rapid prototyping, AI integration, and download utilities.',
+                url: 'https://berapi.my.id/',
+                image_url: 'https://cdn.discordapp.my.id/cdn/secure/1f75f1.webp',
+                full_width: 0,
+                category: 'API platform',
+                chips: ['Node.js', 'API', 'Tools']
+            },
+            {
+                title: 'Automated Bot Systems',
+                description: 'Custom automated WhatsApp bots to handle community engagement, moderate chats, and process repetitive tasks.',
+                url: null,
+                image_url: 'https://cdn.discordapp.my.id/cdn/e3dece.webp',
+                full_width: 0,
+                category: 'Automation',
+                chips: ['Bots', 'Moderation', 'Support']
+            }
+        ];
+
+        const fallbackExperience = [
+            {
+                company: 'Arqonara Hosting',
+                role: 'Manager & Staff',
+                date_range: 'Aug 2025 — Present',
+                description: 'Managing core backend infrastructure, ensuring game server stability under heavy load, and resolving network issues.',
+                logo_url: 'https://cdn.discordapp.my.id/cdn/df7b8d.webp',
+                url: 'https://arqonara.com'
+            },
+            {
+                company: 'HeppyCloud',
+                role: 'Customer Service',
+                date_range: 'Mar 2025 — Present',
+                description: 'Helping customers troubleshoot hosting issues, manage service requests, and keep support responses clear.',
+                logo_url: 'https://cdn.discordapp.my.id/cdn/028eba.webp',
+                url: 'https://heppycloud.id'
+            }
+        ];
+
+        function renderProjects(projects) {
+            const projGrid = document.getElementById('dynamic-projects');
+            if (!projGrid || !projects.length) return;
+            projGrid.innerHTML = projects.map(p => {
+                const category = p.category || (p.full_width ? 'Cloud infrastructure' : 'Digital service');
+                const chips = p.chips || ['Backend', 'Panel', 'Hosting'];
+                const content = `
+                    <div class="proj-img">
+                        <img loading="lazy" src="${safeUrl(p.image_url)}" alt="${escHtml(p.title)}">
+                    </div>
+                    <div class="proj-content">
+                        <div class="proj-topline"><span class="proj-icon"><i class="fa-solid fa-server"></i></span><span>${escHtml(category)}</span></div>
+                        <h3 class="proj-title">${escHtml(p.title)}</h3>
+                        <p class="proj-desc">${escHtml(p.description)}</p>
+                        <div class="proj-tags">${chips.map(chip => `<span>${escHtml(chip)}</span>`).join('')}</div>
+                        <span class="proj-link-hint">${p.url ? 'Open project ↗' : 'Private build'}</span>
+                    </div>`;
+                const classes = `project-card ${p.full_width ? 'full-width' : ''} ${p.url ? 'is-clickable' : ''}`;
+                return p.url ? `<a href="${safeUrl(p.url)}" target="_blank" rel="noopener noreferrer" class="${classes}" aria-label="Open ${escHtml(p.title)} project">${content}</a>`
+                             : `<div class="${classes}">${content}</div>`;
+            }).join('');
+            installImageTimeouts(projGrid);
+        }
+
+        function renderExperience(experiences) {
+            const expTimeline = document.getElementById('dynamic-experience');
+            if (!expTimeline || !experiences.length) return;
+            expTimeline.innerHTML = experiences.map(e => {
+                const tag = e.url ? 'a' : 'div';
+                const href = e.url ? ` href="${safeUrl(e.url)}" target="_blank" rel="noopener noreferrer"` : '';
+                const classes = `exp-card ${e.url ? 'exp-clickable' : ''}`;
+                return `
+                <${tag}${href} class="${classes}">
+                    <span class="exp-logo-frame"><img loading="lazy" src="${safeUrl(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo"></span>
+                    <div class="exp-info">
+                        <h3 class="exp-title">${escHtml(e.company)}</h3>
+                        <div class="exp-role">${escHtml(e.role)}</div>
+                        <div class="exp-date">${escHtml(e.date_range)}</div>
+                        <p class="exp-desc">${escHtml(e.description)}</p>
+                    </div>
+                </${tag}>
+            `}).join('');
+            installImageTimeouts(expTimeline);
+        }
 
         async function loadCMSData() {
-            const fetchJSON = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+            const fetchJSON = async url => {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 3500);
+                try {
+                    const res = await fetch(url, { signal: controller.signal });
+                    if (!res.ok) throw new Error(res.status);
+                    return await res.json();
+                } finally {
+                    clearTimeout(timeout);
+                }
+            };
+            renderProjects(fallbackProjects);
+            renderExperience(fallbackExperience);
             const [projResult, expResult] = await Promise.allSettled([
                 fetchJSON(`${API_BASE}/api/projects`),
                 fetchJSON(`${API_BASE}/api/experience`),
             ]);
 
-            if (projResult.status === 'fulfilled') {
-                const projects = projResult.value;
-                const projGrid = document.getElementById('dynamic-projects');
-                if (projGrid && projects.length > 0) {
-                    projGrid.innerHTML = projects.map(p => {
-                        const content = `
-                            <div class="proj-img">
-                                <img loading="lazy" src="${safeUrl(p.image_url)}" alt="${escHtml(p.title)}">
-                            </div>
-                            <div class="proj-content">
-                                <h3 class="proj-title">${escHtml(p.title)}</h3>
-                                <p class="proj-desc">${escHtml(p.description)}</p>
-                                ${p.url ? `<span class="btn-outline">View Project</span>` : ''}
-                            </div>`;
-                        const classes = `project-card ${p.full_width ? 'full-width' : ''}`;
-                        return p.url ? `<a href="${safeUrl(p.url)}" target="_blank" rel="noopener noreferrer" class="${classes}">${content}</a>` 
-                                     : `<div class="${classes}">${content}</div>`;
-                    }).join('');
-                }
-            }
+            renderProjects(projResult.status === 'fulfilled' && projResult.value.length ? projResult.value : fallbackProjects);
 
             if (expResult.status === 'fulfilled') {
                 const experiences = expResult.value;
-                const expTimeline = document.getElementById('dynamic-experience');
-                if (expTimeline && experiences.length > 0) {
-                    expTimeline.innerHTML = experiences.map(e => `
-                        <div class="exp-card">
-                            <img loading="lazy" src="${safeUrl(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo">
-                            <div class="exp-info">
-                                <h3 class="exp-title">${escHtml(e.company)}</h3>
-                                <div class="exp-role">${escHtml(e.role)}</div>
-                                <div class="exp-date">${escHtml(e.date_range)}</div>
-                                <p class="exp-desc">${escHtml(e.description)}</p>
-                                ${e.url ? `<a href="${safeUrl(e.url)}" target="_blank" rel="noopener noreferrer" class="btn-outline" style="margin-top: 12px; display: inline-block;">Link</a>` : ''}
-                            </div>
-                        </div>
-                    `).join('');
-                }
+                if (experiences.length > 0) renderExperience(experiences);
             }
         }
         loadCMSData();
 
-        // Form
-        const cfForm = document.getElementById('contact-form');
-        const cfSubmit = document.getElementById('cf-submit');
-        const cfStatus = document.getElementById('cf-status');
-        
-        if (cfForm) {
-            cfForm.addEventListener('submit', async e => {
-                e.preventDefault();
-                cfSubmit.disabled = true;
-                cfSubmit.textContent = 'Processing...';
-                cfStatus.style.display = 'block';
-                cfStatus.style.color = '#fff';
-                cfStatus.textContent = 'Sending...';
-                try {
-                    const fd = new FormData(cfForm);
-                    const res = await fetch(`${API_BASE}/api/contact`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            name: fd.get('name'), email: fd.get('email'), 
-                            subject: fd.get('subject'), message: fd.get('message'), 
-                            website_url: fd.get('website_url'), 
-                            ticket: Date.now().toString(36), 
-                            turnstile: fd.get('cf-turnstile-response') 
-                        }),
-                    });
-                    const json = await res.json();
-                    if (json.ok) {
-                        cfStatus.style.color = '#22c55e';
-                        cfStatus.textContent = json.message || 'Success.';
-                        cfForm.reset();
-                        if (window.turnstile) turnstile.reset();
-                    } else {
-                        cfStatus.style.color = '#ef4444';
-                        cfStatus.textContent = json.error || 'Failed.';
-                    }
-                } catch { 
-                    cfStatus.style.color = '#ef4444'; 
-                    cfStatus.textContent = 'Network Error.'; 
-                } finally {
-                    cfSubmit.disabled = false;
-                    cfSubmit.textContent = 'Send Message';
-                }
+        let commentUser = null;
+        const authForm = document.getElementById('comment-auth-form');
+        const authSubmit = document.getElementById('comment-auth-submit');
+        const loginCard = document.getElementById('comment-login-card');
+        const userCard = document.getElementById('comment-user-card');
+        const anonFields = document.getElementById('anon-fields');
+        const commentForm = document.getElementById('comment-form');
+        const commentSubmit = document.getElementById('comment-submit');
+        const commentStatus = document.getElementById('comment-status');
+        const commentList = document.getElementById('comment-list');
+        const refreshComments = document.getElementById('refresh-comments');
+        const authDetails = document.getElementById('comment-auth');
+
+        const initials = name => String(name || '?').trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase() || '?';
+        const setStatus = (text, type = '') => {
+            if (!commentStatus) return;
+            commentStatus.textContent = text;
+            commentStatus.className = `form-status ${type}`.trim();
+        };
+        const readFileAsDataUrl = file => new Promise((resolve, reject) => {
+            if (!file) return resolve('');
+            if (file.size > 2 * 1024 * 1024) return reject(new Error('Profile image must be 2MB or smaller.'));
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Could not read profile image.'));
+            reader.readAsDataURL(file);
+        });
+
+        function renderCommentUser() {
+            if (!loginCard || !userCard || !anonFields) return;
+            if (!commentUser) {
+                if (authDetails) authDetails.open = false;
+                loginCard.classList.remove('hidden');
+                userCard.classList.add('hidden');
+                anonFields.classList.remove('hidden');
+                return;
+            }
+            if (authDetails) authDetails.open = true;
+            loginCard.classList.add('hidden');
+            userCard.classList.remove('hidden');
+            anonFields.classList.add('hidden');
+            userCard.innerHTML = `
+                <div class="avatar small-avatar">${commentUser.avatar_url ? `<img src="${safeUrl(commentUser.avatar_url)}" alt="${escHtml(commentUser.name)}">` : escHtml(initials(commentUser.name))}</div>
+                <div><strong>${escHtml(commentUser.name)}</strong><span>${escHtml(commentUser.email)}</span></div>
+                <button type="button" id="comment-logout" class="btn-ghost">Logout</button>`;
+            installImageTimeouts(userCard);
+            document.getElementById('comment-logout')?.addEventListener('click', async () => {
+                await fetch(`${API_BASE}/api/comment/logout`, { method: 'POST', credentials: 'include' });
+                commentUser = null;
+                renderCommentUser();
             });
         }
+
+        async function loadCommentMe() {
+            try {
+                const res = await fetch(`${API_BASE}/api/comment/me`, { credentials: 'include' });
+                const json = await res.json();
+                commentUser = json.user || null;
+                renderCommentUser();
+            } catch { renderCommentUser(); }
+        }
+
+        async function loadComments() {
+            if (!commentList) return;
+            commentList.innerHTML = '<div class="empty-note">Loading comments...</div>';
+            try {
+                const res = await fetch(`${API_BASE}/api/comments`);
+                const comments = await res.json();
+                if (!Array.isArray(comments) || !comments.length) {
+                    commentList.innerHTML = '<div class="empty-note">No comments yet. First one gets bragging rights.</div>';
+                    return;
+                }
+                commentList.innerHTML = comments.map(comment => `
+                    <article class="comment-card">
+                        <div class="avatar">${comment.avatar_url ? `<img src="${safeUrl(comment.avatar_url)}" alt="${escHtml(comment.author_name)}">` : escHtml(initials(comment.author_name))}</div>
+                        <div>
+                            <div class="comment-meta"><strong>${escHtml(comment.author_name)}</strong><time>${escHtml(new Date(comment.created_at).toLocaleDateString())}</time></div>
+                            <p>${escHtml(comment.body)}</p>
+                        </div>
+                    </article>`).join('');
+                installImageTimeouts(commentList);
+            } catch {
+                const local = ['localhost', '127.0.0.1'].includes(location.hostname);
+                commentList.innerHTML = `<div class="empty-note error">${local ? 'Start backend on port 3001 to load comments.' : 'Could not load comments.'}</div>`;
+            }
+        }
+
+        document.querySelectorAll('[data-auth-mode]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const mode = tab.dataset.authMode;
+                document.querySelectorAll('[data-auth-mode]').forEach(item => item.classList.toggle('active', item === tab));
+                authForm.querySelector('[name="mode"]').value = mode;
+                authSubmit.textContent = mode === 'register' ? 'Create account' : 'Login';
+                authForm.querySelectorAll('.register-only').forEach(el => el.classList.toggle('hidden', mode !== 'register'));
+                document.getElementById('comment-auth-password').autocomplete = mode === 'register' ? 'new-password' : 'current-password';
+            });
+        });
+
+        authForm?.addEventListener('submit', async event => {
+            event.preventDefault();
+            authSubmit.disabled = true;
+            const original = authSubmit.textContent;
+            authSubmit.textContent = 'Working...';
+            try {
+                const fd = new FormData(authForm);
+                const mode = fd.get('mode');
+                const avatarFile = document.getElementById('comment-avatar')?.files?.[0];
+                const body = { email: fd.get('email'), password: fd.get('password') };
+                if (mode === 'register') {
+                    body.name = fd.get('name');
+                    body.avatar_data = await readFileAsDataUrl(avatarFile);
+                }
+                const res = await fetch(`${API_BASE}/api/comment/${mode}`, {
+                    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.error || 'Account request failed.');
+                commentUser = json.user;
+                authForm.reset();
+                renderCommentUser();
+                setStatus(mode === 'register' ? 'Account ready. Your comments can post instantly.' : 'Logged in.');
+            } catch (err) {
+                setStatus(err.message || 'Account request failed.', 'error');
+            } finally {
+                authSubmit.disabled = false;
+                authSubmit.textContent = original;
+            }
+        });
+
+        commentForm?.addEventListener('submit', async event => {
+            event.preventDefault();
+            commentSubmit.disabled = true;
+            commentSubmit.textContent = 'Posting...';
+            setStatus('Checking Turnstile...');
+            try {
+                const fd = new FormData(commentForm);
+                const res = await fetch(`${API_BASE}/api/comments`, {
+                    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        body: fd.get('body'),
+                        anonymous_name: fd.get('anonymous_name'),
+                        anonymous_email: fd.get('anonymous_email'),
+                        website_url: fd.get('website_url'),
+                        turnstile: fd.get('cf-turnstile-response'),
+                    })
+                });
+                const json = await res.json();
+                if (!res.ok || !json.ok) throw new Error(json.error || 'Could not post comment.');
+                commentForm.reset();
+                if (window.turnstile) turnstile.reset();
+                setStatus(json.message || 'Comment posted.', json.status === 'pending' ? '' : 'success');
+                await loadComments();
+            } catch (err) {
+                setStatus(err.message || 'Could not post comment.', 'error');
+            } finally {
+                commentSubmit.disabled = false;
+                commentSubmit.textContent = 'Post Comment';
+            }
+        });
+
+        refreshComments?.addEventListener('click', loadComments);
+        loadCommentMe();
+        loadComments();
     </script>
 </body>
 </html>

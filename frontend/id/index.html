@@ -10,7 +10,6 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://arraffi.com/id/">
 
-    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://arraffi.com/id/">
     <meta property="og:title" content="Arraffi | Backend Engineer">
@@ -19,7 +18,6 @@
     <meta property="og:locale" content="id_ID">
     <meta property="og:locale:alternate" content="en_US">
 
-    <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://arraffi.com/id/">
     <meta name="twitter:title" content="Arraffi | Backend Engineer">
@@ -28,22 +26,19 @@
     <meta name="twitter:site" content="@arraffianakbaik">
     <meta name="twitter:creator" content="@arraffianakbaik">
 
-    <!-- Language Alternates -->
     <link rel="alternate" hreflang="x-default" href="https://arraffi.com/">
     <link rel="alternate" hreflang="en" href="https://arraffi.com/">
     <link rel="alternate" hreflang="id" href="https://arraffi.com/id/">
 
-    <!-- Performance / Core Web Vitals -->
     <link rel="preconnect" href="https://api.arraffi.com" crossorigin>
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
 
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../style.css?v=section-fix-11">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-    
+
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="#" class="nav-brand">Arraffi<span>.</span></a>
@@ -51,7 +46,7 @@
                 <a href="#about" class="nav-close">Tentang</a>
                 <a href="#projects" class="nav-close">Karya</a>
                 <a href="#experience" class="nav-close">Pengalaman</a>
-                <a href="#contact" class="nav-close">Kontak</a>
+                <a href="#comments" class="nav-close">Komentar</a>
                 <a href="/" class="lang-toggle nav-close">EN</a>
             </div>
             <button class="nav-toggle" id="nav-toggle" aria-label="Buka menu">
@@ -61,8 +56,7 @@
     </nav>
 
     <main class="container">
-        
-        <!-- Hero Section -->
+
         <section id="home" class="hero reveal">
             <div class="hero-content">
                 <div class="hero-text">
@@ -84,7 +78,6 @@
             </div>
         </section>
 
-        <!-- About Section -->
         <section id="about" class="section reveal">
             <h2 class="section-title"><span class="gradient-text">Tentang</span> Saya</h2>
             <div class="about-grid">
@@ -95,8 +88,8 @@
                         <span class="skill-badge"><i class="fa-brands fa-node-js"></i> Node.js</span>
                         <span class="skill-badge"><i class="fa-brands fa-python"></i> Python</span>
                         <span class="skill-badge"><i class="fa-brands fa-linux"></i> Linux</span>
-                        <span class="skill-badge"><i class="fa-solid fa-database"></i> SQL</span>
-                        <span class="skill-badge"><i class="fa-solid fa-server"></i> Nginx</span>
+                        <span class="skill-badge"><i class="fa-solid fa-code"></i> JavaScript</span>
+                        <span class="skill-badge"><i class="fa-solid fa-server"></i> VPS</span>
                     </div>
                 </div>
                 <div class="terminal-card">
@@ -116,62 +109,97 @@
             </div>
         </section>
 
-        <!-- Projects Section -->
         <section id="projects" class="section reveal">
-            <h2 class="section-title"><span class="gradient-text">Karya</span> Terpilih</h2>
+            <h2 class="section-title"><span class="gradient-text">Proyek</span></h2>
             <div id="dynamic-projects" class="projects-grid">
-                <!-- Injected via JS -->
             </div>
         </section>
 
-        <!-- Experience Section -->
         <section id="experience" class="section reveal">
-            <h2 class="section-title"><span class="gradient-text">Jejak</span> Karir</h2>
+            <h2 class="section-title"><span class="gradient-text">Pengalaman</span></h2>
             <div id="dynamic-experience" class="exp-timeline">
-                <!-- Injected via JS -->
             </div>
         </section>
 
-        <!-- Contact Section -->
-        <section id="contact" class="section reveal">
-            <h2 class="section-title"><span class="gradient-text">Hubungi</span> Saya</h2>
-            <div class="contact-wrapper">
-                <div class="contact-info">
-                    <h3>Mari bekerja sama.</h3>
-                    <p>Memiliki proyek baru atau membutuhkan insinyur backend yang andal? Kirimkan pesan kepada saya dan saya akan menghubungi Anda sesegera mungkin.</p>
+        <section id="comments" class="section reveal">
+            <div class="comment-shell compact">
+                <div class="comment-box">
+                    <div class="comment-head">
+                        <p class="eyebrow">Kontak</p>
+                        <h2><span class="gradient-text">Tinggalkan</span> catatan</h2>
+                        <p>Kirim masukan, tanya sesuatu, atau sapa singkat. Login untuk avatar; anonim tetap bisa.</p>
+                        <div class="contact-shortcuts" aria-label="Pintasan kontak">
+                            <a href="mailto:kona@konaima.my.id"><i class="fa-solid fa-envelope"></i><span>Email</span></a>
+                            <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i><span>GitHub</span></a>
+                            <a href="https://instagram.com/konasgor" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i><span>Instagram</span></a>
+                        </div>
+                    </div>
+                    <form id="comment-form" class="comment-form compact-form">
+                        <input type="text" name="website_url" class="hp-field" tabindex="-1" autocomplete="off">
+                        <div class="input-group"><label for="comment-body">Komentar</label><textarea id="comment-body" name="body" maxlength="1200" required placeholder="Sapa. Tanya sesuatu. Jangan spam."></textarea></div>
+                        <div class="anon-fields" id="anon-fields">
+                            <div class="input-group"><label for="comment-name">Nama</label><input id="comment-name" name="anonymous_name" maxlength="120" placeholder="Anonim"></div>
+                            <div class="input-group"><label for="comment-email">Email <span>(tersembunyi)</span></label><input id="comment-email" type="email" name="anonymous_email" placeholder="opsional"></div>
+                        </div>
+                        <div class="comment-actions-row">
+                            <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark"></div>
+                            <button type="submit" id="comment-submit" class="btn-submit">Kirim</button>
+                        </div>
+                        <div id="comment-status" class="form-status" role="status"></div>
+                    </form>
+                    <details class="comment-auth" id="comment-auth">
+                        <summary>Login untuk posting langsung dan avatar</summary>
+                        <div id="comment-user-card" class="comment-user-card hidden"></div>
+                        <div id="comment-login-card" class="comment-login-card">
+                            <div class="auth-tabs" role="tablist" aria-label="Mode akun komentar"><button type="button" class="auth-tab active" data-auth-mode="login">Login</button><button type="button" class="auth-tab" data-auth-mode="register">Buat akun</button></div>
+                            <form id="comment-auth-form" class="mini-form">
+                                <input type="hidden" name="mode" value="login">
+                                <div class="input-group register-only hidden"><label for="comment-auth-name">Nama</label><input id="comment-auth-name" name="name" maxlength="120" autocomplete="name"></div>
+                                <div class="input-group"><label for="comment-auth-email">Email</label><input id="comment-auth-email" type="email" name="email" autocomplete="email"></div>
+                                <div class="input-group"><label for="comment-auth-password">Password</label><input id="comment-auth-password" type="password" name="password" minlength="8" autocomplete="current-password"></div>
+                                <div class="input-group register-only hidden"><label for="comment-avatar">Avatar <span>(maks 2MB)</span></label><input id="comment-avatar" type="file" name="avatar" accept="image/jpeg,image/png,image/webp"></div>
+                                <button type="submit" class="btn-submit small" id="comment-auth-submit">Login</button>
+                            </form>
+                        </div>
+                    </details>
                 </div>
-                <form id="contact-form" class="contact-form">
-                    <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
-                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                        <div class="input-group" style="flex: 1; min-width: 200px;">
-                            <label for="cf-name">Nama</label>
-                            <input type="text" id="cf-name" name="name" required maxlength="100">
-                        </div>
-                        <div class="input-group" style="flex: 1; min-width: 200px;">
-                            <label for="cf-email">Email</label>
-                            <input type="email" id="cf-email" name="email" required>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label for="cf-subject">Subjek</label>
-                        <input type="text" id="cf-subject" name="subject" required maxlength="200">
-                    </div>
-                    <div class="input-group">
-                        <label for="cf-message">Pesan</label>
-                        <textarea id="cf-message" name="message" required maxlength="2000"></textarea>
-                    </div>
-                    <div class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark"></div>
-                    <button type="submit" id="cf-submit" class="btn-submit">Kirim Pesan</button>
-                    <div id="cf-status" style="font-family: 'Minecraft', monospace; text-align: center; margin-top: 10px; display: none;"></div>
-                </form>
+                <div class="comment-feed">
+                    <div class="comment-list-head"><h3>Catatan</h3><button type="button" id="refresh-comments" class="btn-ghost">Refresh</button></div>
+                    <div id="comment-list" class="comment-list"></div>
+                </div>
             </div>
         </section>
 
     </main>
-    
+
     <footer class="footer">
-        <p>&copy; 2026 Arraffi.</p>
-        <p>Dibuat dengan <i class="fa-solid fa-heart heart"></i> dan Node.js</p>
+        <div class="footer-main">
+            <div class="footer-brand">
+                <a href="#home" class="footer-logo">Arraffi<span>.</span></a>
+                <p>Sistem backend, API, dan server Linux yang stabil di produksi.</p>
+                <div class="footer-socials" aria-label="Tautan sosial">
+                    <a href="https://github.com/Konaimav2/" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://discord.gg/5mxJF4Uh" target="_blank" rel="noopener noreferrer" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+                    <a href="https://x.com/konasgor" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+            <nav class="footer-links" aria-label="Navigasi footer">
+                <span>Link Cepat</span>
+                <a href="#about">Tentang</a>
+                <a href="#projects">Proyek</a>
+                <a href="#experience">Pengalaman</a>
+                <a href="#comments">Komentar</a>
+            </nav>
+            <div class="footer-stack" aria-label="Stack teknologi">
+                <span>Stack</span>
+                <div><b>Node.js</b><b>Python</b><b>Linux</b><b>VPS</b></div>
+            </div>
+            <a href="#comments" class="footer-cta">Mulai Proyek <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Arraffi.</p>
+            <p>Dibuat dengan <i class="fa-solid fa-heart heart"></i> dan Node.js</p>
+        </div>
     </footer>
 
     <script>
@@ -229,7 +257,18 @@
         revealElements.forEach(el => revealObserver.observe(el));
 
         // API
-        const API_BASE = 'https://api.arraffi.com';
+        const API_BASE = ['localhost', '127.0.0.1'].includes(location.hostname)
+            ? `${location.protocol}//${location.hostname}:3001`
+            : 'https://api.arraffi.com';
+        const TURNSTILE_SITE_KEY = ['localhost', '127.0.0.1'].includes(location.hostname)
+            ? '1x00000000000000000000AA'
+            : '0x4AAAAAADMAtXOh4MijdApa';
+        document.querySelectorAll('.cf-turnstile').forEach(el => { el.dataset.sitekey = TURNSTILE_SITE_KEY; });
+        const turnstileScript = document.createElement('script');
+        turnstileScript.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+        turnstileScript.async = true;
+        turnstileScript.defer = true;
+        document.head.appendChild(turnstileScript);
 
         function escHtml(s) {
             return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -240,106 +279,313 @@
                 return (u.protocol === 'http:' || u.protocol === 'https:') ? escHtml(url) : '#';
             } catch { return '#'; }
         }
+        function installImageTimeouts(root = document, timeoutMs = 2600) {
+            root.querySelectorAll('img[src]:not([data-timeout-bound])').forEach(img => {
+                img.dataset.timeoutBound = '1';
+                const fail = () => {
+                    if (img.complete && img.naturalWidth > 0) return;
+                    img.classList.add('img-timeout');
+                    img.closest('.proj-img')?.classList.add('image-timeout');
+                    img.closest('.hero-visual')?.classList.add('image-timeout');
+                    img.closest('.exp-logo-frame')?.classList.add('image-timeout');
+                    img.removeAttribute('src');
+                };
+                const timer = setTimeout(fail, timeoutMs);
+                img.addEventListener('load', () => clearTimeout(timer), { once: true });
+                img.addEventListener('error', fail, { once: true });
+            });
+        }
+        installImageTimeouts(document);
+
+        const fallbackProjects = [
+            {
+                title: 'SimpleCDN',
+                description: 'Saya membangun CDN yang ringan dan cepat ini dari nol untuk menyajikan file statis tanpa beban tambahan.',
+                url: 'https://cdn.discordapp.my.id',
+                image_url: 'https://cdn.discordapp.my.id/cdn/7541df.webp',
+                full_width: 0,
+                category: 'Edge delivery',
+                chips: ['CDN', 'File statis', 'Caching']
+            },
+            {
+                title: 'BerAPI',
+                description: 'Kumpulan endpoint API yang saya buat untuk mempermudah prototyping cepat, integrasi AI, dan fitur unduh.',
+                url: 'https://berapi.my.id/',
+                image_url: 'https://cdn.discordapp.my.id/cdn/secure/1f75f1.webp',
+                full_width: 0,
+                category: 'Platform API',
+                chips: ['Node.js', 'API', 'Tools']
+            },
+            {
+                title: 'Sistem Bot Otomatis',
+                description: 'Bot WhatsApp yang saya tulis untuk mengelola komunitas, memoderasi obrolan, dan mengotomatiskan hal-hal yang membosankan.',
+                url: null,
+                image_url: 'https://cdn.discordapp.my.id/cdn/e3dece.webp',
+                full_width: 0,
+                category: 'Automation',
+                chips: ['Bot', 'Moderasi', 'Support']
+            }
+        ];
+
+        const fallbackExperience = [
+            {
+                company: 'Arqonara Hosting',
+                role: 'Manager & Staff',
+                date_range: 'Aug 2025 — Present',
+                description: 'Mengelola infrastruktur backend utama, menjaga stabilitas game server saat beban tinggi, dan menyelesaikan masalah jaringan.',
+                logo_url: 'https://cdn.discordapp.my.id/cdn/df7b8d.webp',
+                url: 'https://arqonara.com'
+            },
+            {
+                company: 'HeppyCloud',
+                role: 'Customer Service',
+                date_range: 'Mar 2025 — Present',
+                description: 'Membantu pelanggan memperbaiki masalah hosting, mengurus permintaan layanan, dan menjaga respons support tetap jelas.',
+                logo_url: 'https://cdn.discordapp.my.id/cdn/028eba.webp',
+                url: 'https://heppycloud.id'
+            }
+        ];
+
+        function renderProjects(projects) {
+            const projGrid = document.getElementById('dynamic-projects');
+            if (!projGrid || !projects.length) return;
+            projGrid.innerHTML = projects.map(p => {
+                const title = p.title_id || p.title;
+                const desc = p.description_id || p.description;
+                const category = p.category || (p.full_width ? 'Cloud infrastructure' : 'Layanan digital');
+                const chips = p.chips || ['Backend', 'Panel', 'Hosting'];
+                const content = `
+                    <div class="proj-img">
+                        <img loading="lazy" src="${safeUrl(p.image_url)}" alt="${escHtml(title)}">
+                    </div>
+                    <div class="proj-content">
+                        <div class="proj-topline"><span class="proj-icon"><i class="fa-solid fa-server"></i></span><span>${escHtml(category)}</span></div>
+                        <h3 class="proj-title">${escHtml(title)}</h3>
+                        <p class="proj-desc">${escHtml(desc)}</p>
+                        <div class="proj-tags">${chips.map(chip => `<span>${escHtml(chip)}</span>`).join('')}</div>
+                        <span class="proj-link-hint">${p.url ? 'Buka proyek ↗' : 'Build privat'}</span>
+                    </div>`;
+                const classes = `project-card ${p.full_width ? 'full-width' : ''} ${p.url ? 'is-clickable' : ''}`;
+                return p.url ? `<a href="${safeUrl(p.url)}" target="_blank" rel="noopener noreferrer" class="${classes}" aria-label="Buka proyek ${escHtml(title)}">${content}</a>`
+                             : `<div class="${classes}">${content}</div>`;
+            }).join('');
+            installImageTimeouts(projGrid);
+        }
+
+        function renderExperience(experiences) {
+            const expTimeline = document.getElementById('dynamic-experience');
+            if (!expTimeline || !experiences.length) return;
+            expTimeline.innerHTML = experiences.map(e => {
+                const role = e.role_id || e.role;
+                const desc = e.description_id || e.description;
+                const tag = e.url ? 'a' : 'div';
+                const href = e.url ? ` href="${safeUrl(e.url)}" target="_blank" rel="noopener noreferrer"` : '';
+                const classes = `exp-card ${e.url ? 'exp-clickable' : ''}`;
+                return `
+                <${tag}${href} class="${classes}">
+                    <span class="exp-logo-frame"><img loading="lazy" src="${safeUrl(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo"></span>
+                    <div class="exp-info">
+                        <h3 class="exp-title">${escHtml(e.company)}</h3>
+                        <div class="exp-role">${escHtml(role)}</div>
+                        <div class="exp-date">${escHtml(e.date_range)}</div>
+                        <p class="exp-desc">${escHtml(desc)}</p>
+                    </div>
+                </${tag}>
+            `}).join('');
+            installImageTimeouts(expTimeline);
+        }
 
         async function loadCMSData() {
-            const fetchJSON = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+            const fetchJSON = async url => {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 3500);
+                try {
+                    const res = await fetch(url, { signal: controller.signal });
+                    if (!res.ok) throw new Error(res.status);
+                    return await res.json();
+                } finally {
+                    clearTimeout(timeout);
+                }
+            };
+            renderProjects(fallbackProjects);
+            renderExperience(fallbackExperience);
             const [projResult, expResult] = await Promise.allSettled([
                 fetchJSON(`${API_BASE}/api/projects`),
                 fetchJSON(`${API_BASE}/api/experience`),
             ]);
 
-            if (projResult.status === 'fulfilled') {
-                const projects = projResult.value;
-                const projGrid = document.getElementById('dynamic-projects');
-                if (projGrid && projects.length > 0) {
-                    projGrid.innerHTML = projects.map(p => {
-                        const title = p.title_id || p.title;
-                        const desc = p.description_id || p.description;
-                        const content = `
-                            <div class="proj-img">
-                                <img loading="lazy" src="${safeUrl(p.image_url)}" alt="${escHtml(title)}">
-                            </div>
-                            <div class="proj-content">
-                                <h3 class="proj-title">${escHtml(title)}</h3>
-                                <p class="proj-desc">${escHtml(desc)}</p>
-                                ${p.url ? `<span class="btn-outline">Kunjungi Proyek</span>` : ''}
-                            </div>`;
-                        const classes = `project-card ${p.full_width ? 'full-width' : ''}`;
-                        return p.url ? `<a href="${safeUrl(p.url)}" target="_blank" rel="noopener noreferrer" class="${classes}">${content}</a>` 
-                                     : `<div class="${classes}">${content}</div>`;
-                    }).join('');
-                }
-            }
+            renderProjects(projResult.status === 'fulfilled' && projResult.value.length ? projResult.value : fallbackProjects);
 
             if (expResult.status === 'fulfilled') {
                 const experiences = expResult.value;
-                const expTimeline = document.getElementById('dynamic-experience');
-                if (expTimeline && experiences.length > 0) {
-                    expTimeline.innerHTML = experiences.map(e => {
-                        const role = e.role_id || e.role;
-                        const desc = e.description_id || e.description;
-                        return `
-                        <div class="exp-card">
-                            <img loading="lazy" src="${safeUrl(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo">
-                            <div class="exp-info">
-                                <h3 class="exp-title">${escHtml(e.company)}</h3>
-                                <div class="exp-role">${escHtml(role)}</div>
-                                <div class="exp-date">${escHtml(e.date_range)}</div>
-                                <p class="exp-desc">${escHtml(desc)}</p>
-                                ${e.url ? `<a href="${safeUrl(e.url)}" target="_blank" rel="noopener noreferrer" class="btn-outline" style="margin-top: 12px; display: inline-block;">Tautan</a>` : ''}
-                            </div>
-                        </div>
-                    `}).join('');
-                }
+                if (experiences.length > 0) renderExperience(experiences);
             }
         }
         loadCMSData();
 
-        // Form
-        const cfForm = document.getElementById('contact-form');
-        const cfSubmit = document.getElementById('cf-submit');
-        const cfStatus = document.getElementById('cf-status');
-        
-        if (cfForm) {
-            cfForm.addEventListener('submit', async e => {
-                e.preventDefault();
-                cfSubmit.disabled = true;
-                cfSubmit.textContent = 'Memproses...';
-                cfStatus.style.display = 'block';
-                cfStatus.style.color = '#fff';
-                cfStatus.textContent = 'Mengirim...';
-                try {
-                    const fd = new FormData(cfForm);
-                    const res = await fetch(`${API_BASE}/api/contact`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            name: fd.get('name'), email: fd.get('email'), 
-                            subject: fd.get('subject'), message: fd.get('message'), 
-                            website_url: fd.get('website_url'), 
-                            ticket: Date.now().toString(36), 
-                            turnstile: fd.get('cf-turnstile-response') 
-                        }),
-                    });
-                    const json = await res.json();
-                    if (json.ok) {
-                        cfStatus.style.color = '#22c55e';
-                        cfStatus.textContent = json.message || 'Sukses.';
-                        cfForm.reset();
-                        if (window.turnstile) turnstile.reset();
-                    } else {
-                        cfStatus.style.color = '#ef4444';
-                        cfStatus.textContent = json.error || 'Gagal.';
-                    }
-                } catch { 
-                    cfStatus.style.color = '#ef4444'; 
-                    cfStatus.textContent = 'Kesalahan Jaringan.'; 
-                } finally {
-                    cfSubmit.disabled = false;
-                    cfSubmit.textContent = 'Kirim Pesan';
-                }
+        let commentUser = null;
+        const authForm = document.getElementById('comment-auth-form');
+        const authSubmit = document.getElementById('comment-auth-submit');
+        const loginCard = document.getElementById('comment-login-card');
+        const userCard = document.getElementById('comment-user-card');
+        const anonFields = document.getElementById('anon-fields');
+        const commentForm = document.getElementById('comment-form');
+        const commentSubmit = document.getElementById('comment-submit');
+        const commentStatus = document.getElementById('comment-status');
+        const commentList = document.getElementById('comment-list');
+        const refreshComments = document.getElementById('refresh-comments');
+        const authDetails = document.getElementById('comment-auth');
+
+        const initials = name => String(name || '?').trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase() || '?';
+        const setStatus = (text, type = '') => {
+            if (!commentStatus) return;
+            commentStatus.textContent = text;
+            commentStatus.className = `form-status ${type}`.trim();
+        };
+        const readFileAsDataUrl = file => new Promise((resolve, reject) => {
+            if (!file) return resolve('');
+            if (file.size > 2 * 1024 * 1024) return reject(new Error('Foto profil maksimal 2MB.'));
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Foto profil tidak bisa dibaca.'));
+            reader.readAsDataURL(file);
+        });
+
+        function renderCommentUser() {
+            if (!loginCard || !userCard || !anonFields) return;
+            if (!commentUser) {
+                if (authDetails) authDetails.open = false;
+                loginCard.classList.remove('hidden');
+                userCard.classList.add('hidden');
+                anonFields.classList.remove('hidden');
+                return;
+            }
+            if (authDetails) authDetails.open = true;
+            loginCard.classList.add('hidden');
+            userCard.classList.remove('hidden');
+            anonFields.classList.add('hidden');
+            userCard.innerHTML = `
+                <div class="avatar small-avatar">${commentUser.avatar_url ? `<img src="${safeUrl(commentUser.avatar_url)}" alt="${escHtml(commentUser.name)}">` : escHtml(initials(commentUser.name))}</div>
+                <div><strong>${escHtml(commentUser.name)}</strong><span>${escHtml(commentUser.email)}</span></div>
+                <button type="button" id="comment-logout" class="btn-ghost">Logout</button>`;
+            installImageTimeouts(userCard);
+            document.getElementById('comment-logout')?.addEventListener('click', async () => {
+                await fetch(`${API_BASE}/api/comment/logout`, { method: 'POST', credentials: 'include' });
+                commentUser = null;
+                renderCommentUser();
             });
         }
+
+        async function loadCommentMe() {
+            try {
+                const res = await fetch(`${API_BASE}/api/comment/me`, { credentials: 'include' });
+                const json = await res.json();
+                commentUser = json.user || null;
+                renderCommentUser();
+            } catch { renderCommentUser(); }
+        }
+
+        async function loadComments() {
+            if (!commentList) return;
+            commentList.innerHTML = '<div class="empty-note">Memuat komentar...</div>';
+            try {
+                const res = await fetch(`${API_BASE}/api/comments`);
+                const comments = await res.json();
+                if (!Array.isArray(comments) || !comments.length) {
+                    commentList.innerHTML = '<div class="empty-note">Belum ada komentar. Jadilah yang pertama.</div>';
+                    return;
+                }
+                commentList.innerHTML = comments.map(comment => `
+                    <article class="comment-card">
+                        <div class="avatar">${comment.avatar_url ? `<img src="${safeUrl(comment.avatar_url)}" alt="${escHtml(comment.author_name)}">` : escHtml(initials(comment.author_name))}</div>
+                        <div>
+                            <div class="comment-meta"><strong>${escHtml(comment.author_name)}</strong><time>${escHtml(new Date(comment.created_at).toLocaleDateString())}</time></div>
+                            <p>${escHtml(comment.body)}</p>
+                        </div>
+                    </article>`).join('');
+                installImageTimeouts(commentList);
+            } catch {
+                const local = ['localhost', '127.0.0.1'].includes(location.hostname);
+                commentList.innerHTML = `<div class="empty-note error">${local ? 'Jalankan backend di port 3001 untuk memuat komentar.' : 'Komentar gagal dimuat.'}</div>`;
+            }
+        }
+
+        document.querySelectorAll('[data-auth-mode]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const mode = tab.dataset.authMode;
+                document.querySelectorAll('[data-auth-mode]').forEach(item => item.classList.toggle('active', item === tab));
+                authForm.querySelector('[name="mode"]').value = mode;
+                authSubmit.textContent = mode === 'register' ? 'Buat akun' : 'Login';
+                authForm.querySelectorAll('.register-only').forEach(el => el.classList.toggle('hidden', mode !== 'register'));
+                document.getElementById('comment-auth-password').autocomplete = mode === 'register' ? 'new-password' : 'current-password';
+            });
+        });
+
+        authForm?.addEventListener('submit', async event => {
+            event.preventDefault();
+            authSubmit.disabled = true;
+            const original = authSubmit.textContent;
+            authSubmit.textContent = 'Memproses...';
+            try {
+                const fd = new FormData(authForm);
+                const mode = fd.get('mode');
+                const avatarFile = document.getElementById('comment-avatar')?.files?.[0];
+                const body = { email: fd.get('email'), password: fd.get('password') };
+                if (mode === 'register') {
+                    body.name = fd.get('name');
+                    body.avatar_data = await readFileAsDataUrl(avatarFile);
+                }
+                const res = await fetch(`${API_BASE}/api/comment/${mode}`, {
+                    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.error || 'Permintaan akun gagal.');
+                commentUser = json.user;
+                authForm.reset();
+                renderCommentUser();
+                setStatus(mode === 'register' ? 'Akun siap. Komentar bisa langsung tampil.' : 'Berhasil login.');
+            } catch (err) {
+                setStatus(err.message || 'Permintaan akun gagal.', 'error');
+            } finally {
+                authSubmit.disabled = false;
+                authSubmit.textContent = original;
+            }
+        });
+
+        commentForm?.addEventListener('submit', async event => {
+            event.preventDefault();
+            commentSubmit.disabled = true;
+            commentSubmit.textContent = 'Mengirim...';
+            setStatus('Memeriksa Turnstile...');
+            try {
+                const fd = new FormData(commentForm);
+                const res = await fetch(`${API_BASE}/api/comments`, {
+                    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        body: fd.get('body'),
+                        anonymous_name: fd.get('anonymous_name'),
+                        anonymous_email: fd.get('anonymous_email'),
+                        website_url: fd.get('website_url'),
+                        turnstile: fd.get('cf-turnstile-response'),
+                    })
+                });
+                const json = await res.json();
+                if (!res.ok || !json.ok) throw new Error(json.error || 'Komentar gagal dikirim.');
+                commentForm.reset();
+                if (window.turnstile) turnstile.reset();
+                setStatus(json.message || 'Komentar terkirim.', json.status === 'pending' ? '' : 'success');
+                await loadComments();
+            } catch (err) {
+                setStatus(err.message || 'Komentar gagal dikirim.', 'error');
+            } finally {
+                commentSubmit.disabled = false;
+                commentSubmit.textContent = 'Kirim Komentar';
+            }
+        });
+
+        refreshComments?.addEventListener('click', loadComments);
+        loadCommentMe();
+        loadComments();
     </script>
 </body>
 </html>

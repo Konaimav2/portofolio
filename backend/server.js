@@ -1,145 +1,318 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const path = require('path');
+const fs = require('fs/promises');
 
 const app = express();
 
-// ── Trust proxy for correct IP behind Nginx ────────────────────────────────
 app.set('trust proxy', 1);
 
-// ── CORS: locked to production domain only ────────────────────────────────
 const allowedOrigins = [
     'https://arraffi.com',
+    'https://www.arraffi.com',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'http://localhost:5501',
+    'http://127.0.0.1:5501',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3001',
 ];
 app.use(cors({
     origin: (origin, callback) => {
-        // Echo the origin to allow any site to read public APIs (e.g. PageSpeed bots).
-        // Admin endpoints are separately protected by strict origin-checking middleware later.
-        return callback(null, origin || '*');
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        return callback(null, false);
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
     credentials: true,
 }));
 
-app.use(express.json({ limit: '20kb' }));   // Prevent large payload DoS
-
-// ── Serve static frontend files (for local dev only) ──────────────────────
-// NOTE: On VPS, Nginx serves the frontend directly. This is kept for local use.
-// The frontend dir does NOT contain sensitive files (backend/.env is separate).
-app.use(express.static(path.join(__dirname, '../frontend')));
-
-// ── Remove fingerprinting headers ─────────────────────────────────────────
-app.disable('x-powered-by');
-
-// ── Database Pool ──────────────────────────────────────────────────────────
-const pool = mysql.createPool(process.env.DATABASE_URL);
-
-// ── SMTP Transporter ──────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT, 10),
-    secure: process.env.SMTP_PORT === '465',
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-    // tls.rejectUnauthorized should be true in production.
-    // Set to false ONLY if your SMTP server uses a self-signed cert.
-    tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    next();
 });
 
-// ── Timing-safe password comparison (prevents timing attacks + length oracle) ─
+app.use(express.json({ limit: '3mb' }));
+
+app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/uploads/avatars', express.static(path.join(__dirname, 'uploads/avatars'), {
+    immutable: true,
+    maxAge: '30d',
+    setHeaders: res => res.setHeader('X-Content-Type-Options', 'nosniff'),
+}));
+
+app.disable('x-powered-by');
+
+if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL missing. Add it to backend/.env or copy backend/.env.example to backend/.env.');
+}
+const pool = mysql.createPool(process.env.DATABASE_URL);
+const ADMIN_DB_TIMEOUT_MS = 10000;
+
+function adminQuery(sql, values = []) {
+    return pool.query({ sql, values, timeout: ADMIN_DB_TIMEOUT_MS });
+}
+
+async function ensureOrderColumn(table) {
+    try {
+        await pool.query(`ALTER TABLE ${table} ADD COLUMN sort_order INT NOT NULL DEFAULT 0`);
+    } catch (err) {
+        if (err?.code !== 'ER_DUP_FIELDNAME') throw err;
+    }
+    await pool.query(`UPDATE ${table} SET sort_order = id WHERE sort_order = 0`);
+}
+
+async function ensureContentSchema() {
+    await ensureOrderColumn('projects');
+    await ensureOrderColumn('experience');
+}
+
+ensureContentSchema().catch(err => console.error('Content schema setup failed:', err?.message));
+
 function timingSafeEqual(a, b) {
-    // Pad both inputs to a fixed 256-byte buffer to prevent length oracle:
-    // Without this, an attacker could determine the password length by
-    // measuring response time differences for the early-return branch.
     const MAX = 256;
     const bufA = Buffer.alloc(MAX);
     const bufB = Buffer.alloc(MAX);
     Buffer.from(String(a)).copy(bufA);
     Buffer.from(String(b)).copy(bufB);
-    // crypto.timingSafeEqual runs in constant time regardless of content.
-    // The extra length check prevents prefix matches on truncated passwords.
     return crypto.timingSafeEqual(bufA, bufB) && String(a).length === String(b).length;
 }
 
-// ── Session token store (in-memory, TTL 8 hours) ───────────────────────────
-// Tokens are 32 random bytes (hex), invalidated on logout or after TTL.
-// This avoids sending the raw password on every request after login.
-const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
-const activeSessions = new Map(); // token → expiry timestamp
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+const activeSessions = new Map();
+const commentSessions = new Map();
 
 function createSessionToken() {
     const token = crypto.randomBytes(32).toString('hex');
-    activeSessions.set(token, Date.now() + SESSION_TTL_MS);
-    return token;
+    const csrf = crypto.randomBytes(32).toString('hex');
+    activeSessions.set(token, { expiry: Date.now() + SESSION_TTL_MS, csrf });
+    return { token, csrf };
 }
 
-function validateSessionToken(token) {
+function getAdminSession(token) {
     if (!token || typeof token !== 'string') return false;
-    const expiry = activeSessions.get(token);
-    if (!expiry) return false;
+    const session = activeSessions.get(token);
+    if (!session) return false;
+    const expiry = typeof session === 'number' ? session : session.expiry;
     if (Date.now() > expiry) {
         activeSessions.delete(token);
         return false;
     }
-    return true;
+    return typeof session === 'number' ? { expiry, csrf: '' } : session;
+}
+
+function validateSessionToken(token) {
+    return Boolean(getAdminSession(token));
 }
 
 function revokeSessionToken(token) {
     activeSessions.delete(token);
 }
 
-// Periodic cleanup to prevent unbounded memory growth from expired tokens.
+function createCommentSession(userId) {
+    const token = crypto.randomBytes(32).toString('hex');
+    commentSessions.set(token, { userId, expiry: Date.now() + SESSION_TTL_MS });
+    return token;
+}
+
+function getCommentSession(token) {
+    const session = commentSessions.get(token);
+    if (!session) return null;
+    if (Date.now() > session.expiry) {
+        commentSessions.delete(token);
+        return null;
+    }
+    return session;
+}
+
+function revokeCommentSession(token) {
+    commentSessions.delete(token);
+}
+
 setInterval(() => {
     const now = Date.now();
-    for (const [token, expiry] of activeSessions.entries()) {
+    for (const [token, session] of activeSessions.entries()) {
+        const expiry = typeof session === 'number' ? session : session.expiry;
         if (now > expiry) activeSessions.delete(token);
     }
-}, 60 * 60 * 1000).unref(); // every 1h
+    for (const [token, session] of commentSessions.entries()) {
+        if (now > session.expiry) commentSessions.delete(token);
+    }
+}, 60 * 60 * 1000).unref();
 
 const ADMIN_SESSION_COOKIE = 'admin_session';
-function extractAdminSessionToken(req) {
+const COMMENT_SESSION_COOKIE = 'comment_session';
+
+function extractCookie(req, name) {
     const raw = req.headers.cookie || '';
     const cookie = raw
         .split(';')
         .map(v => v.trim())
-        .find(v => v.startsWith(`${ADMIN_SESSION_COOKIE}=`));
+        .find(v => v.startsWith(`${name}=`));
     if (!cookie) return '';
-    return decodeURIComponent(cookie.slice(ADMIN_SESSION_COOKIE.length + 1));
+    try {
+        return decodeURIComponent(cookie.slice(name.length + 1));
+    } catch {
+        return '';
+    }
 }
 
-// ── Validate numeric :id param ────────────────────────────────────────────
+function extractAdminSessionToken(req) {
+    return extractCookie(req, ADMIN_SESSION_COOKIE);
+}
+
+function extractCommentSessionToken(req) {
+    return extractCookie(req, COMMENT_SESSION_COOKIE);
+}
+
 function parseId(raw) {
     const n = parseInt(raw, 10);
     if (!Number.isFinite(n) || n <= 0 || String(n) !== raw) return null;
     return n;
 }
 
-// ── Validate URL (allow only http/https, block javascript: data: etc.) ────
 function isValidUrl(str) {
-    if (!str || str.trim() === '') return true; // optional — null is fine
+    if (!str || str.trim() === '') return true;
     try {
         const u = new URL(str.trim());
         return u.protocol === 'http:' || u.protocol === 'https:';
     } catch { return false; }
 }
 
-// ── Sanitize string for email header use (prevent header injection) ────────
 function sanitizeHeader(str) {
     return String(str ?? '').replace(/[\r\n"\\]/g, '');
 }
 
-// ── Rate limiter: contact form ────────────────────────────────────────────
-const contactLimiter = rateLimit({
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+}
+
+function publicUser(row) {
+    if (!row) return null;
+    return {
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        avatar_url: row.avatar_url || '',
+    };
+}
+
+async function hashPassword(password) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const derived = await new Promise((resolve, reject) => {
+        crypto.scrypt(String(password), salt, 64, (err, key) => err ? reject(err) : resolve(key));
+    });
+    return `scrypt:${salt}:${derived.toString('hex')}`;
+}
+
+async function verifyPassword(password, stored) {
+    const [scheme, salt, hash] = String(stored || '').split(':');
+    if (scheme !== 'scrypt' || !salt || !hash) return false;
+    const derived = await new Promise((resolve, reject) => {
+        crypto.scrypt(String(password), salt, 64, (err, key) => err ? reject(err) : resolve(key));
+    });
+    const expected = Buffer.from(hash, 'hex');
+    return expected.length === derived.length && crypto.timingSafeEqual(expected, derived);
+}
+
+const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+const AVATAR_TYPES = new Map([
+    ['image/jpeg', 'jpg'],
+    ['image/png', 'png'],
+    ['image/webp', 'webp'],
+]);
+
+function detectImageMime(buffer) {
+    if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg';
+    if (buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+    if (buffer.length >= 12 && buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WEBP') return 'image/webp';
+    return '';
+}
+
+async function saveAvatarDataUrl(dataUrl) {
+    if (!dataUrl) return '';
+    const match = String(dataUrl).match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
+    if (!match) throw new Error('Avatar must be a JPG, PNG, or WebP image.');
+    const [, mime, payload] = match;
+    const buffer = Buffer.from(payload, 'base64');
+    if (buffer.length > AVATAR_MAX_BYTES) throw new Error('Avatar must be 2MB or smaller.');
+    if (buffer.length < 12) throw new Error('Avatar file is not valid.');
+    if (detectImageMime(buffer) !== mime) throw new Error('Avatar file is not a valid image.');
+    const ext = AVATAR_TYPES.get(mime);
+    const dir = path.join(__dirname, 'uploads/avatars');
+    await fs.mkdir(dir, { recursive: true });
+    const filename = `${crypto.randomBytes(18).toString('hex')}.${ext}`;
+    await fs.writeFile(path.join(dir, filename), buffer, { flag: 'wx', mode: 0o644 });
+    return `/uploads/avatars/${filename}`;
+}
+
+async function deleteAvatarUrl(avatarUrl) {
+    if (!avatarUrl || !avatarUrl.startsWith('/uploads/avatars/')) return;
+    const filename = path.basename(avatarUrl);
+    try { await fs.unlink(path.join(__dirname, 'uploads/avatars', filename)); } catch {}
+}
+
+function moderateComment(text) {
+    const body = String(text || '').trim();
+    if (body.length < 2) return 'Write a comment first.';
+    if (body.length > 1200) return 'Keep comments under 1200 characters.';
+    const lower = body.toLowerCase();
+    const blocked = [
+        /\b(casino|gambling|slot\s*online|sportsbook|betting|jackpot|togel|gacor)\b/i,
+        /\b(porn|xxx|onlyfans|sex\s*chat|escort|nsfw|nude)\b/i,
+        /\b(buy\s+now|free\s+money|cheap\s+followers|seo\s+backlinks|crypto\s+airdrop)\b/i,
+    ];
+    if (blocked.some(pattern => pattern.test(lower))) return 'Comment looks like spam or advertising.';
+    const links = lower.match(/https?:\/\//g) || [];
+    if (links.length > 1) return 'Too many links for a comment.';
+    if (/(.)\1{12,}/.test(body)) return 'Comment has too much repeated text.';
+    return '';
+}
+
+async function ensureCommentSchema() {
+    await pool.query(`CREATE TABLE IF NOT EXISTS app_meta (
+        meta_key VARCHAR(120) PRIMARY KEY,
+        meta_value VARCHAR(255) NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS comment_users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(120) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        avatar_url VARCHAR(500) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS comments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NULL,
+        author_name VARCHAR(120) NOT NULL,
+        author_email VARCHAR(255) NULL,
+        avatar_url VARCHAR(500) NULL,
+        body TEXT NOT NULL,
+        status ENUM('approved','pending') NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_comments_status_created (status, created_at),
+        CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES comment_users(id) ON DELETE SET NULL
+    )`);
+    const [meta] = await pool.query('SELECT meta_value FROM app_meta WHERE meta_key=? LIMIT 1', ['messages_flushed_for_comments']);
+    if (!meta.length) {
+        try { await pool.query('DELETE FROM messages'); } catch {}
+        await pool.query('INSERT INTO app_meta (meta_key, meta_value) VALUES (?, ?)', ['messages_flushed_for_comments', '1']);
+    }
+}
+
+ensureCommentSchema().catch(err => console.error('Comment schema setup failed:', err?.message));
+
+const commentLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 3,
     message: { ok: false, error: 'Too many requests. Please wait a minute.' },
@@ -147,29 +320,45 @@ const contactLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// ── Cloudflare Turnstile verification ─────────────────────────────────────
-// Used on the admin login form. Requires TURNSTILE_SECRET in backend/.env
-async function verifyTurnstile(token, remoteip) {
-    if (!token || typeof token !== 'string' || !process.env.TURNSTILE_SECRET) return false;
+const TURNSTILE_TEST_SECRET = '1x0000000000000000000000000000000AA';
+
+function isLocalRequest(req) {
+    if (process.env.NODE_ENV === 'production') return false;
+    const originHost = (() => {
+        try { return new URL(req.get('origin') || '').hostname; } catch { return ''; }
+    })();
+    const host = req.hostname || '';
+    return ['localhost', '127.0.0.1', '::1'].includes(host) || ['localhost', '127.0.0.1', '::1'].includes(originHost);
+}
+
+async function verifyTurnstile(token, req) {
+    const secret = isLocalRequest(req) ? TURNSTILE_TEST_SECRET : process.env.TURNSTILE_SECRET;
+    if (!token || typeof token !== 'string' || !secret) return false;
     try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
         const params = new URLSearchParams({
-            secret: process.env.TURNSTILE_SECRET,
+            secret,
             response: token,
-            remoteip: String(remoteip || ''),
+            remoteip: String(req.ip || ''),
         });
-        const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString(),
-        });
-        const data = await r.json();
-        return data.success === true;
+        try {
+            const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString(),
+                signal: controller.signal,
+            });
+            const data = await r.json();
+            return data.success === true;
+        } finally {
+            clearTimeout(timeout);
+        }
     } catch {
         return false;
     }
 }
 
-// ── Rate limiter: admin login endpoint ─────────────────────────────────────
 const loginLimiter = rateLimit({
     windowMs: 10 * 60 * 1000,
     max: 5,
@@ -178,94 +367,177 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// ── Admin auth middleware (validates HttpOnly cookie session) ─────────────
 const authMiddleware = (req, res, next) => {
     const token = extractAdminSessionToken(req);
-    if (!validateSessionToken(token)) {
+    const session = getAdminSession(token);
+    if (!session) {
         return res.status(401).json({ error: 'Unauthorized' });
+    }
+    req.adminSession = session;
+    next();
+};
+
+const adminCsrfMiddleware = (req, res, next) => {
+    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
+    const supplied = req.get('x-csrf-token') || '';
+    const expected = req.adminSession?.csrf || '';
+    if (!expected || !timingSafeEqual(supplied, expected)) {
+        return res.status(403).json({ error: 'Invalid CSRF token' });
     }
     next();
 };
 
-/* ── PUBLIC ENDPOINTS ───────────────────────────────────────────────────── */
 
 app.get('/api/projects', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, title, title_id, description, description_id, url, image_url, full_width FROM projects ORDER BY id ASC');
+        const [rows] = await pool.query({
+            sql: 'SELECT id, title, title_id, description, description_id, url, image_url, full_width FROM projects ORDER BY sort_order ASC, id ASC',
+            timeout: 7000,
+        });
         res.json(rows);
-    } catch {
+    } catch (err) {
+        console.error('Projects load failed:', err?.message);
         res.status(500).json({ error: 'Failed to load projects.' });
     }
 });
 
 app.get('/api/experience', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url FROM experience ORDER BY id ASC');
+        const [rows] = await pool.query({
+            sql: 'SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url FROM experience ORDER BY sort_order ASC, id ASC',
+            timeout: 7000,
+        });
         res.json(rows);
-    } catch {
+    } catch (err) {
+        console.error('Experience load failed:', err?.message);
         res.status(500).json({ error: 'Failed to load experience.' });
     }
 });
 
-app.post('/api/contact', contactLimiter, async (req, res) => {
+async function currentCommentUser(req) {
+    const session = getCommentSession(extractCommentSessionToken(req));
+    if (!session) return null;
+    const [rows] = await pool.query('SELECT id, name, email, avatar_url FROM comment_users WHERE id=? LIMIT 1', [session.userId]);
+    return rows[0] || null;
+}
+
+app.get('/api/comment/me', async (req, res) => {
     try {
-        const { name, email, subject, message, website_url, turnstile } = req.body;
+        res.json({ user: publicUser(await currentCommentUser(req)) });
+    } catch {
+        res.status(500).json({ error: 'Failed to load account.' });
+    }
+});
 
-        // Spam protection: honeypot field
-        if (website_url) return res.json({ ok: true, message: 'Message sent!' });
-
-        // Verify Turnstile
-        const tsOk = await verifyTurnstile(turnstile, req.ip);
-        if (!tsOk) {
-            return res.status(403).json({ ok: false, error: 'Bot verification failed. Please try again.' });
+app.post('/api/comment/register', commentLimiter, async (req, res) => {
+    try {
+        const { name, email, password, avatar_data } = req.body ?? {};
+        if (!name?.trim() || !email?.trim() || !password) {
+            return res.status(422).json({ error: 'Name, email, and password are required.' });
         }
-
-        // Server-side input validation
-        if (!name?.trim() || !email?.trim() || !message?.trim()) {
-            return res.status(422).json({ ok: false, error: 'Name, email, and message are required.' });
+        if (name.trim().length > 120) return res.status(422).json({ error: 'Name is too long.' });
+        if (!isValidEmail(email)) return res.status(422).json({ error: 'Use a valid email address.' });
+        if (String(password).length < 8 || String(password).length > 160) {
+            return res.status(422).json({ error: 'Password must be 8 to 160 characters.' });
         }
-        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRe.test(email)) {
-            return res.status(422).json({ ok: false, error: 'Please enter a valid email address.' });
-        }
-        if (message.length > 2000) {
-            return res.status(422).json({ ok: false, error: 'Message is too long (max 2000 characters).' });
-        }
-        if (name.length > 100 || (subject && subject.length > 200)) {
-            return res.status(422).json({ ok: false, error: 'Input fields are too long.' });
-        }
-
-        // Insert to DB
-        await pool.query(
-            'INSERT INTO messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
-            [name.trim(), email.trim(), subject?.trim() ?? '', message.trim()]
+        const avatarUrl = await saveAvatarDataUrl(avatar_data);
+        const passwordHash = await hashPassword(password);
+        const [result] = await pool.query(
+            'INSERT INTO comment_users (name, email, password_hash, avatar_url) VALUES (?, ?, ?, ?)',
+            [name.trim(), email.trim().toLowerCase(), passwordHash, avatarUrl || null]
         );
-
-        // Send Email — sanitize name to prevent header injection
-        const safeName = sanitizeHeader(name.trim());
-        try {
-            await transporter.sendMail({
-                from: `"Arraffi Portfolio" <${process.env.SMTP_FROM}>`,
-                to: 'kona@konaima.my.id',
-                replyTo: `"${safeName}" <${sanitizeHeader(email.trim())}>`,
-                subject: `[Portfolio] ${sanitizeHeader(subject?.trim() || 'New message from ' + name.trim())}`,
-                text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subject?.trim() || '(none)'}\n\n${message.trim()}`
-            });
-        } catch (emailErr) {
-            console.error('Email notification failed (but message saved to DB):', emailErr);
-        }
-
-        res.json({ ok: true, message: 'Message sent successfully!' });
+        const token = createCommentSession(result.insertId);
+        res.cookie(COMMENT_SESSION_COOKIE, token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: SESSION_TTL_MS,
+            path: '/api',
+        });
+        res.json({ ok: true, user: { id: result.insertId, name: name.trim(), email: email.trim().toLowerCase(), avatar_url: avatarUrl } });
     } catch (err) {
-        console.error('Contact error:', err);
-        res.status(500).json({ ok: false, error: 'Something went wrong. Please try again later.' });
+        if (err?.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That email already has an account.' });
+        res.status(422).json({ error: err?.message || 'Could not create account.' });
+    }
+});
+
+app.post('/api/comment/login', commentLimiter, async (req, res) => {
+    try {
+        const { email, password } = req.body ?? {};
+        if (!isValidEmail(email) || !password) return res.status(401).json({ error: 'Invalid email or password.' });
+        const [rows] = await pool.query('SELECT id, name, email, password_hash, avatar_url FROM comment_users WHERE email=? LIMIT 1', [email.trim().toLowerCase()]);
+        const user = rows[0];
+        if (!user || !(await verifyPassword(password, user.password_hash))) {
+            return res.status(401).json({ error: 'Invalid email or password.' });
+        }
+        const token = createCommentSession(user.id);
+        res.cookie(COMMENT_SESSION_COOKIE, token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: SESSION_TTL_MS,
+            path: '/api',
+        });
+        res.json({ ok: true, user: publicUser(user) });
+    } catch {
+        res.status(500).json({ error: 'Login failed.' });
+    }
+});
+
+app.post('/api/comment/logout', async (req, res) => {
+    revokeCommentSession(extractCommentSessionToken(req));
+    res.clearCookie(COMMENT_SESSION_COOKIE, {
+        path: '/api',
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
+    });
+    res.json({ ok: true });
+});
+
+app.get('/api/comments', async (_req, res) => {
+    try {
+        const [rows] = await pool.query(
+            `SELECT id, author_name, avatar_url, body, created_at
+             FROM comments WHERE status='approved' ORDER BY created_at DESC LIMIT 60`
+        );
+        res.json(rows);
+    } catch {
+        res.status(500).json({ error: 'Failed to load comments.' });
+    }
+});
+
+app.post('/api/comments', commentLimiter, async (req, res) => {
+    try {
+        const { body, anonymous_name, anonymous_email, website_url, turnstile } = req.body ?? {};
+        if (website_url) return res.json({ ok: true, status: 'pending', message: 'Comment received.' });
+        const tsOk = await verifyTurnstile(turnstile, req);
+        if (!tsOk) return res.status(403).json({ ok: false, error: 'Turnstile check failed. Please try again.' });
+        const moderationError = moderateComment(body);
+        if (moderationError) return res.status(422).json({ ok: false, error: moderationError });
+
+        const user = await currentCommentUser(req);
+        const name = user?.name || String(anonymous_name || 'Anonymous').trim();
+        const email = user?.email || String(anonymous_email || '').trim().toLowerCase();
+        if (!name || name.length > 120) return res.status(422).json({ ok: false, error: 'Name is required and must be short.' });
+        if (email && !isValidEmail(email)) return res.status(422).json({ ok: false, error: 'Use a valid email address or leave it blank.' });
+
+        const status = user ? 'approved' : 'pending';
+        await pool.query(
+            'INSERT INTO comments (user_id, author_name, author_email, avatar_url, body, status) VALUES (?, ?, ?, ?, ?, ?)',
+            [user?.id || null, name, email || null, user?.avatar_url || null, String(body).trim(), status]
+        );
+        res.json({
+            ok: true,
+            status,
+            message: status === 'approved' ? 'Comment posted.' : 'Comment received. Anonymous posts wait for review.',
+        });
+    } catch {
+        res.status(500).json({ ok: false, error: 'Could not post comment.' });
     }
 });
 
 
-/* ── ADMIN ENDPOINTS ───────────────────────────────────────────────────── */
 
-// Admin APIs must originate from approved browser origins in production.
 app.use('/api/admin', (req, res, next) => {
     if (process.env.NODE_ENV !== 'production') return next();
     const origin = req.headers.origin;
@@ -277,30 +549,29 @@ app.use('/api/admin', (req, res, next) => {
 
 app.post('/api/admin/login', loginLimiter, async (req, res) => {
     const { password, turnstile } = req.body ?? {};
-    // Verify Turnstile challenge first — stops bots before touching the password
-    const tsOk = await verifyTurnstile(turnstile, req.ip);
+    const tsOk = await verifyTurnstile(turnstile, req);
     if (!tsOk) {
         return res.status(403).json({ error: 'Turnstile verification failed. Please try again.' });
     }
     if (typeof password === 'string' && timingSafeEqual(password, process.env.ADMIN_PASSWORD)) {
-        const token = createSessionToken();
+        const { token, csrf } = createSessionToken();
         res.cookie(ADMIN_SESSION_COOKIE, token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: SESSION_TTL_MS,
             path: '/api/admin',
         });
-        return res.json({ ok: true });
+        return res.json({ ok: true, csrfToken: csrf });
     }
     return res.status(401).json({ error: 'Invalid password' });
 });
 
-app.post('/api/admin/logout', authMiddleware, (req, res) => {
+app.post('/api/admin/logout', authMiddleware, adminCsrfMiddleware, (req, res) => {
     revokeSessionToken(extractAdminSessionToken(req));
     res.clearCookie(ADMIN_SESSION_COOKIE, {
         path: '/api/admin',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         secure: process.env.NODE_ENV === 'production',
     });
     res.json({ ok: true });
@@ -308,27 +579,25 @@ app.post('/api/admin/logout', authMiddleware, (req, res) => {
 
 // Auto-login check
 app.get('/api/admin/check', authMiddleware, (req, res) => {
-    res.json({ ok: true });
+    res.json({ ok: true, csrfToken: req.adminSession.csrf });
 });
 
-// ── Projects CRUD ──────────────────────────────────────────────────────────
 
 app.get('/api/admin/projects', authMiddleware, async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            'SELECT id, title, title_id, description, description_id, url, image_url, full_width FROM projects ORDER BY id ASC'
-        );
+        const [rows] = await adminQuery('SELECT id, title, title_id, description, description_id, url, image_url, full_width, sort_order FROM projects ORDER BY sort_order ASC, id ASC');
         res.json(rows);
-    } catch {
+    } catch (err) {
+        console.error('Admin projects fetch failed:', err.message);
         res.status(500).json({ error: 'Failed to fetch projects.' });
     }
 });
 
-app.post('/api/admin/projects', authMiddleware, async (req, res) => {
+app.post('/api/admin/projects', authMiddleware, adminCsrfMiddleware, async (req, res) => {
     try {
         const { title, title_id, description, description_id, url, image_url, full_width } = req.body ?? {};
-        if (!title?.trim() || !description?.trim()) {
-            return res.status(422).json({ error: 'Title and description are required.' });
+        if (!title?.trim() || !title_id?.trim() || !description?.trim() || !description_id?.trim()) {
+            return res.status(422).json({ error: 'English and Indonesian title/description are required.' });
         }
         if (title.length > 255 || (title_id && title_id.length > 255)) {
             return res.status(422).json({ error: 'Title is too long (max 255 characters).' });
@@ -338,23 +607,24 @@ app.post('/api/admin/projects', authMiddleware, async (req, res) => {
         }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Project URL must start with http:// or https://' });
         if (!isValidUrl(image_url)) return res.status(422).json({ error: 'Image URL must start with http:// or https://' });
-        await pool.query(
-            'INSERT INTO projects (title, title_id, description, description_id, url, image_url, full_width) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [title.trim(), title_id?.trim() || null, description.trim(), description_id?.trim() || null, url?.trim() || null, image_url?.trim() || null, full_width ? 1 : 0]
+        await adminQuery(
+            'INSERT INTO projects (title, title_id, description, description_id, url, image_url, full_width, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT next_order FROM (SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM projects) AS p))',
+            [title.trim(), title_id.trim(), description.trim(), description_id.trim(), url?.trim() || null, image_url?.trim() || null, full_width ? 1 : 0]
         );
         res.json({ ok: true });
-    } catch {
+    } catch (err) {
+        console.error('Admin project create failed:', err.message);
         res.status(500).json({ error: 'Failed to create project.' });
     }
 });
 
-app.put('/api/admin/projects/:id', authMiddleware, async (req, res) => {
+app.put('/api/admin/projects/:id', authMiddleware, adminCsrfMiddleware, async (req, res) => {
     try {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Invalid project ID.' });
         const { title, title_id, description, description_id, url, image_url, full_width } = req.body ?? {};
-        if (!title?.trim() || !description?.trim()) {
-            return res.status(422).json({ error: 'Title and description are required.' });
+        if (!title?.trim() || !title_id?.trim() || !description?.trim() || !description_id?.trim()) {
+            return res.status(422).json({ error: 'English and Indonesian title/description are required.' });
         }
         if (title.length > 255 || (title_id && title_id.length > 255)) {
             return res.status(422).json({ error: 'Title is too long (max 255 characters).' });
@@ -364,45 +634,72 @@ app.put('/api/admin/projects/:id', authMiddleware, async (req, res) => {
         }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Project URL must start with http:// or https://' });
         if (!isValidUrl(image_url)) return res.status(422).json({ error: 'Image URL must start with http:// or https://' });
-        await pool.query(
+        await adminQuery(
             'UPDATE projects SET title=?, title_id=?, description=?, description_id=?, url=?, image_url=?, full_width=? WHERE id=?',
-            [title.trim(), title_id?.trim() || null, description.trim(), description_id?.trim() || null, url?.trim() || null, image_url?.trim() || null, full_width ? 1 : 0, id]
+            [title.trim(), title_id.trim(), description.trim(), description_id.trim(), url?.trim() || null, image_url?.trim() || null, full_width ? 1 : 0, id]
         );
         res.json({ ok: true });
-    } catch {
+    } catch (err) {
+        console.error('Admin project update failed:', err.message);
         res.status(500).json({ error: 'Failed to update project.' });
     }
 });
 
-app.delete('/api/admin/projects/:id', authMiddleware, async (req, res) => {
+app.delete('/api/admin/projects/:id', authMiddleware, adminCsrfMiddleware, async (req, res) => {
     try {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Invalid project ID.' });
-        await pool.query('DELETE FROM projects WHERE id=?', [id]);
+        await adminQuery('DELETE FROM projects WHERE id=?', [id]);
         res.json({ ok: true });
-    } catch {
+    } catch (err) {
+        console.error('Admin project delete failed:', err.message);
         res.status(500).json({ error: 'Failed to delete project.' });
     }
 });
 
-// ── Experience CRUD ───────────────────────────────────────────────────────
+app.patch('/api/admin/projects/:id/move', authMiddleware, adminCsrfMiddleware, async (req, res) => {
+    try {
+        const id = parseId(req.params.id);
+        const direction = req.body?.direction === 'down' ? 'down' : 'up';
+        if (!id) return res.status(400).json({ error: 'Invalid project ID.' });
+
+        const [currentRows] = await adminQuery('SELECT id, sort_order FROM projects WHERE id=? LIMIT 1', [id]);
+        if (!currentRows.length) return res.status(404).json({ error: 'Project not found.' });
+        const current = currentRows[0];
+        const comparison = direction === 'up' ? '<' : '>';
+        const orderDirection = direction === 'up' ? 'DESC' : 'ASC';
+        const [neighborRows] = await adminQuery(
+            `SELECT id, sort_order FROM projects WHERE sort_order ${comparison} ? ORDER BY sort_order ${orderDirection}, id ${orderDirection} LIMIT 1`,
+            [current.sort_order]
+        );
+        if (!neighborRows.length) return res.json({ ok: true, moved: false });
+
+        const neighbor = neighborRows[0];
+        await adminQuery('UPDATE projects SET sort_order=? WHERE id=?', [neighbor.sort_order, current.id]);
+        await adminQuery('UPDATE projects SET sort_order=? WHERE id=?', [current.sort_order, neighbor.id]);
+        res.json({ ok: true, moved: true });
+    } catch (err) {
+        console.error('Admin project move failed:', err.message);
+        res.status(500).json({ error: 'Failed to move project.' });
+    }
+});
+
 
 app.get('/api/admin/experience', authMiddleware, async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            'SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url FROM experience ORDER BY id ASC'
-        );
+        const [rows] = await adminQuery('SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url, sort_order FROM experience ORDER BY sort_order ASC, id ASC');
         res.json(rows);
-    } catch {
+    } catch (err) {
+        console.error('Admin experience fetch failed:', err.message);
         res.status(500).json({ error: 'Failed to fetch experience.' });
     }
 });
 
-app.post('/api/admin/experience', authMiddleware, async (req, res) => {
+app.post('/api/admin/experience', authMiddleware, adminCsrfMiddleware, async (req, res) => {
     try {
         const { company, role, role_id, date_range, description, description_id, logo_url, url } = req.body ?? {};
-        if (!company?.trim() || !role?.trim() || !date_range?.trim() || !description?.trim()) {
-            return res.status(422).json({ error: 'Company, role, date range, and description are required.' });
+        if (!company?.trim() || !role?.trim() || !role_id?.trim() || !date_range?.trim() || !description?.trim() || !description_id?.trim()) {
+            return res.status(422).json({ error: 'Company, date range, and English/Indonesian role/description are required.' });
         }
         if (role.length > 255 || (role_id && role_id.length > 255) || company.length > 255) {
             return res.status(422).json({ error: 'Text field is too long (max 255 characters).' });
@@ -412,23 +709,24 @@ app.post('/api/admin/experience', authMiddleware, async (req, res) => {
         }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Company URL must start with http:// or https://' });
         if (!isValidUrl(logo_url)) return res.status(422).json({ error: 'Logo URL must start with http:// or https://' });
-        await pool.query(
-            'INSERT INTO experience (company, role, role_id, date_range, description, description_id, logo_url, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [company.trim(), role.trim(), role_id?.trim() || null, date_range.trim(), description.trim(), description_id?.trim() || null, logo_url?.trim() || null, url?.trim() || null]
+        await adminQuery(
+            'INSERT INTO experience (company, role, role_id, date_range, description, description_id, logo_url, url, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT next_order FROM (SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM experience) AS e))',
+            [company.trim(), role.trim(), role_id.trim(), date_range.trim(), description.trim(), description_id.trim(), logo_url?.trim() || null, url?.trim() || null]
         );
         res.json({ ok: true });
-    } catch {
+    } catch (err) {
+        console.error('Admin experience create failed:', err.message);
         res.status(500).json({ error: 'Failed to create experience entry.' });
     }
 });
 
-app.put('/api/admin/experience/:id', authMiddleware, async (req, res) => {
+app.put('/api/admin/experience/:id', authMiddleware, adminCsrfMiddleware, async (req, res) => {
     try {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Invalid experience ID.' });
         const { company, role, role_id, date_range, description, description_id, logo_url, url } = req.body ?? {};
-        if (!company?.trim() || !role?.trim() || !date_range?.trim() || !description?.trim()) {
-            return res.status(422).json({ error: 'Company, role, date range, and description are required.' });
+        if (!company?.trim() || !role?.trim() || !role_id?.trim() || !date_range?.trim() || !description?.trim() || !description_id?.trim()) {
+            return res.status(422).json({ error: 'Company, date range, and English/Indonesian role/description are required.' });
         }
         if (role.length > 255 || (role_id && role_id.length > 255) || company.length > 255) {
             return res.status(422).json({ error: 'Text field is too long (max 255 characters).' });
@@ -438,58 +736,96 @@ app.put('/api/admin/experience/:id', authMiddleware, async (req, res) => {
         }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Company URL must start with http:// or https://' });
         if (!isValidUrl(logo_url)) return res.status(422).json({ error: 'Logo URL must start with http:// or https://' });
-        await pool.query(
+        await adminQuery(
             'UPDATE experience SET company=?, role=?, role_id=?, date_range=?, description=?, description_id=?, logo_url=?, url=? WHERE id=?',
-            [company.trim(), role.trim(), role_id?.trim() || null, date_range.trim(), description.trim(), description_id?.trim() || null, logo_url?.trim() || null, url?.trim() || null, id]
+            [company.trim(), role.trim(), role_id.trim(), date_range.trim(), description.trim(), description_id.trim(), logo_url?.trim() || null, url?.trim() || null, id]
         );
         res.json({ ok: true });
-    } catch {
+    } catch (err) {
+        console.error('Admin experience update failed:', err.message);
         res.status(500).json({ error: 'Failed to update experience entry.' });
     }
 });
 
-app.delete('/api/admin/experience/:id', authMiddleware, async (req, res) => {
+app.delete('/api/admin/experience/:id', authMiddleware, adminCsrfMiddleware, async (req, res) => {
     try {
         const id = parseId(req.params.id);
         if (!id) return res.status(400).json({ error: 'Invalid experience ID.' });
-        await pool.query('DELETE FROM experience WHERE id=?', [id]);
+        await adminQuery('DELETE FROM experience WHERE id=?', [id]);
         res.json({ ok: true });
-    } catch {
+    } catch (err) {
+        console.error('Admin experience delete failed:', err.message);
         res.status(500).json({ error: 'Failed to delete experience entry.' });
     }
 });
 
-// ── Messages ──────────────────────────────────────────────────────────────
-
-app.get('/api/admin/messages', authMiddleware, async (req, res) => {
+app.patch('/api/admin/experience/:id/move', authMiddleware, adminCsrfMiddleware, async (req, res) => {
     try {
-        // Explicit columns — avoids leaking future sensitive fields added to the table
+        const id = parseId(req.params.id);
+        const direction = req.body?.direction === 'down' ? 'down' : 'up';
+        if (!id) return res.status(400).json({ error: 'Invalid experience ID.' });
+
+        const [currentRows] = await adminQuery('SELECT id, sort_order FROM experience WHERE id=? LIMIT 1', [id]);
+        if (!currentRows.length) return res.status(404).json({ error: 'Experience not found.' });
+        const current = currentRows[0];
+        const comparison = direction === 'up' ? '<' : '>';
+        const orderDirection = direction === 'up' ? 'DESC' : 'ASC';
+        const [neighborRows] = await adminQuery(
+            `SELECT id, sort_order FROM experience WHERE sort_order ${comparison} ? ORDER BY sort_order ${orderDirection}, id ${orderDirection} LIMIT 1`,
+            [current.sort_order]
+        );
+        if (!neighborRows.length) return res.json({ ok: true, moved: false });
+
+        const neighbor = neighborRows[0];
+        await adminQuery('UPDATE experience SET sort_order=? WHERE id=?', [neighbor.sort_order, current.id]);
+        await adminQuery('UPDATE experience SET sort_order=? WHERE id=?', [current.sort_order, neighbor.id]);
+        res.json({ ok: true, moved: true });
+    } catch (err) {
+        console.error('Admin experience move failed:', err.message);
+        res.status(500).json({ error: 'Failed to move experience.' });
+    }
+});
+
+
+app.get('/api/admin/comments', authMiddleware, async (_req, res) => {
+    try {
         const [rows] = await pool.query(
-            'SELECT id, name, email, subject, message, created_at FROM messages ORDER BY created_at DESC'
+            `SELECT id, user_id, author_name, author_email, avatar_url, body, status, created_at
+             FROM comments ORDER BY created_at DESC LIMIT 200`
         );
         res.json(rows);
     } catch {
-        res.status(500).json({ error: 'Failed to fetch messages.' });
+        res.status(500).json({ error: 'Failed to fetch comments.' });
     }
 });
 
-app.delete('/api/admin/messages/:id', authMiddleware, async (req, res) => {
+app.delete('/api/admin/comments/:id', authMiddleware, adminCsrfMiddleware, async (req, res) => {
     try {
         const id = parseId(req.params.id);
-        if (!id) return res.status(400).json({ error: 'Invalid message ID.' });
-        await pool.query('DELETE FROM messages WHERE id=?', [id]);
+        if (!id) return res.status(400).json({ error: 'Invalid comment ID.' });
+        await pool.query('DELETE FROM comments WHERE id=?', [id]);
         res.json({ ok: true });
     } catch {
-        res.status(500).json({ error: 'Failed to delete message.' });
+        res.status(500).json({ error: 'Failed to delete comment.' });
     }
 });
 
-// ── 404 fallback ──────────────────────────────────────────────────────────
+app.patch('/api/admin/comments/:id/approve', authMiddleware, adminCsrfMiddleware, async (req, res) => {
+    try {
+        const id = parseId(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Invalid comment ID.' });
+        const [result] = await pool.query('UPDATE comments SET status=? WHERE id=?', ['approved', id]);
+        if (!result.affectedRows) return res.status(404).json({ error: 'Comment not found.' });
+        res.json({ ok: true });
+    } catch {
+        res.status(500).json({ error: 'Failed to approve comment.' });
+    }
+});
+
 app.use((req, res) => {
     res.status(404).json({ error: 'Not found.' });
 });
 
-// ── Global error handler ───────────────────────────────────────────────────
 app.use((err, req, res, _next) => {
     console.error('[Unhandled Error]', err?.message);
     res.status(500).json({ error: 'Internal Server Error' });
