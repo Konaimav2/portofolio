@@ -1058,3 +1058,4 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+.terminal-muted-line { color: #a1a1aa; margin-bottom: 8px; }
