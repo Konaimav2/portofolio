@@ -5,7 +5,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 const crypto = require('crypto');
-const fs = require('fs/promises');
+const { saveAvatarDataUrl, deleteAvatarUrl } = require('./avatar-storage');
 
 const app = express();
 
@@ -223,43 +223,6 @@ async function verifyPassword(password, stored) {
     return expected.length === derived.length && crypto.timingSafeEqual(expected, derived);
 }
 
-const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
-const AVATAR_TYPES = new Map([
-    ['image/jpeg', 'jpg'],
-    ['image/png', 'png'],
-    ['image/webp', 'webp'],
-]);
-
-function detectImageMime(buffer) {
-    if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg';
-    if (buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
-    if (buffer.length >= 12 && buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WEBP') return 'image/webp';
-    return '';
-}
-
-async function saveAvatarDataUrl(dataUrl) {
-    if (!dataUrl) return '';
-    const match = String(dataUrl).match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
-    if (!match) throw new Error('Avatar must be a JPG, PNG, or WebP image.');
-    const [, mime, payload] = match;
-    const buffer = Buffer.from(payload, 'base64');
-    if (buffer.length > AVATAR_MAX_BYTES) throw new Error('Avatar must be 2MB or smaller.');
-    if (buffer.length < 12) throw new Error('Avatar file is not valid.');
-    if (detectImageMime(buffer) !== mime) throw new Error('Avatar file is not a valid image.');
-    const ext = AVATAR_TYPES.get(mime);
-    const dir = path.join(__dirname, 'uploads/avatars');
-    await fs.mkdir(dir, { recursive: true });
-    const filename = `${crypto.randomBytes(18).toString('hex')}.${ext}`;
-    await fs.writeFile(path.join(dir, filename), buffer, { flag: 'wx', mode: 0o644 });
-    return `/uploads/avatars/${filename}`;
-}
-
-async function deleteAvatarUrl(avatarUrl) {
-    if (!avatarUrl || !avatarUrl.startsWith('/uploads/avatars/')) return;
-    const filename = path.basename(avatarUrl);
-    try { await fs.unlink(path.join(__dirname, 'uploads/avatars', filename)); } catch {}
-}
-
 function moderateComment(text) {
     const body = String(text || '').trim();
     if (body.length < 2) return 'Write a comment first.';
@@ -430,6 +393,7 @@ app.get('/api/comment/me', async (req, res) => {
 });
 
 app.post('/api/comment/register', commentLimiter, async (req, res) => {
+    let avatarUrl = '';
     try {
         const { name, email, password, avatar_data } = req.body ?? {};
         if (!name?.trim() || !email?.trim() || !password) {
@@ -440,7 +404,7 @@ app.post('/api/comment/register', commentLimiter, async (req, res) => {
         if (String(password).length < 8 || String(password).length > 160) {
             return res.status(422).json({ error: 'Password must be 8 to 160 characters.' });
         }
-        const avatarUrl = await saveAvatarDataUrl(avatar_data);
+        avatarUrl = await saveAvatarDataUrl(avatar_data);
         const passwordHash = await hashPassword(password);
         const [result] = await pool.query(
             'INSERT INTO comment_users (name, email, password_hash, avatar_url) VALUES (?, ?, ?, ?)',
@@ -456,6 +420,9 @@ app.post('/api/comment/register', commentLimiter, async (req, res) => {
         });
         res.json({ ok: true, user: { id: result.insertId, name: name.trim(), email: email.trim().toLowerCase(), avatar_url: avatarUrl } });
     } catch (err) {
+        if (avatarUrl) {
+            try { await deleteAvatarUrl(avatarUrl); } catch (cleanupErr) { console.error('Avatar cleanup failed:', cleanupErr?.message); }
+        }
         if (err?.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That email already has an account.' });
         res.status(422).json({ error: err?.message || 'Could not create account.' });
     }
