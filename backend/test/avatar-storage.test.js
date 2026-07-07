@@ -77,9 +77,29 @@ test('parseAvatarDataUrl rejects mismatched MIME and magic bytes', () => {
   );
 });
 
-test('parseAvatarDataUrl accepts real PNG header', () => {
-  const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
-  const parsed = parseAvatarDataUrl(`data:image/png;base64,${pngHeader.toString('base64')}`);
+test('parseAvatarDataUrl rejects executable payload disguised with PNG header', () => {
+  const disguised = Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    Buffer.from('#!/bin/sh\necho pwned\n'),
+  ]);
+  assert.throws(
+    () => parseAvatarDataUrl(`data:image/png;base64,${disguised.toString('base64')}`),
+    /valid image/
+  );
+});
+
+test('parseAvatarDataUrl rejects executable appended after a valid PNG', () => {
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=', 'base64');
+  const polyglot = Buffer.concat([png, Buffer.from('#!/bin/sh\necho pwned\n')]);
+  assert.throws(
+    () => parseAvatarDataUrl(`data:image/png;base64,${polyglot.toString('base64')}`),
+    /valid image/
+  );
+});
+
+test('parseAvatarDataUrl accepts a structurally valid PNG', () => {
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=', 'base64');
+  const parsed = parseAvatarDataUrl(`data:image/png;base64,${png.toString('base64')}`);
   assert.equal(parsed.mime, 'image/png');
   assert.equal(parsed.ext, 'png');
 });

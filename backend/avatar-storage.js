@@ -78,6 +78,47 @@ function detectImageMime(buffer) {
     return '';
 }
 
+function isStructurallyValidPng(buffer) {
+    const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    if (buffer.length < 33 || !buffer.subarray(0, 8).equals(signature)) return false;
+    let offset = 8;
+    let sawIhdr = false;
+    while (offset + 12 <= buffer.length) {
+        const length = buffer.readUInt32BE(offset);
+        const type = buffer.subarray(offset + 4, offset + 8).toString('ascii');
+        const end = offset + 12 + length;
+        if (end > buffer.length) return false;
+        if (!/^[A-Za-z]{4}$/.test(type)) return false;
+        if (!sawIhdr && (type !== 'IHDR' || length !== 13)) return false;
+        if (type === 'IHDR') sawIhdr = true;
+        if (type === 'IEND') return sawIhdr && length === 0 && end === buffer.length;
+        offset = end;
+    }
+    return false;
+}
+
+function isStructurallyValidJpeg(buffer) {
+    return buffer.length > 4
+        && buffer[0] === 0xff
+        && buffer[1] === 0xd8
+        && buffer[buffer.length - 2] === 0xff
+        && buffer[buffer.length - 1] === 0xd9;
+}
+
+function isStructurallyValidWebp(buffer) {
+    if (buffer.length < 12) return false;
+    if (buffer.subarray(0, 4).toString('ascii') !== 'RIFF') return false;
+    if (buffer.subarray(8, 12).toString('ascii') !== 'WEBP') return false;
+    return buffer.readUInt32LE(4) + 8 === buffer.length;
+}
+
+function isStructurallyValidImage(buffer, mime) {
+    if (mime === 'image/png') return isStructurallyValidPng(buffer);
+    if (mime === 'image/jpeg') return isStructurallyValidJpeg(buffer);
+    if (mime === 'image/webp') return isStructurallyValidWebp(buffer);
+    return false;
+}
+
 function parseAvatarDataUrl(dataUrl) {
     if (!dataUrl) return null;
     const match = String(dataUrl).match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
@@ -87,6 +128,7 @@ function parseAvatarDataUrl(dataUrl) {
     if (buffer.length > AVATAR_MAX_BYTES) throw new Error('Avatar must be 2MB or smaller.');
     if (buffer.length < 12) throw new Error('Avatar file is not valid.');
     if (detectImageMime(buffer) !== mime) throw new Error('Avatar file is not a valid image.');
+    if (!isStructurallyValidImage(buffer, mime)) throw new Error('Avatar file is not a valid image.');
     return { mime, buffer, ext: AVATAR_TYPES.get(mime) };
 }
 
@@ -148,6 +190,7 @@ module.exports = {
     avatarKeyFromUrl,
     isR2AvatarUrl,
     detectImageMime,
+    isStructurallyValidImage,
     parseAvatarDataUrl,
     saveAvatarDataUrl,
     deleteAvatarUrl,
