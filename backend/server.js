@@ -6,23 +6,18 @@ const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 const crypto = require('crypto');
 const { saveAvatarDataUrl, deleteAvatarUrl } = require('./avatar-storage');
+const {
+    allowedOriginsForEnv,
+    isAllowedAdminOrigin,
+    clientSafeRegisterError,
+    shouldRequireRegisterTurnstile,
+} = require('./security-helpers');
 
 const app = express();
 
 app.set('trust proxy', 1);
 
-const allowedOrigins = [
-    'https://arraffi.com',
-    'https://www.arraffi.com',
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
-    'http://localhost:5501',
-    'http://127.0.0.1:5501',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:3001',
-];
+const allowedOrigins = allowedOriginsForEnv(process.env.NODE_ENV);
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
@@ -37,6 +32,9 @@ app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Referrer-Policy', 'no-referrer');
+    if (process.env.NODE_ENV === 'production') {
+        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    }
     next();
 });
 
@@ -395,9 +393,13 @@ app.get('/api/comment/me', async (req, res) => {
 app.post('/api/comment/register', commentLimiter, async (req, res) => {
     let avatarUrl = '';
     try {
-        const { name, email, password, avatar_data } = req.body ?? {};
+        const { name, email, password, avatar_data, turnstile } = req.body ?? {};
         if (!name?.trim() || !email?.trim() || !password) {
             return res.status(422).json({ error: 'Name, email, and password are required.' });
+        }
+        if (shouldRequireRegisterTurnstile(process.env.NODE_ENV, isLocalRequest(req))) {
+            const tsOk = await verifyTurnstile(turnstile, req);
+            if (!tsOk) return res.status(403).json({ error: 'Turnstile verification failed. Please try again.' });
         }
         if (name.trim().length > 120) return res.status(422).json({ error: 'Name is too long.' });
         if (!isValidEmail(email)) return res.status(422).json({ error: 'Use a valid email address.' });
@@ -424,7 +426,7 @@ app.post('/api/comment/register', commentLimiter, async (req, res) => {
             try { await deleteAvatarUrl(avatarUrl); } catch (cleanupErr) { console.error('Avatar cleanup failed:', cleanupErr?.message); }
         }
         if (err?.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That email already has an account.' });
-        res.status(422).json({ error: err?.message || 'Could not create account.' });
+        res.status(422).json({ error: clientSafeRegisterError(err) });
     }
 });
 
@@ -508,7 +510,7 @@ app.post('/api/comments', commentLimiter, async (req, res) => {
 app.use('/api/admin', (req, res, next) => {
     if (process.env.NODE_ENV !== 'production') return next();
     const origin = req.headers.origin;
-    if (!origin || !allowedOrigins.includes(origin)) {
+    if (!isAllowedAdminOrigin(origin, process.env.NODE_ENV)) {
         return res.status(403).json({ error: 'Forbidden origin' });
     }
     next();
