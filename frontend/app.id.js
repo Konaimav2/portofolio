@@ -321,14 +321,16 @@ authForm?.addEventListener('submit', async event => {
     authSubmit.disabled = true;
     const original = authSubmit.textContent;
     authSubmit.textContent = 'Memproses...';
+    let mode = 'login';
     try {
         const fd = new FormData(authForm);
-        const mode = fd.get('mode');
+        mode = fd.get('mode');
         const avatarFile = document.getElementById('comment-avatar')?.files?.[0];
         const body = { email: fd.get('email'), password: fd.get('password') };
         if (mode === 'register') {
             body.name = fd.get('name');
             body.avatar_data = await readFileAsDataUrl(avatarFile);
+            body.turnstile = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
         }
         const res = await fetch(`${API_BASE}/api/comment/${mode}`, {
             method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
@@ -342,6 +344,7 @@ authForm?.addEventListener('submit', async event => {
     } catch (err) {
         setStatus(err.message || 'Permintaan akun gagal.', 'error');
     } finally {
+        if (window.turnstile && mode === 'register') window.turnstile.reset();
         authSubmit.disabled = false;
         authSubmit.textContent = original;
     }
