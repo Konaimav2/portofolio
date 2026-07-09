@@ -1,6 +1,29 @@
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0,0);
 
+// Page loader — dismiss after hero image + DOM ready, 3s max
+(function initLoader() {
+    const loader = document.getElementById('page-loader');
+    if (!loader) return;
+    const TIMEOUT_MS = 3000;
+    let done = false;
+    function dismiss() {
+        if (done) return;
+        done = true;
+        loader.classList.add('loader-done');
+    }
+    const timer = setTimeout(dismiss, TIMEOUT_MS);
+    // Wait for hero image if present
+    const heroImg = document.querySelector('.hero-visual img');
+    if (heroImg && !heroImg.complete) {
+        heroImg.addEventListener('load', () => { clearTimeout(timer); dismiss(); }, { once: true });
+        heroImg.addEventListener('error', () => { clearTimeout(timer); dismiss(); }, { once: true });
+    } else {
+        document.addEventListener('DOMContentLoaded', () => { clearTimeout(timer); dismiss(); }, { once: true });
+        if (document.readyState !== 'loading') { clearTimeout(timer); dismiss(); }
+    }
+})();
+
 // Smooth scroll without changing URL hash
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {

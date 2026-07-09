@@ -812,6 +812,9 @@ body::after {
   margin-bottom: -6px;
   overflow: hidden;
 }
+.comment-actions-row .cf-turnstile > iframe {
+  border-radius: 6px;
+}
 .hidden, .hp-field { display: none !important; }
 .form-status { min-height: 18px; font-family: 'Minecraft', monospace; color: var(--text-muted); text-align: center; font-size: 0.82rem; }
 .form-status.success { color: #22c55e; }
@@ -1048,12 +1051,58 @@ body::after {
   .exp-logo-frame { width: 50px; height: 50px; flex-basis: 50px; }
   .exp-date { white-space: normal; }
   .contact-shortcuts { grid-template-columns: 1fr; }
-  .comment-actions-row { align-items: flex-start; }
-  .comment-actions-row .cf-turnstile { transform: scale(0.82); margin-right: -48px; }
+  .comment-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .comment-actions-row .cf-turnstile {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 65px;
+    transform: none;
+    margin: 0;
+    overflow: visible;
+  }
+  .comment-actions-row .cf-turnstile > iframe {
+    width: 100% !important;
+    max-width: 300px;
+  }
+  .comment-actions-row .btn-submit {
+    width: 100%;
+  }
 }
 
 .reveal { opacity: 0; transform: translateY(30px); transition: 0.6s ease-out; }
 .reveal.active { opacity: 1; transform: translateY(0); }
+
+/* ── Page loader ─────────────────────────────────────────── */
+#page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #07080c;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+#page-loader.loader-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loader-ring {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255,117,32,0.18);
+  border-top-color: #ff7520;
+  border-radius: 50%;
+  animation: loader-spin 0.75s linear infinite;
+}
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
