@@ -1,20 +1,38 @@
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0,0);
 
-// Page loader — dismiss after hero image + DOM ready, 3s max
 (function initLoader() {
     const loader = document.getElementById('page-loader');
-    if (!loader) return;
-    const TIMEOUT_MS = 3000;
+    const bar = document.getElementById('loader-bar');
+    const label = document.getElementById('loader-label');
+    if (!loader || !bar) return;
+    let pct = 0;
     let done = false;
-    function dismiss() {
+    function setProgress(p) {
+        pct = Math.min(p, 100);
+        bar.style.width = pct + '%';
+        if (label) label.textContent = Math.round(pct) + '%';
+    }
+    function finish() {
         if (done) return;
         done = true;
-        loader.classList.add('loader-done');
+        setProgress(100);
+        setTimeout(() => loader.classList.add('loader-done'), 380);
     }
-    const timer = setTimeout(dismiss, TIMEOUT_MS);
-    window.addEventListener('load', () => { clearTimeout(timer); dismiss(); }, { once: true });
-    if (document.readyState === 'complete') { clearTimeout(timer); dismiss(); }
+    const FAST_STEP = 70 / 20;
+    let steps = 0;
+    const fast = setInterval(() => {
+        steps++;
+        setProgress(steps * FAST_STEP);
+        if (pct >= 70) clearInterval(fast);
+    }, 30);
+    const slow = setInterval(() => {
+        if (pct >= 92) return;
+        setProgress(pct + 0.8);
+    }, 120);
+    window.addEventListener('load', () => { clearInterval(slow); finish(); }, { once: true });
+    setTimeout(() => { clearInterval(slow); finish(); }, 5000);
+    if (document.readyState === 'complete') { clearInterval(fast); clearInterval(slow); finish(); }
 })();
 
 // Smooth scroll without changing URL hash

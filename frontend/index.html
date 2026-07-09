@@ -34,19 +34,25 @@
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
 
     <style>
-        #page-loader{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#07080c;transition:opacity .45s ease,visibility .45s ease}
+        #page-loader{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;background:#07080c;transition:opacity .5s ease,visibility .5s ease}
         #page-loader.loader-done{opacity:0;visibility:hidden;pointer-events:none}
-        .loader-ring{width:48px;height:48px;border:3px solid rgba(255,117,32,.18);border-top-color:#ff7520;border-radius:50%;animation:loader-spin .75s linear infinite}
-        @keyframes loader-spin{to{transform:rotate(360deg)}}
+        .loader-brand{font-size:1.8rem;font-weight:700;letter-spacing:-0.5px;color:#fff}
+        .loader-brand span{color:#ff7520}
+        .loader-bar-wrap{width:220px;height:3px;background:rgba(255,117,32,.15);border-radius:99px;overflow:hidden}
+        .loader-bar{height:100%;width:0%;background:linear-gradient(90deg,#ff7520,#ffae00);border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1)}
+        .loader-label{font-size:.72rem;color:rgba(255,255,255,.35);letter-spacing:.08em;font-family:monospace}
     </style>
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
-    <link rel="stylesheet" href="./style.css?v=loader-1">
+    <link rel="stylesheet" href="./style.css?v=loader-3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div id="page-loader" aria-hidden="true">
-        <div class="loader-ring"></div>
+        <div class="loader-brand">Arr<span>.</span></div>
+        <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
+        <div class="loader-label" id="loader-label">Loading...</div>
     </div>
+
 
 
     <nav class="navbar" id="navbar">

@@ -804,13 +804,7 @@ body::after {
 .btn-submit.small { padding: 10px 14px; }
 .comment-actions-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .comment-actions-row .cf-turnstile {
-  width: min(270px, 100%);
-  max-width: 100%;
-  height: 56px;
-  transform: scale(0.9);
-  transform-origin: left top;
-  margin-bottom: -6px;
-  overflow: hidden;
+  flex-shrink: 0;
 }
 .comment-actions-row .cf-turnstile > iframe {
   border-radius: 6px;
@@ -1056,17 +1050,7 @@ body::after {
     align-items: stretch;
   }
   .comment-actions-row .cf-turnstile {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    min-height: 65px;
-    transform: none;
-    margin: 0;
-    overflow: visible;
-  }
-  .comment-actions-row .cf-turnstile > iframe {
-    width: 100% !important;
-    max-width: 300px;
+    flex-shrink: 0;
   }
   .comment-actions-row .btn-submit {
     width: 100%;
