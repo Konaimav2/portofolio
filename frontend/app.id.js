@@ -13,14 +13,8 @@ window.scrollTo(0,0);
         loader.classList.add('loader-done');
     }
     const timer = setTimeout(dismiss, TIMEOUT_MS);
-    const heroImg = document.querySelector('.hero-visual img');
-    if (heroImg && !heroImg.complete) {
-        heroImg.addEventListener('load', () => { clearTimeout(timer); dismiss(); }, { once: true });
-        heroImg.addEventListener('error', () => { clearTimeout(timer); dismiss(); }, { once: true });
-    } else {
-        document.addEventListener('DOMContentLoaded', () => { clearTimeout(timer); dismiss(); }, { once: true });
-        if (document.readyState !== 'loading') { clearTimeout(timer); dismiss(); }
-    }
+    window.addEventListener('load', () => { clearTimeout(timer); dismiss(); }, { once: true });
+    if (document.readyState === 'complete') { clearTimeout(timer); dismiss(); }
 })();
 
 // Smooth scroll without changing URL hash
