@@ -4,32 +4,32 @@ window.scrollTo(0,0);
 (function initLoader() {
     const loader = document.getElementById('page-loader');
     const bar = document.getElementById('loader-bar');
-    const label = document.getElementById('loader-label');
+    const status = document.getElementById('loader-status');
     if (!loader || !bar) return;
     let pct = 0;
     let done = false;
-    function setProgress(p) {
+    function setBar(p) {
         pct = Math.min(p, 100);
         bar.style.width = pct + '%';
-        if (label) label.textContent = Math.round(pct) + '%';
     }
     function finish() {
         if (done) return;
         done = true;
-        setProgress(100);
-        setTimeout(() => loader.classList.add('loader-done'), 380);
+        setBar(100);
+        if (status) { status.textContent = 'Siap  ✓'; status.classList.add('ready'); }
+        setTimeout(() => loader.classList.add('loader-done'), 700);
     }
     const FAST_STEP = 70 / 20;
     let steps = 0;
     const fast = setInterval(() => {
         steps++;
-        setProgress(steps * FAST_STEP);
+        setBar(steps * FAST_STEP);
         if (pct >= 70) clearInterval(fast);
     }, 30);
     const slow = setInterval(() => {
         if (pct >= 92) return;
-        setProgress(pct + 0.8);
-    }, 120);
+        setBar(pct + 0.6);
+    }, 100);
     window.addEventListener('load', () => { clearInterval(slow); finish(); }, { once: true });
     setTimeout(() => { clearInterval(slow); finish(); }, 5000);
     if (document.readyState === 'complete') { clearInterval(fast); clearInterval(slow); finish(); }
