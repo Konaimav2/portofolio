@@ -33,8 +33,14 @@
     <link rel="preconnect" href="https://api.arraffi.com" crossorigin>
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
 
+    <style>
+        #page-loader{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#07080c;transition:opacity .45s ease,visibility .45s ease}
+        #page-loader.loader-done{opacity:0;visibility:hidden;pointer-events:none}
+        .loader-ring{width:48px;height:48px;border:3px solid rgba(255,117,32,.18);border-top-color:#ff7520;border-radius:50%;animation:loader-spin .75s linear infinite}
+        @keyframes loader-spin{to{transform:rotate(360deg)}}
+    </style>
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
-    <link rel="stylesheet" href="./style.css?v=section-fix-11">
+    <link rel="stylesheet" href="./style.css?v=loader-1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
