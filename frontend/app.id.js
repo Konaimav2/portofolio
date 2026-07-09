@@ -246,6 +246,37 @@ const readFileAsDataUrl = file => new Promise((resolve, reject) => {
     reader.readAsDataURL(file);
 });
 
+const MAX_AVATAR_PX = 256;
+const MAX_AVATAR_BYTES = 200 * 1024;
+
+function resizeAndCompressAvatar(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) return resolve('');
+        if (file.size > 2 * 1024 * 1024) return reject(new Error('Foto profil maksimal 2MB.'));
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const scale = Math.min(1, MAX_AVATAR_PX / Math.max(img.width, img.height));
+            const w = Math.round(img.width * scale);
+            const h = Math.round(img.height * scale);
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            let quality = 0.85;
+            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+            while (dataUrl.length * 0.75 > MAX_AVATAR_BYTES && quality > 0.3) {
+                quality -= 0.1;
+                dataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
+            resolve(dataUrl);
+        };
+        img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Foto profil tidak bisa dibaca.')); };
+        img.src = objectUrl;
+    });
+}
+
 function renderCommentUser() {
     if (!loginCard || !userCard || !anonFields) return;
     if (!commentUser) {
@@ -329,7 +360,7 @@ authForm?.addEventListener('submit', async event => {
         const body = { email: fd.get('email'), password: fd.get('password') };
         if (mode === 'register') {
             body.name = fd.get('name');
-            body.avatar_data = await readFileAsDataUrl(avatarFile);
+            body.avatar_data = await resizeAndCompressAvatar(avatarFile);
             body.turnstile = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
         }
         const res = await fetch(`${API_BASE}/api/comment/${mode}`, {
