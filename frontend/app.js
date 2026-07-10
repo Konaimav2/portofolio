@@ -1,36 +1,3 @@
-(function initLoader() {
-    var loader = document.getElementById('page-loader');
-    var bar    = document.getElementById('loader-bar');
-    if (!loader || !bar) return;
-    var pct = 0, done = false;
-    function setBar(p) { pct = Math.min(p, 100); bar.style.width = pct + '%'; }
-    function finish() {
-        if (done) return; done = true;
-        setBar(100);
-        setTimeout(function() { loader.classList.add('loader-done'); }, 380);
-    }
-    // Always run the fast phase so user sees bar animate
-    var steps = 0;
-    var fast = setInterval(function() {
-        setBar((++steps) * (70 / 22));
-        if (pct >= 70) {
-            clearInterval(fast);
-            // After fast phase, wait for load or crawl
-            if (document.readyState === 'complete') {
-                finish();
-            } else {
-                var slow = setInterval(function() {
-                    if (pct < 92) setBar(pct + 0.4);
-                }, 100);
-                window.addEventListener('load', function() {
-                    clearInterval(slow); finish();
-                }, { once: true });
-                setTimeout(function() { clearInterval(slow); finish(); }, 5000);
-            }
-        }
-    }, 28);
-})();
-
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0,0);
 
