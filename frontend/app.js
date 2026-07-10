@@ -1,35 +1,34 @@
+(function initLoader() {
+    var loader = document.getElementById('page-loader');
+    var bar    = document.getElementById('loader-bar');
+    if (!loader || !bar) return;
+    var pct = 0, done = false;
+    function setBar(p) { pct = Math.min(p, 100); bar.style.width = pct + '%'; }
+    function finish() {
+        if (done) return; done = true;
+        setBar(100);
+        // wait for bar to visually complete (transition 300ms) then fade out
+        setTimeout(function() { loader.classList.add('loader-done'); }, 400);
+    }
+    // fast: 0→70% in ~600ms
+    var steps = 0;
+    var fast = setInterval(function() {
+        setBar((++steps) * (70 / 21));
+        if (pct >= 70) clearInterval(fast);
+    }, 28);
+    // slow crawl while waiting for window.load
+    var slow = setInterval(function() {
+        if (pct < 92) setBar(pct + 0.4);
+    }, 100);
+    window.addEventListener('load', function() { clearInterval(slow); finish(); }, { once: true });
+    setTimeout(function() { clearInterval(slow); finish(); }, 6000);
+    if (document.readyState === 'complete') { clearInterval(fast); clearInterval(slow); finish(); }
+})();
+
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0,0);
 
-(function initLoader() {
-    const loader = document.getElementById('page-loader');
-    const bar    = document.getElementById('loader-bar');
-    const msg    = document.getElementById('loader-status');
-    if (!loader || !bar) return;
-    let pct = 0, done = false;
-    function setBar(p) {
-        pct = Math.min(p, 100);
-        bar.style.width = pct + '%';
-    }
-    function finish() {
-        if (done) return; done = true;
-        bar.classList.add('finishing');
-        setBar(100);
-        if (msg) { msg.textContent = 'Ready'; msg.classList.add('done'); }
-        setTimeout(() => loader.classList.add('loader-done'), 750);
-    }
-    let steps = 0;
-    const fast = setInterval(() => {
-        setBar((++steps) * (70 / 22));
-        if (pct >= 70) clearInterval(fast);
-    }, 28);
-    const slow = setInterval(() => {
-        if (pct < 92) setBar(pct + 0.5);
-    }, 90);
-    window.addEventListener('load', () => { clearInterval(slow); finish(); }, { once: true });
-    setTimeout(() => { clearInterval(slow); finish(); }, 5000);
-    if (document.readyState === 'complete') { clearInterval(fast); clearInterval(slow); finish(); }
-})();
+
 
 // Smooth scroll without changing URL hash
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
