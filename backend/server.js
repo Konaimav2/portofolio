@@ -5,13 +5,50 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 const crypto = require('crypto');
-const { saveAvatarDataUrl, deleteAvatarUrl } = require('./avatar-storage');
+const { saveAvatarDataUrl, deleteAvatarUrl, buildR2Config } = require('./avatar-storage');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const {
     allowedOriginsForEnv,
     isAllowedAdminOrigin,
     clientSafeRegisterError,
     shouldRequireRegisterTurnstile,
 } = require('./security-helpers');
+
+const _r2Config = buildR2Config();
+const _r2Client = _r2Config ? new S3Client({
+    region: 'auto',
+    endpoint: _r2Config.endpoint,
+    credentials: _r2Config.credentials,
+    forcePathStyle: true,
+}) : null;
+
+async function mirrorToR2(imageUrl, folder = 'image') {
+    if (!_r2Config || !_r2Client || !imageUrl) return null;
+    try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(imageUrl, { signal: controller.signal });
+        clearTimeout(t);
+        if (!res.ok) return null;
+        const buf = Buffer.from(await res.arrayBuffer());
+        if (buf.length < 12 || buf.length > 10 * 1024 * 1024) return null;
+        const ct = res.headers.get('content-type') || '';
+        const extMap = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg' };
+        const mime = Object.keys(extMap).find(m => ct.includes(m)) || 'image/jpeg';
+        const ext = extMap[mime];
+        const key = `${folder}/${crypto.randomBytes(12).toString('hex')}.${ext}`;
+        await _r2Client.send(new PutObjectCommand({
+            Bucket: _r2Config.bucket,
+            Key: key,
+            Body: buf,
+            ContentType: mime,
+            CacheControl: 'public, max-age=31536000, immutable',
+        }));
+        return `${_r2Config.publicBaseUrl}/${key}`;
+    } catch {
+        return null;
+    }
+}
 
 const app = express();
 
@@ -264,6 +301,12 @@ async function ensureCommentSchema() {
         INDEX idx_comments_status_created (status, created_at),
         CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES comment_users(id) ON DELETE SET NULL
     )`);
+    for (const ddl of [
+        "ALTER TABLE projects ADD COLUMN IF NOT EXISTS image_url_fallback VARCHAR(1000) NULL",
+        "ALTER TABLE experience ADD COLUMN IF NOT EXISTS logo_url_fallback VARCHAR(1000) NULL",
+    ]) {
+        try { await pool.query(ddl); } catch {}
+    }
     const [meta] = await pool.query('SELECT meta_value FROM app_meta WHERE meta_key=? LIMIT 1', ['messages_flushed_for_comments']);
     if (!meta.length) {
         try { await pool.query('DELETE FROM messages'); } catch {}
@@ -352,7 +395,7 @@ const adminCsrfMiddleware = (req, res, next) => {
 app.get('/api/projects', async (req, res) => {
     try {
         const [rows] = await pool.query({
-            sql: 'SELECT id, title, title_id, description, description_id, url, image_url, full_width FROM projects ORDER BY sort_order ASC, id ASC',
+            sql: 'SELECT id, title, title_id, description, description_id, url, image_url, image_url_fallback, full_width FROM projects ORDER BY sort_order ASC, id ASC',
             timeout: 7000,
         });
         res.json(rows);
@@ -365,7 +408,7 @@ app.get('/api/projects', async (req, res) => {
 app.get('/api/experience', async (req, res) => {
     try {
         const [rows] = await pool.query({
-            sql: 'SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url FROM experience ORDER BY sort_order ASC, id ASC',
+            sql: 'SELECT id, company, role, role_id, date_range, description, description_id, logo_url, logo_url_fallback, url FROM experience ORDER BY sort_order ASC, id ASC',
             timeout: 7000,
         });
         res.json(rows);
@@ -554,7 +597,7 @@ app.get('/api/admin/check', authMiddleware, (req, res) => {
 
 app.get('/api/admin/projects', authMiddleware, async (req, res) => {
     try {
-        const [rows] = await adminQuery('SELECT id, title, title_id, description, description_id, url, image_url, full_width, sort_order FROM projects ORDER BY sort_order ASC, id ASC');
+        const [rows] = await adminQuery('SELECT id, title, title_id, description, description_id, url, image_url, image_url_fallback, full_width, sort_order FROM projects ORDER BY sort_order ASC, id ASC');
         res.json(rows);
     } catch (err) {
         console.error('Admin projects fetch failed:', err.message);
@@ -576,10 +619,12 @@ app.post('/api/admin/projects', authMiddleware, adminCsrfMiddleware, async (req,
         }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Project URL must start with http:// or https://' });
         if (!isValidUrl(image_url)) return res.status(422).json({ error: 'Image URL must start with http:// or https://' });
-        await adminQuery(
+        const [projIns] = await adminQuery(
             'INSERT INTO projects (title, title_id, description, description_id, url, image_url, full_width, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT next_order FROM (SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM projects) AS p))',
             [title.trim(), title_id.trim(), description.trim(), description_id.trim(), url?.trim() || null, image_url?.trim() || null, full_width ? 1 : 0]
         );
+        const fallbackImgC = await mirrorToR2(image_url?.trim(), 'image');
+        if (fallbackImgC) await adminQuery('UPDATE projects SET image_url_fallback=? WHERE id=?', [fallbackImgC, projIns.insertId]);
         res.json({ ok: true });
     } catch (err) {
         console.error('Admin project create failed:', err.message);
@@ -607,6 +652,8 @@ app.put('/api/admin/projects/:id', authMiddleware, adminCsrfMiddleware, async (r
             'UPDATE projects SET title=?, title_id=?, description=?, description_id=?, url=?, image_url=?, full_width=? WHERE id=?',
             [title.trim(), title_id.trim(), description.trim(), description_id.trim(), url?.trim() || null, image_url?.trim() || null, full_width ? 1 : 0, id]
         );
+        const fallbackImg = await mirrorToR2(image_url?.trim(), 'image');
+        if (fallbackImg) await adminQuery('UPDATE projects SET image_url_fallback=? WHERE id=?', [fallbackImg, id]);
         res.json({ ok: true });
     } catch (err) {
         console.error('Admin project update failed:', err.message);
@@ -656,7 +703,7 @@ app.patch('/api/admin/projects/:id/move', authMiddleware, adminCsrfMiddleware, a
 
 app.get('/api/admin/experience', authMiddleware, async (req, res) => {
     try {
-        const [rows] = await adminQuery('SELECT id, company, role, role_id, date_range, description, description_id, logo_url, url, sort_order FROM experience ORDER BY sort_order ASC, id ASC');
+        const [rows] = await adminQuery('SELECT id, company, role, role_id, date_range, description, description_id, logo_url, logo_url_fallback, url, sort_order FROM experience ORDER BY sort_order ASC, id ASC');
         res.json(rows);
     } catch (err) {
         console.error('Admin experience fetch failed:', err.message);
@@ -678,10 +725,12 @@ app.post('/api/admin/experience', authMiddleware, adminCsrfMiddleware, async (re
         }
         if (!isValidUrl(url)) return res.status(422).json({ error: 'Company URL must start with http:// or https://' });
         if (!isValidUrl(logo_url)) return res.status(422).json({ error: 'Logo URL must start with http:// or https://' });
-        await adminQuery(
+        const [expIns] = await adminQuery(
             'INSERT INTO experience (company, role, role_id, date_range, description, description_id, logo_url, url, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT next_order FROM (SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM experience) AS e))',
             [company.trim(), role.trim(), role_id.trim(), date_range.trim(), description.trim(), description_id.trim(), logo_url?.trim() || null, url?.trim() || null]
         );
+        const fallbackLogoC = await mirrorToR2(logo_url?.trim(), 'image');
+        if (fallbackLogoC) await adminQuery('UPDATE experience SET logo_url_fallback=? WHERE id=?', [fallbackLogoC, expIns.insertId]);
         res.json({ ok: true });
     } catch (err) {
         console.error('Admin experience create failed:', err.message);
@@ -709,6 +758,8 @@ app.put('/api/admin/experience/:id', authMiddleware, adminCsrfMiddleware, async 
             'UPDATE experience SET company=?, role=?, role_id=?, date_range=?, description=?, description_id=?, logo_url=?, url=? WHERE id=?',
             [company.trim(), role.trim(), role_id.trim(), date_range.trim(), description.trim(), description_id.trim(), logo_url?.trim() || null, url?.trim() || null, id]
         );
+        const fallbackLogo = await mirrorToR2(logo_url?.trim(), 'image');
+        if (fallbackLogo) await adminQuery('UPDATE experience SET logo_url_fallback=? WHERE id=?', [fallbackLogo, id]);
         res.json({ ok: true });
     } catch (err) {
         console.error('Admin experience update failed:', err.message);
