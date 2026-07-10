@@ -161,7 +161,7 @@ function renderProjects(projects) {
         const chips = p.chips || ['Backend', 'Panel', 'Hosting'];
         const content = `
             <div class="proj-img">
-                <img loading="lazy" src="${safeUrl(p.image_url)}" alt="${escHtml(p.title)}">
+                <img loading="lazy" src="${safeUrl(p.image_url)}"${p.image_url_fallback ? \` data-fallback="${safeUrl(p.image_url_fallback)}"\` : ''} alt="${escHtml(p.title)}" onerror="if(this.dataset.fallback&&this.src!==this.dataset.fallback){this.src=this.dataset.fallback}else{this.closest('.proj-img')?.classList.add('image-timeout');this.removeAttribute('src')}">
             </div>
             <div class="proj-content">
                 <div class="proj-topline"><span class="proj-icon"><i class="fa-solid fa-server"></i></span><span>${escHtml(category)}</span></div>
@@ -186,7 +186,7 @@ function renderExperience(experiences) {
         const classes = `exp-card ${e.url ? 'exp-clickable' : ''}`;
         return `
         <${tag}${href} class="${classes}">
-            <span class="exp-logo-frame"><img loading="lazy" src="${safeUrl(e.logo_url)}" alt="${escHtml(e.company)}" class="exp-logo"></span>
+            <span class="exp-logo-frame"><img loading="lazy" src="${safeUrl(e.logo_url)}"${e.logo_url_fallback ? \` data-fallback="${safeUrl(e.logo_url_fallback)}"\` : ''} alt="${escHtml(e.company)}" class="exp-logo" onerror="if(this.dataset.fallback&&this.src!==this.dataset.fallback){this.src=this.dataset.fallback}else{this.closest('.exp-logo-frame')?.classList.add('image-timeout');this.removeAttribute('src')}"></span>
             <div class="exp-info">
                 <h3 class="exp-title">${escHtml(e.company)}</h3>
                 <div class="exp-role">${escHtml(e.role)}</div>
