@@ -41,7 +41,7 @@
                 '.pl-logo em{font-style:normal;color:#ff7520;}'+
                 '.pl-sub{font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.3);margin:0 0 44px;font-family:monospace;}'+
                 '.pl-track{width:min(440px,78vw);height:6px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;}'+
-                '.pl-fill{height:100%;width:0%;background:linear-gradient(90deg,#d45a10,#ff7520 40%,#ffae00);border-radius:99px;transition:width .28s ease-out;}';
+                '.pl-fill{height:100%;width:0%;background:linear-gradient(90deg,#d45a10,#ff7520 40%,#ffae00);border-radius:99px;transition:width .18s ease-out;}';
             document.head.appendChild(s);
             var d=document.createElement('div');
             d.id='page-loader';
@@ -49,25 +49,39 @@
             d.innerHTML='<h1 class="pl-logo">Arr<em>affi.</em></h1><p class="pl-sub">Backend Engineer</p><div class="pl-track"><div class="pl-fill" id="loader-bar"></div></div>';
             document.documentElement.appendChild(d);
             var b=d.querySelector('#loader-bar');
-            var pct=0,done=false;
+            var start=Date.now(),MIN=1400;
+            var pct=0,done=false,pageReady=false;
             function setBar(p){pct=Math.min(p,100);b.style.width=pct+'%';}
-            function finish(){
+            function dismiss(){
                 if(done)return;done=true;
                 setBar(100);
-                setTimeout(function(){d.style.opacity='0';d.style.pointerEvents='none';setTimeout(function(){d.remove();},500);},350);
+                setTimeout(function(){
+                    d.style.opacity='0';
+                    d.style.pointerEvents='none';
+                    setTimeout(function(){d.remove();},500);
+                },300);
             }
-            var steps=0,fast=setInterval(function(){
-                setBar((++steps)*(70/22));
-                if(pct>=70){
-                    clearInterval(fast);
-                    if(document.readyState==='complete'){finish();}
-                    else{
-                        var slow=setInterval(function(){if(pct<92)setBar(pct+0.4);},100);
-                        window.addEventListener('load',function(){clearInterval(slow);finish();},{once:true});
-                        setTimeout(function(){clearInterval(slow);finish();},6000);
-                    }
-                }
-            },28);
+            function tryFinish(){
+                if(!pageReady)return;
+                var elapsed=Date.now()-start;
+                var wait=Math.max(0,MIN-elapsed);
+                setTimeout(function(){
+                    var fill=setInterval(function(){
+                        if(pct>=100){clearInterval(fill);dismiss();}
+                        else setBar(pct+4);
+                    },16);
+                },wait);
+            }
+            /* animate bar to 85% over ~1s */
+            var step=0,total=60;
+            var anim=setInterval(function(){
+                step++;
+                setBar(step*(85/total));
+                if(step>=total)clearInterval(anim);
+            },17);
+            window.addEventListener('load',function(){pageReady=true;tryFinish();},{once:true});
+            /* fallback: if load never fires */
+            setTimeout(function(){pageReady=true;tryFinish();},8000);
         })();
     </script>
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
