@@ -76,7 +76,7 @@ function safeUrl(url) {
         return (u.protocol === 'http:' || u.protocol === 'https:') ? escHtml(url) : '#';
     } catch { return '#'; }
 }
-function installImageTimeouts(root = document, timeoutMs = 2600) {
+function installImageTimeouts(root = document, timeoutMs = 4000) {
     root.querySelectorAll('img[src]:not([data-timeout-bound])').forEach(img => {
         img.dataset.timeoutBound = '1';
         const fail = () => {
@@ -87,9 +87,19 @@ function installImageTimeouts(root = document, timeoutMs = 2600) {
             img.closest('.exp-logo-frame')?.classList.add('image-timeout');
             img.removeAttribute('src');
         };
-        const timer = setTimeout(fail, timeoutMs);
-        img.addEventListener('load', () => clearTimeout(timer), { once: true });
+        let timer = null;
+        const start = () => { if (!timer) timer = setTimeout(fail, timeoutMs); };
+        img.addEventListener('load', () => { clearTimeout(timer); }, { once: true });
         img.addEventListener('error', fail, { once: true });
+        if (img.complete && img.naturalWidth > 0) return;
+        if (!img.loading || img.loading !== 'lazy') {
+            start();
+        } else {
+            const io = new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting) { io.disconnect(); start(); }
+            }, { rootMargin: '200px' });
+            io.observe(img);
+        }
     });
 }
 installImageTimeouts(document);
