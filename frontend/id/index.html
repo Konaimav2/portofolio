@@ -36,68 +36,44 @@
     <style>
         #page-loader{
             position:fixed;inset:0;z-index:9999;
-            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
             background:#08090e;
             font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-            transition:transform .6s cubic-bezier(.76,0,.24,1),opacity .5s ease;
+            transition:opacity .5s ease;
+            visibility:visible;
         }
-        #page-loader.loader-done{
-            transform:translateY(-100%);
-            opacity:0;
-            pointer-events:none;
-        }
+        #page-loader.loader-done{opacity:0;visibility:hidden;pointer-events:none}
         .pl-logo{
-            font-size:2.8rem;font-weight:800;letter-spacing:-2px;
-            color:#ffffff;margin:0 0 4px;line-height:1;
+            font-size:2.6rem;font-weight:800;letter-spacing:-2px;
+            color:#fff;line-height:1;margin:0 0 6px;
         }
-        .pl-logo em{
-            font-style:normal;
-            color:#ff7520;
-        }
+        .pl-logo em{font-style:normal;color:#ff7520}
         .pl-sub{
-            font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;
-            color:rgba(255,255,255,.3);margin:0 0 48px;
+            font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;
+            color:rgba(255,255,255,.25);margin:0 0 40px;
+            font-family:monospace;
         }
         .pl-track{
-            width:min(480px,80vw);height:5px;
-            background:rgba(255,255,255,.08);
+            width:min(400px,75vw);height:3px;
+            background:rgba(255,255,255,.1);
             border-radius:99px;overflow:hidden;
         }
         .pl-fill{
             height:100%;width:0%;
-            background:#ff7520;
-            border-radius:99px;
-            transition:width .25s linear;
-            box-shadow:0 0 12px rgba(255,117,32,.6);
-        }
-        .pl-fill.finishing{
             background:linear-gradient(90deg,#ff7520,#ffae00);
-            box-shadow:0 0 20px rgba(255,174,0,.8);
-        }
-        .pl-msg{
-            margin-top:18px;
-            font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
-            color:rgba(255,255,255,.2);
-            transition:color .4s,letter-spacing .4s;
-            font-family:monospace;
-        }
-        .pl-msg.done{
-            color:#ff7520;
-            letter-spacing:.28em;
+            border-radius:99px;
+            transition:width .3s ease-out;
         }
     </style>
     <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
-    <link rel="stylesheet" href="../style.css?v=loader-6">
+    <link rel="stylesheet" href="../style.css?v=loader-7">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div id="page-loader" aria-hidden="true">
         <h1 class="pl-logo">Arr<em>affi.</em></h1>
         <p class="pl-sub">Backend Engineer</p>
-        <div class="pl-track">
-            <div class="pl-fill" id="loader-bar"></div>
-        </div>
-        <p class="pl-msg" id="loader-status">Memuat</p>
+        <div class="pl-track"><div class="pl-fill" id="loader-bar"></div></div>
     </div>
 
 
