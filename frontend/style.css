@@ -54,6 +54,10 @@ body > * {
   position: relative;
   z-index: 1;
 }
+body > #page-loader {
+  position: fixed;
+  z-index: 9999;
+}
 
 ::-webkit-scrollbar {
   width: 10px;
