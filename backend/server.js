@@ -105,9 +105,19 @@ async function ensureOrderColumn(table) {
     await pool.query(`UPDATE ${table} SET sort_order = id WHERE sort_order = 0`);
 }
 
+async function ensureColumn(table, column, definition) {
+    try {
+        await pool.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    } catch (err) {
+        if (err?.code !== 'ER_DUP_FIELDNAME') throw err;
+    }
+}
+
 async function ensureContentSchema() {
     await ensureOrderColumn('projects');
     await ensureOrderColumn('experience');
+    await ensureColumn('projects', 'image_url_fallback', 'VARCHAR(1000) NULL');
+    await ensureColumn('experience', 'logo_url_fallback', 'VARCHAR(1000) NULL');
 }
 
 ensureContentSchema().catch(err => console.error('Content schema setup failed:', err?.message));
@@ -301,12 +311,6 @@ async function ensureCommentSchema() {
         INDEX idx_comments_status_created (status, created_at),
         CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES comment_users(id) ON DELETE SET NULL
     )`);
-    for (const ddl of [
-        "ALTER TABLE projects ADD COLUMN IF NOT EXISTS image_url_fallback VARCHAR(1000) NULL",
-        "ALTER TABLE experience ADD COLUMN IF NOT EXISTS logo_url_fallback VARCHAR(1000) NULL",
-    ]) {
-        try { await pool.query(ddl); } catch {}
-    }
     const [meta] = await pool.query('SELECT meta_value FROM app_meta WHERE meta_key=? LIMIT 1', ['messages_flushed_for_comments']);
     if (!meta.length) {
         try { await pool.query('DELETE FROM messages'); } catch {}
