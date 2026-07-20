@@ -43,7 +43,7 @@
         toast.className = `save-toast show${type === 'error' ? ' error' : ''}`;
         toast.innerHTML = `<span class="tick">${type === 'error' ? '!' : '✓'}</span><span>${esc(message)}</span>`;
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), type === 'error' ? 7000 : 5000);
     }
     const toastError = (err) => showToast(err?.message || 'Request failed', 'error');
 
@@ -181,6 +181,7 @@
     function confirmModal(title, text, confirmText = 'Delete') {
         return new Promise((resolve) => {
             const root = $('#modal-root');
+            let settled = false;
             root.classList.remove('hidden');
             root.innerHTML = `<div class="modal-card confirm-card">
                 <div class="modal-title">${esc(title)}</div>
@@ -191,8 +192,11 @@
                 </div>
             </div>`;
             root.onclick = (event) => {
+                if (settled) return;
                 const action = event.target?.dataset?.action;
                 if (!action && event.target !== root) return;
+                settled = true;
+                root.querySelectorAll('button').forEach((button) => { button.disabled = true; });
                 root.classList.add('hidden');
                 root.innerHTML = '';
                 root.onclick = null;
@@ -203,6 +207,7 @@
 
     function editModal(title, formHtml, onSave) {
         const root = $('#modal-root');
+        let submitting = false;
         root.classList.remove('hidden');
         root.innerHTML = `<form class="modal-card edit-form">
             <div class="modal-title">${esc(title)}</div>
@@ -213,12 +218,26 @@
             </div>
         </form>`;
         root.onclick = (event) => {
+            if (submitting) return;
             if (event.target === root || event.target?.dataset?.action === 'cancel') closeModal();
         };
         root.querySelector('form').onsubmit = async (event) => {
             event.preventDefault();
-            await onSave(valuesFrom(event.currentTarget));
-            closeModal();
+            if (submitting) return;
+            submitting = true;
+            const form = event.currentTarget;
+            const buttons = form.querySelectorAll('button');
+            const saveButton = form.querySelector('[type="submit"]');
+            buttons.forEach((button) => { button.disabled = true; });
+            saveButton.textContent = 'Saving…';
+            const saved = await onSave(valuesFrom(form));
+            if (saved) {
+                closeModal();
+                return;
+            }
+            submitting = false;
+            buttons.forEach((button) => { button.disabled = false; });
+            saveButton.textContent = 'Save';
         };
     }
 
@@ -230,24 +249,26 @@
     }
 
     async function saveProject(record, id = null) {
-        if (!requireFields(record, ['title', 'title_id', 'description', 'description_id'], 'Project needs English and Indonesian title/description.')) return;
+        if (!requireFields(record, ['title', 'title_id', 'description', 'description_id'], 'Project needs English and Indonesian title/description.')) return false;
         setBusy(true);
         try {
             await requestJson(id ? `/admin/projects/${id}` : '/admin/projects', { method: id ? 'PUT' : 'POST', body: JSON.stringify(record) });
             await fetchAll();
             showToast(id ? 'Changes saved' : 'Project added');
-        } catch (err) { toastError(err); }
+            return true;
+        } catch (err) { toastError(err); return false; }
         finally { setBusy(false); }
     }
 
     async function saveExperience(record, id = null) {
-        if (!requireFields(record, ['company', 'role', 'role_id', 'date_range', 'description', 'description_id'], 'Experience needs English and Indonesian fields.')) return;
+        if (!requireFields(record, ['company', 'role', 'role_id', 'date_range', 'description', 'description_id'], 'Experience needs English and Indonesian fields.')) return false;
         setBusy(true);
         try {
             await requestJson(id ? `/admin/experience/${id}` : '/admin/experience', { method: id ? 'PUT' : 'POST', body: JSON.stringify(record) });
             await fetchAll();
             showToast(id ? 'Changes saved' : 'Experience added');
-        } catch (err) { toastError(err); }
+            return true;
+        } catch (err) { toastError(err); return false; }
         finally { setBusy(false); }
     }
 
@@ -367,6 +388,7 @@
             return;
         }
         const action = target.dataset.action;
+        if (state.saving && action) return;
         if (action === 'add-project') return editModal('Add Project', projectForm(), (data) => saveProject(data));
         if (action === 'edit-project') {
             const project = state.projects.find((item) => Number(item.id) === id);
