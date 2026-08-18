@@ -1,35 +1,41 @@
-(function(){
-    var d=document.getElementById('page-loader');
-    var b=document.getElementById('loader-bar');
-    if(!d||!b)return;
-    var start=Date.now(), MIN=1400;
-    var pct=0, done=false, pageReady=false;
-    function setBar(p){pct=Math.min(p,100);b.style.width=pct+'%';}
-    function dismiss(){
-        if(done)return;done=true;
-        setBar(100);
-        setTimeout(function(){
-            d.style.opacity='0';
-            d.style.pointerEvents='none';
-            setTimeout(function(){d.style.display='none';},500);
-        },300);
-    }
-    function tryFinish(){
-        if(!pageReady)return;
-        var wait=Math.max(0,MIN-(Date.now()-start));
-        setTimeout(function(){
-            var iv=setInterval(function(){
-                if(pct>=100){clearInterval(iv);dismiss();}
-                else setBar(pct+4);
-            },16);
-        },wait);
-    }
-    var step=0,total=60;
-    var anim=setInterval(function(){
-        step++;
-        setBar(step*(85/total));
-        if(step>=total)clearInterval(anim);
-    },17);
-    window.addEventListener('load',function(){pageReady=true;tryFinish();},{once:true});
-    setTimeout(function(){pageReady=true;tryFinish();},8000);
+(function () {
+    const body = document.body;
+    const bar = document.getElementById('loader-bar');
+    const status = document.getElementById('loader-status');
+    if (!body || !bar) return;
+
+    const startedAt = performance.now();
+    const minimumMs = 1000;
+    const timeoutMs = 6000;
+    const images = [...document.querySelectorAll('[data-loader-critical]')];
+    let completed = 0;
+    let finished = false;
+
+    const update = () => {
+        const progress = images.length ? completed / images.length : 1;
+        bar.style.setProperty('--loader-progress', Math.round(progress * 100) + '%');
+    };
+
+    const settle = () => { completed += 1; update(); };
+
+    const waitForImage = image => image.complete
+        ? Promise.resolve()
+        : new Promise(resolve => {
+            image.addEventListener('load', resolve, { once: true });
+            image.addEventListener('error', resolve, { once: true });
+        });
+
+    const reveal = async () => {
+        if (finished) return;
+        finished = true;
+        const remaining = Math.max(0, minimumMs - (performance.now() - startedAt));
+        await new Promise(resolve => setTimeout(resolve, remaining));
+        bar.style.setProperty('--loader-progress', '100%');
+        if (status) status.textContent = 'Ready';
+        body.classList.remove('is-loading');
+        body.classList.add('is-ready');
+    };
+
+    Promise.allSettled(images.map(image => waitForImage(image).finally(settle))).then(reveal);
+    setTimeout(reveal, timeoutMs);
 })();

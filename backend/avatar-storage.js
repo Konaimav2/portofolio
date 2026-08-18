@@ -2,6 +2,7 @@ const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs/promises');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { decodeAndNormalizeImage } = require('./image-pipeline');
 
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 const AVATAR_TYPES = new Map([
@@ -60,11 +61,21 @@ function publicAvatarUrl(publicBaseUrl, key) {
     return `${trimTrailingSlash(publicBaseUrl)}/${encodedKey}`;
 }
 
+function buildAvatarKey(ext, now = new Date(), randomBytes = crypto.randomBytes) {
+    const [year, month] = now.toISOString().slice(0, 7).split('-');
+    return `portfolio/avatars/${year}/${month}/${randomBytes(18).toString('hex')}.${ext}`;
+}
+
+function buildAssetKey(ext, randomBytes = crypto.randomBytes) {
+    return `portfolio/assets/${randomBytes(12).toString('hex')}.${ext}`;
+}
+
 function avatarKeyFromUrl(avatarUrl, config) {
-    if (!avatarUrl || !config?.publicBaseUrl) return '';
+    if (!avatarUrl || !config?.publicBaseUrl) return null;
     const base = `${trimTrailingSlash(config.publicBaseUrl)}/`;
-    if (!String(avatarUrl).startsWith(base)) return '';
-    return decodeURIComponent(String(avatarUrl).slice(base.length));
+    if (!String(avatarUrl).startsWith(base)) return null;
+    const key = decodeURIComponent(String(avatarUrl).slice(base.length));
+    return key.startsWith('portfolio/avatars/') && key.length > 'portfolio/avatars/'.length ? key : null;
 }
 
 function isR2AvatarUrl(avatarUrl, config) {
@@ -140,24 +151,36 @@ async function saveLocalAvatar(parsed, rootDir = __dirname) {
     return `/uploads/avatars/${filename}`;
 }
 
-async function saveR2Avatar(parsed, config, client = createR2Client(config)) {
-    const key = `avatars/${new Date().toISOString().slice(0, 10)}/${crypto.randomBytes(18).toString('hex')}.${parsed.ext}`;
-    await client.send(new PutObjectCommand({
+async function saveR2Avatar(parsed, config, client = createR2Client(config), options = {}) {
+    const normalized = await decodeAndNormalizeImage(parsed.buffer, { decoder: options.decoder });
+    const key = buildAvatarKey(normalized.ext, options.now, options.randomBytes);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      await client.send(new PutObjectCommand({
         Bucket: config.bucket,
         Key: key,
-        Body: parsed.buffer,
-        ContentType: parsed.mime,
+        Body: normalized.body,
+        ContentType: normalized.mime,
         CacheControl: 'public, max-age=31536000, immutable',
-    }));
-    return publicAvatarUrl(config.publicBaseUrl, key);
+      }), { abortSignal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
+    const publicUrl = publicAvatarUrl(config.publicBaseUrl, key);
+    if (options.verifyPublicUrl) await options.verifyPublicUrl({ publicUrl, body: normalized.body, mime: normalized.mime });
+    return publicUrl;
 }
 
 async function saveAvatarDataUrl(dataUrl, options = {}) {
     const parsed = parseAvatarDataUrl(dataUrl);
     if (!parsed) return '';
     const config = options.r2Config === undefined ? buildR2Config() : options.r2Config;
-    if (config) return saveR2Avatar(parsed, config, options.r2Client);
-    return saveLocalAvatar(parsed, options.rootDir || __dirname);
+    if (config) return saveR2Avatar(parsed, config, options.r2Client, options);
+    if (options.production) throw new Error('R2 configuration incomplete');
+    if (options.localStorage !== true) throw new Error('Avatar storage is not configured');
+    const normalized = await decodeAndNormalizeImage(parsed.buffer, { decoder: options.decoder });
+    return saveLocalAvatar({ buffer: normalized.body, ext: normalized.ext }, options.rootDir || __dirname);
 }
 
 async function deleteLocalAvatar(avatarUrl, rootDir = __dirname) {
@@ -187,6 +210,8 @@ module.exports = {
     buildR2Config,
     parseBucketUrl,
     publicAvatarUrl,
+    buildAvatarKey,
+    buildAssetKey,
     avatarKeyFromUrl,
     isR2AvatarUrl,
     detectImageMime,

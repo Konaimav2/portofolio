@@ -1,0 +1,11 @@
+{
+  "name": "Arraffi — Backend Engineer",
+  "short_name": "Arraffi",
+  "description": "Portfolio of Arraffi, Backend Engineer and Linux infrastructure specialist.",
+  "lang": "en",
+  "dir": "ltr",
+  "display": "standalone",
+  "start_url": "/",
+  "theme_color": "#0b1020",
+  "background_color": "#0b1020"
+}
