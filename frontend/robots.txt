@@ -1,5 +1,17 @@
+User-agent: Googlebot
+Allow: /
+Disallow: /admin.html
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin.html
+Disallow: /api/
+
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /api/
+Disallow: /cdn-cgi/
 
 Sitemap: https://arraffi.com/sitemap.xml

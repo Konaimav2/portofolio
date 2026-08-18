@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Portfolio Admin</title>
-    <link rel="icon" type="image/webp" href="https://cdn.discordapp.my.id/cdn/11acaa.webp">
+    <link rel="icon" type="image/webp" href="https://banquet.arraffi.com/portfolio/assets/site.webp">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="admin.css">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+    <script src="turnstile.js" defer></script>
     <script src="admin.js" defer></script>
 </head>
 <body>
@@ -23,7 +23,7 @@
                     <label for="admin-password">Password</label>
                     <input id="admin-password" type="password" placeholder="••••••••••••" autocomplete="current-password" required>
                 </div>
-                <div id="admin-turnstile" class="cf-turnstile" data-sitekey="0x4AAAAAADMAtXOh4MijdApa" data-theme="dark"></div>
+                <div id="admin-turnstile" class="turnstile-container"></div>
                 <button id="login-button" class="btn btn-primary btn-full" type="submit">Sign In</button>
                 <p id="login-error" class="form-error hidden"></p>
             </form>

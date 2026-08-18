@@ -8,6 +8,9 @@
     const API = requestedApi && allowedApiOverrides.has(requestedApi)
         ? requestedApi
         : (location.hostname === '127.0.0.1' || location.hostname === 'localhost' ? LOCAL_API : PROD_API);
+    const TURNSTILE_SITE_KEY = location.hostname === '127.0.0.1' || location.hostname === 'localhost'
+        ? '1x00000000000000000000AA'
+        : '0x4AAAAAADMAtXOh4MijdApa';
     const TURNSTILE_TIMEOUT_MS = 9000;
     const API_TIMEOUT_MS = 12000;
 
@@ -73,11 +76,20 @@
         }
     }
 
-    function waitForTurnstileToken() {
+    function renderAdminTurnstile() {
+        return window.PortfolioTurnstile.render('admin-turnstile', {
+            sitekey: TURNSTILE_SITE_KEY,
+            theme: 'dark',
+            action: 'admin_login',
+        });
+    }
+
+    async function waitForTurnstileToken() {
+        await renderAdminTurnstile();
         return new Promise((resolve) => {
             const started = Date.now();
             const tick = () => {
-                const token = $('#admin-turnstile [name="cf-turnstile-response"]')?.value || '';
+                const token = window.PortfolioTurnstile.getToken('admin-turnstile');
                 if (token || Date.now() - started > TURNSTILE_TIMEOUT_MS) return resolve(token);
                 setTimeout(tick, 120);
             };
@@ -109,7 +121,7 @@
             error.textContent = err.message || 'Wrong password.';
             error.classList.remove('hidden');
             password.value = '';
-            if (window.turnstile) window.turnstile.reset();
+            window.PortfolioTurnstile.reset('admin-turnstile');
         } finally {
             button.disabled = false;
             button.textContent = 'Sign In';
@@ -422,5 +434,6 @@
             }
         } catch {}
         render();
+        if (!state.loggedIn) renderAdminTurnstile().catch(() => {});
     })();
 })();
