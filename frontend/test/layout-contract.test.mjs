@@ -106,7 +106,7 @@ test('Screen 1 has environmental typography but no information panel', async () 
 test('About contains square dual portrait and two stack lanes', async () => {
     const html = await read('../index.html');
     assert.match(html, /https:\/\/banquet\.arraffi\.com\/portfolio\/assets\/hero-oc\.18b0b8c4a67f\.webp/);
-        assert.match(html, /character-alt\.png/);
+        assert.match(html, /hero-real\.ba9ca0a6abd4\.webp/);
     assert.match(html, /stack-lane-top/);
     assert.match(html, /stack-lane-bottom/);
 });
