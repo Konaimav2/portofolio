@@ -1,13 +1,9 @@
 const { loadConfig } = require('./config');
 const { createPool } = require('./database');
-const { verifySchemaVersion } = require('./migrate');
 const { createApp } = require('./app');
 const { createLogger } = require('./logger');
 
 function startupFailureMessage(error) {
-  if (error?.message === 'schema version mismatch') {
-    return 'Server startup failed: schema migration required (run npm run migrate)';
-  }
   if (error?.code === 'EADDRINUSE') return 'Server startup failed: port already in use';
   const code = String(error?.code || '');
   return /^[A-Z0-9_]{1,64}$/.test(code) ? `Server startup failed (${code})` : 'Server startup failed';
@@ -48,13 +44,11 @@ async function startServer(options = {}) {
   const config = options.config || loadConfig(options.env || process.env);
   if (config.listenHost !== '127.0.0.1') throw new Error('Server listen host must be loopback');
   const pool = options.pool || createPool(config);
-  const verifySchema = options.verifySchema || verifySchemaVersion;
   const listenForRequests = options.listen || listen;
   const logger = options.logger || createLogger();
   let server;
 
   try {
-    await verifySchema(pool);
     const app = createApp({ config, pool, logger, ...(options.dependencies || {}) });
     server = await listenForRequests(app, config.port, config.listenHost);
     let closePromise;
