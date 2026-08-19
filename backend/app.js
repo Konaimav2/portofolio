@@ -11,6 +11,7 @@ const { checkDatabaseReady } = require('./database');
 const { sendError } = require('./api-errors');
 const { createLogger, requestLogger } = require('./logger');
 const { createTurnstileVerifier } = require('./turnstile');
+const { createTelegramNotifier } = require('./telegram-notifier');
 
 function createApp({
   config,
@@ -21,6 +22,12 @@ function createApp({
   logger = createLogger(),
 }) {
   const app = express();
+  const telegramNotifier = createTelegramNotifier({
+    botToken: config.telegram?.botToken,
+    chatId: config.telegram?.chatId,
+    ownerUserId: config.telegram?.ownerUserId,
+    logger,
+  });
   const saveAvatar = avatarStore.saveAvatarDataUrl || saveAvatarDataUrl;
   const deleteAvatar = avatarStore.deleteAvatarUrl || deleteAvatarUrl;
   const r2Config = config.r2 ? buildR2Config({
@@ -480,10 +487,18 @@ function createApp({
           if (email && !isValidEmail(email)) return res.status(422).json({ ok: false, error: 'Use a valid email address or leave it blank.' });
 
           const status = user ? 'approved' : 'pending';
-          await pool.query(
+          const [commentResult] = await pool.query(
               'INSERT INTO comments (user_id, author_name, author_email, avatar_url, body, status) VALUES (?, ?, ?, ?, ?, ?)',
               [user?.id || null, name, email || null, user?.avatar_url || null, String(body).trim(), status]
           );
+          void telegramNotifier.notifyNewComment({
+              commentId: commentResult?.insertId,
+              name,
+              body: String(body).trim(),
+              status,
+          }).catch(() => {
+              logger.error({ event: 'telegram_notify_rejected', errorCode: 'TELEGRAM_UNEXPECTED_FAILURE' });
+          });
           res.json({
               ok: true,
               status,
