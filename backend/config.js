@@ -20,6 +20,41 @@ function csv(value) {
   return String(value || '').split(',').map(item => item.trim()).filter(Boolean);
 }
 
+function positiveTelegramUserId(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return undefined;
+  if (!/^[1-9]\d{0,17}$/.test(raw) || !Number.isSafeInteger(Number(raw))) {
+    throw new Error('TELEGRAM_OWNER_USER_ID must be a positive decimal user ID');
+  }
+  return Number(raw);
+}
+
+function telegramSettings(env) {
+  const botToken = String(env.TELEGRAM_BOT_TOKEN || '').trim();
+  const chatId = String(env.TELEGRAM_CHAT_ID || '').trim();
+  const ownerUserIdRaw = String(env.TELEGRAM_OWNER_USER_ID ?? '').trim();
+  if (!botToken && !chatId && !ownerUserIdRaw) return null;
+  const missing = [
+    ...(!botToken ? ['TELEGRAM_BOT_TOKEN'] : []),
+    ...(!chatId ? ['TELEGRAM_CHAT_ID'] : []),
+    ...(!ownerUserIdRaw ? ['TELEGRAM_OWNER_USER_ID'] : []),
+  ];
+  if (missing.length) {
+    throw new Error(`${missing.join(', ')} must be set together`);
+  }
+  const ownerUserId = positiveTelegramUserId(ownerUserIdRaw);
+  if (/replace|change-me|example\.invalid|your[-_ ]?(telegram|bot|chat|token)/i.test(`${botToken} ${chatId}`)) {
+    throw new Error('TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID must not be a placeholder');
+  }
+  if (!/^\d{6,}:[A-Za-z0-9_-]{20,}$/.test(botToken)) {
+    throw new Error('TELEGRAM_BOT_TOKEN is malformed');
+  }
+  if (!/^(-?\d{5,}|@[A-Za-z0-9_]{3,})$/.test(chatId)) {
+    throw new Error('TELEGRAM_CHAT_ID is malformed');
+  }
+  return { botToken, chatId, ownerUserId };
+}
+
 function loadConfig(env = process.env, { readFileSync = fs.readFileSync } = {}) {
   const nodeEnv = String(env.NODE_ENV || '').trim();
   if (!VALID_ENVS.has(nodeEnv)) throw new Error('NODE_ENV must be development, test, or production');
@@ -55,6 +90,7 @@ function loadConfig(env = process.env, { readFileSync = fs.readFileSync } = {}) 
   const imageSourceHosts = csv(production ? productionValue(env, 'IMAGE_SOURCE_HOSTS') : env.IMAGE_SOURCE_HOSTS || '');
   const publicOrigins = csv(production ? productionValue(env, 'PUBLIC_ORIGINS') : env.PUBLIC_ORIGINS || 'http://127.0.0.1:5500,http://127.0.0.1:5501');
   const adminOrigins = csv(production ? productionValue(env, 'ADMIN_ORIGINS') : env.ADMIN_ORIGINS || 'http://127.0.0.1:5500,http://127.0.0.1:5501');
+  const telegram = telegramSettings(env);
 
   return Object.freeze({
     nodeEnv,
@@ -67,6 +103,7 @@ function loadConfig(env = process.env, { readFileSync = fs.readFileSync } = {}) 
     imageSourceHosts,
     publicOrigins,
     adminOrigins,
+    telegram,
     database: {
       uri: production ? productionValue(env, 'DATABASE_URL') : required(env, 'DATABASE_URL'),
       ssl: ca ? { ca, rejectUnauthorized: true } : undefined,
