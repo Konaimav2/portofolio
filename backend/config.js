@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const { buildR2Config } = require('./avatar-storage');
 
 const VALID_ENVS = new Set(['development', 'test', 'production']);
 
@@ -77,13 +78,26 @@ function loadConfig(env = process.env, { readFileSync = fs.readFileSync } = {}) 
     }
   }
 
-  const r2Keys = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET', 'R2_PUBLIC_URL', 'BUCKET_URL'];
-  const r2Values = Object.fromEntries(r2Keys.map(key => [key, String(env[key] || '').trim()]));
-  const r2Complete = r2Keys.every(key => r2Values[key]);
-  if (production && !r2Complete) {
-    throw new Error(`${r2Keys.filter(key => !r2Values[key]).join(', ')} required in production`);
+  const r2 = buildR2Config(env);
+  if (production && !r2) {
+    throw new Error('R2 configuration is required in production. Use BUCKET_URL (or R2_ACCOUNT_ID) with R2_ACCESS_KEY_ID/ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY/SECRET_ACCESS_KEY, and R2_PUBLIC_URL/R2_PUBLIC_BASE_URL/R2_URL.');
   }
-  if (production) r2Keys.forEach(key => productionValue(env, key));
+  if (production) {
+    [
+      'R2_ACCOUNT_ID',
+      'R2_ACCESS_KEY_ID',
+      'ACCESS_KEY_ID',
+      'R2_SECRET_ACCESS_KEY',
+      'SECRET_ACCESS_KEY',
+      'R2_BUCKET',
+      'R2_PUBLIC_URL',
+      'R2_PUBLIC_BASE_URL',
+      'R2_URL',
+      'BUCKET_URL',
+    ].forEach(key => {
+      if (String(env[key] || '').trim()) productionValue(env, key);
+    });
+  }
 
   const turnstileSecret = production ? productionValue(env, 'TURNSTILE_SECRET') : String(env.TURNSTILE_SECRET || '').trim();
   const turnstileHostnames = csv(production ? productionValue(env, 'TURNSTILE_HOSTNAMES') : env.TURNSTILE_HOSTNAMES || 'localhost,127.0.0.1');
@@ -108,14 +122,7 @@ function loadConfig(env = process.env, { readFileSync = fs.readFileSync } = {}) 
       uri: production ? productionValue(env, 'DATABASE_URL') : required(env, 'DATABASE_URL'),
       ssl: ca ? { ca, rejectUnauthorized: true } : undefined,
     },
-    r2: r2Complete ? {
-      accountId: r2Values.R2_ACCOUNT_ID,
-      accessKeyId: r2Values.R2_ACCESS_KEY_ID,
-      secretAccessKey: r2Values.R2_SECRET_ACCESS_KEY,
-      bucket: r2Values.R2_BUCKET,
-      publicBaseUrl: r2Values.R2_PUBLIC_URL.replace(/\/$/, ''),
-      bucketUrl: r2Values.BUCKET_URL,
-    } : null,
+    r2,
   });
 }
 

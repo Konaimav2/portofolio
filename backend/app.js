@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const crypto = require('node:crypto');
-const { saveAvatarDataUrl, deleteAvatarUrl, buildR2Config, buildAssetKey } = require('./avatar-storage');
+const { saveAvatarDataUrl, deleteAvatarUrl, buildAssetKey } = require('./avatar-storage');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const media = require('./content-media');
 const { clientSafeRegisterError } = require('./security-helpers');
@@ -30,13 +30,7 @@ function createApp({
   });
   const saveAvatar = avatarStore.saveAvatarDataUrl || saveAvatarDataUrl;
   const deleteAvatar = avatarStore.deleteAvatarUrl || deleteAvatarUrl;
-  const r2Config = config.r2 ? buildR2Config({
-    R2_ACCOUNT_ID: config.r2.accountId,
-    R2_ACCESS_KEY_ID: config.r2.accessKeyId,
-    R2_SECRET_ACCESS_KEY: config.r2.secretAccessKey,
-    R2_BUCKET: config.r2.bucket,
-    R2_PUBLIC_URL: config.r2.publicBaseUrl,
-  }) : null;
+  const r2Config = config.r2 || null;
   const r2Client = r2Config ? new S3Client({
     region: 'auto',
     endpoint: r2Config.endpoint,
