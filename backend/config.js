@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const { buildR2Config } = require('./avatar-storage');
 
 const VALID_ENVS = new Set(['development', 'test', 'production']);
+const TURNSTILE_TEST_SECRET = '1x0000000000000000000000000000000AA';
 
 function required(env, key) {
   const value = String(env[key] ?? '').trim();
@@ -99,7 +100,10 @@ function loadConfig(env = process.env, { readFileSync = fs.readFileSync } = {}) 
     });
   }
 
-  const turnstileSecret = production ? productionValue(env, 'TURNSTILE_SECRET') : String(env.TURNSTILE_SECRET || '').trim();
+  const turnstileSecret = production
+    ? productionValue(env, 'TURNSTILE_SECRET')
+    : String(env.TURNSTILE_DEV_SECRET || TURNSTILE_TEST_SECRET).trim();
+  const turnstileTestMode = !production && turnstileSecret === TURNSTILE_TEST_SECRET;
   const turnstileHostnames = csv(production ? productionValue(env, 'TURNSTILE_HOSTNAMES') : env.TURNSTILE_HOSTNAMES || 'localhost,127.0.0.1');
   const imageSourceHosts = csv(production ? productionValue(env, 'IMAGE_SOURCE_HOSTS') : env.IMAGE_SOURCE_HOSTS || '');
   const publicOrigins = csv(production ? productionValue(env, 'PUBLIC_ORIGINS') : env.PUBLIC_ORIGINS || 'http://127.0.0.1:5500,http://127.0.0.1:5501');
@@ -113,6 +117,7 @@ function loadConfig(env = process.env, { readFileSync = fs.readFileSync } = {}) 
     listenHost: '127.0.0.1',
     adminPassword,
     turnstileSecret,
+    turnstileTestMode,
     turnstileHostnames,
     imageSourceHosts,
     publicOrigins,

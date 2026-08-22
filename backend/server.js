@@ -1,5 +1,5 @@
 const { loadConfig } = require('./config');
-const { createPool } = require('./database');
+const { createPool, checkDatabaseReady } = require('./database');
 const { createApp } = require('./app');
 const { createLogger } = require('./logger');
 
@@ -41,31 +41,93 @@ function closeHttpServer(server, timeoutMs) {
 }
 
 async function startServer(options = {}) {
-  const config = options.config || loadConfig(options.env || process.env);
-  if (config.listenHost !== '127.0.0.1') throw new Error('Server listen host must be loopback');
-  const pool = options.pool || createPool(config);
-  const listenForRequests = options.listen || listen;
   const logger = options.logger || createLogger();
+  const now = options.now || Date.now;
+  let config;
+  try {
+    config = options.config || loadConfig(options.env || process.env);
+    if (config.listenHost !== '127.0.0.1') throw new Error('Server listen host must be loopback');
+  } catch (error) {
+    logger.error({ event: 'startup_config_failed', component: 'config', errorCode: 'CONFIG_INVALID' });
+    throw error;
+  }
+
+  logger.info({
+    event: 'startup_config_loaded',
+    component: 'config',
+    nodeEnv: config.nodeEnv,
+    port: config.port,
+    tls: Boolean(config.database.ssl),
+    r2: Boolean(config.r2),
+    turnstile: Boolean(config.turnstileSecret),
+    telegram: Boolean(config.telegram),
+  });
+
+  let pool;
+  try {
+    pool = options.pool || createPool(config);
+    logger.info({ event: 'database_pool_created', component: 'database', tls: Boolean(config.database.ssl) });
+  } catch (error) {
+    logger.error({ event: 'database_pool_create_failed', component: 'database', tls: Boolean(config.database.ssl), errorCode: 'DATABASE_POOL_UNAVAILABLE' });
+    throw error;
+  }
+
+  const listenForRequests = options.listen || listen;
+  const createApplication = options.createApp || createApp;
+  const databaseCheck = options.databaseCheck || checkDatabaseReady;
   let server;
 
   try {
-    const app = createApp({ config, pool, logger, ...(options.dependencies || {}) });
+    const app = createApplication({ config, pool, logger, ...(options.dependencies || {}) });
     server = await listenForRequests(app, config.port, config.listenHost);
+    logger.info({ event: 'http_listening', component: 'server', port: config.port });
+
+    let shuttingDown = false;
+    const checkStartedAt = now();
+    void Promise.resolve(databaseCheck(pool, options.startupDatabaseTimeoutMs || 5000, { requireTls: config.production }))
+      .then(() => {
+        if (shuttingDown) return;
+        logger.info({
+          event: 'database_startup_check_succeeded',
+          component: 'database',
+          tls: Boolean(config.database.ssl),
+          durationMs: now() - checkStartedAt,
+        });
+      })
+      .catch(() => {
+        if (shuttingDown) return;
+        logger.error({
+          event: 'database_startup_check_failed',
+          component: 'database',
+          tls: Boolean(config.database.ssl),
+          durationMs: now() - checkStartedAt,
+          errorCode: 'DATABASE_UNAVAILABLE',
+        });
+      });
+
     let closePromise;
     const close = () => {
       if (!closePromise) {
         closePromise = (async () => {
+          shuttingDown = true;
+          logger.info({ event: 'shutdown_started', component: 'server' });
           try {
             await closeHttpServer(server, options.shutdownTimeoutMs || 10000);
           } finally {
             await pool.end();
           }
+          logger.info({ event: 'shutdown_complete', component: 'server' });
         })();
       }
       return closePromise;
     };
     return { app, server, pool, close };
   } catch (error) {
+    logger.error({
+      event: 'server_startup_failed',
+      component: 'server',
+      errorCode: error?.code === 'EADDRINUSE' ? 'PORT_IN_USE' : 'SERVER_STARTUP_FAILED',
+    });
     if (server) await closeHttpServer(server, options.shutdownTimeoutMs || 10000).catch(() => {});
     await pool.end().catch(() => {});
     throw error;
