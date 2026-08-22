@@ -6,7 +6,10 @@
     <meta name="robots" content="noindex, nofollow">
     <title>Portfolio Admin</title>
     <link rel="icon" type="image/webp" href="https://banquet.arraffi.com/portfolio/assets/site.webp">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="admin.css">
     <script src="turnstile.js" defer></script>
     <script src="admin.js" defer></script>
@@ -15,40 +18,69 @@
     <div id="toast" class="save-toast" role="status" aria-live="polite"></div>
 
     <main id="login-view" class="login-wrap hidden">
-        <section class="login-card">
-            <h2>Admin Panel</h2>
-            <p>Enter your password to continue</p>
+        <section class="login-card" aria-labelledby="login-title">
+            <div class="login-mark" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div>
+            <p class="eyebrow">Portfolio workspace</p>
+            <h1 id="login-title">Admin access</h1>
+            <p class="login-copy">Manage work, career history, and community replies.</p>
             <form id="login-form">
                 <div class="field">
                     <label for="admin-password">Password</label>
-                    <input id="admin-password" type="password" placeholder="••••••••••••" autocomplete="current-password" required>
+                    <input id="admin-password" type="password" placeholder="Enter admin password" autocomplete="current-password" required>
                 </div>
                 <div id="admin-turnstile" class="turnstile-container"></div>
-                <button id="login-button" class="btn btn-primary btn-full" type="submit">Sign In</button>
-                <p id="login-error" class="form-error hidden"></p>
+                <button id="login-button" class="btn btn-primary btn-full" type="submit"><i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>Sign in</button>
+                <p id="login-error" class="form-error hidden" role="alert"></p>
             </form>
         </section>
     </main>
 
-    <main id="admin-view" class="shell hidden">
-        <header class="topbar">
-            <span class="topbar-title">⚙ Portfolio CMS</span>
-            <button id="logout-button" class="logout-btn" type="button">Sign out</button>
-        </header>
+    <main id="admin-view" class="admin-shell hidden">
+        <aside class="admin-sidebar" aria-label="Admin navigation">
+            <div class="sidebar-brand">
+                <span class="brand-mark" aria-hidden="true">A.</span>
+                <span><strong>Portfolio</strong><small>Control room</small></span>
+            </div>
+            <nav class="admin-nav" aria-label="Content sections">
+                <button class="tab active" type="button" data-tab="projects" aria-label="Projects"><i class="fa-solid fa-grid-2" aria-hidden="true"></i><span>Projects</span></button>
+                <button class="tab" type="button" data-tab="experience" aria-label="Experience"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>Experience</span></button>
+                <button class="tab" type="button" data-tab="comments" aria-label="Comments"><i class="fa-regular fa-message" aria-hidden="true"></i><span>Comments</span><span id="comment-count" class="nav-count hidden">0</span></button>
+            </nav>
+            <div class="sidebar-note"><i class="fa-solid fa-lock" aria-hidden="true"></i><span>Session expires on backend restart.</span></div>
+        </aside>
 
-        <section class="content">
-            <nav class="tabs" aria-label="Admin sections">
-                <button class="tab active" type="button" data-tab="projects">Projects</button>
-                <button class="tab" type="button" data-tab="experience">Experience</button>
-                <button class="tab" type="button" data-tab="comments">Comments <span id="comment-count" class="badge hidden">0</span></button>
+        <section class="admin-main">
+            <header class="admin-topbar">
+                <div>
+                    <p class="eyebrow">Content manager</p>
+                    <h1 id="workspace-title">Projects</h1>
+                </div>
+                <div class="topbar-actions">
+                    <span id="dashboard-status" class="sync-status" role="status" aria-live="polite">Ready</span>
+                    <button class="icon-button" type="button" data-action="refresh" aria-label="Refresh content" title="Refresh content"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i></button>
+                    <button id="logout-button" class="logout-btn" type="button"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i><span>Sign out</span></button>
+                </div>
+            </header>
+
+            <nav class="admin-mobile-nav" aria-label="Content sections">
+                <button class="tab active" type="button" data-tab="projects" aria-label="Projects"><i class="fa-solid fa-grid-2" aria-hidden="true"></i><span>Projects</span></button>
+                <button class="tab" type="button" data-tab="experience" aria-label="Experience"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>Experience</span></button>
+                <button class="tab" type="button" data-tab="comments" aria-label="Comments"><i class="fa-regular fa-message" aria-hidden="true"></i><span>Comments</span></button>
             </nav>
 
-            <section id="projects-panel" class="panel"></section>
-            <section id="experience-panel" class="panel hidden"></section>
-            <section id="comments-panel" class="panel hidden"></section>
+            <section class="workspace">
+                <div class="workspace-summary" aria-label="Content summary">
+                    <div class="summary-card"><span>Projects</span><strong id="project-total">0</strong></div>
+                    <div class="summary-card"><span>Experience</span><strong id="experience-total">0</strong></div>
+                    <div class="summary-card"><span>Pending</span><strong id="pending-total">0</strong></div>
+                </div>
+                <section id="projects-panel" class="panel"></section>
+                <section id="experience-panel" class="panel hidden"></section>
+                <section id="comments-panel" class="panel hidden"></section>
+            </section>
         </section>
     </main>
 
-    <div id="modal-root" class="modal-overlay hidden" role="dialog" aria-modal="true"></div>
+    <div id="modal-root" class="modal-overlay hidden" aria-live="polite"></div>
 </body>
 </html>

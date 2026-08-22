@@ -91,6 +91,10 @@ function createApp({
     if (config.production) res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
     next();
   });
+  app.use('/api', (_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
   app.use(express.json({ limit: '3mb' }));
   app.use(express.static(path.join(__dirname, '../frontend')));
   app.use('/uploads/avatars', express.static(path.join(__dirname, 'uploads/avatars'), {
@@ -101,10 +105,18 @@ function createApp({
 
   app.get('/livez', (_req, res) => res.json({ ok: true }));
   app.get('/readyz', async (_req, res) => {
+    const startedAt = Date.now();
     try {
       await checkDatabaseReady(pool, 1500, { requireTls: config.production });
       res.json({ ok: true });
     } catch {
+      logger.error({
+        event: 'database_readiness_failed',
+        component: 'database',
+        tls: Boolean(config.database.ssl),
+        durationMs: Date.now() - startedAt,
+        errorCode: 'DATABASE_UNAVAILABLE',
+      });
       res.locals.errorCode = 'DATABASE_UNAVAILABLE';
       res.status(503).json({ ok: false, error: 'DATABASE_UNAVAILABLE' });
     }
@@ -121,6 +133,7 @@ function createApp({
 
   const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
   const ADMIN_DB_TIMEOUT_MS = 10000;
+  const ADMIN_READ_TIMEOUT_MS = 3500;
   const activeSessions = new Map();
   const commentSessions = new Map();
 
@@ -217,6 +230,28 @@ function createApp({
       return pool.query({ sql, values, timeout: ADMIN_DB_TIMEOUT_MS });
   }
 
+  function databaseErrorCode(error) {
+      return error?.code === 'PROTOCOL_SEQUENCE_TIMEOUT' ? 'DATABASE_TIMEOUT' : 'DATABASE_UNAVAILABLE';
+  }
+
+  async function adminRead(entity, sql, values = []) {
+      const startedAt = Date.now();
+      try {
+          const [rows] = await pool.query({ sql, values, timeout: ADMIN_READ_TIMEOUT_MS });
+          logger.info({ event: 'admin_content_loaded', component: 'database', entity, durationMs: Date.now() - startedAt });
+          return rows;
+      } catch (error) {
+          logger.error({
+              event: 'admin_content_load_failed',
+              component: 'database',
+              entity,
+              durationMs: Date.now() - startedAt,
+              errorCode: databaseErrorCode(error),
+          });
+          throw error;
+      }
+  }
+
   function isValidUrl(str) {
       if (!str || str.trim() === '') return true;
       try {
@@ -307,7 +342,13 @@ function createApp({
       }
   }
 
-  function rejectTurnstile(res, result) {
+  function rejectTurnstile(res, result, action) {
+      logger.error({
+          event: 'turnstile_rejected',
+          component: 'turnstile',
+          action,
+          errorCode: result.code || 'TURNSTILE_INVALID',
+      });
       const code = result.code === 'TURNSTILE_REQUIRED' ? 'TURNSTILE_REQUIRED' : 'TURNSTILE_FAILED';
       return sendError(res, code);
   }
@@ -390,7 +431,7 @@ function createApp({
               return res.status(422).json({ error: 'Name, email, and password are required.' });
           }
           const turnstileResult = await verifyTurnstile(turnstile, 'comment_register', req);
-          if (!turnstileResult.ok) return rejectTurnstile(res, turnstileResult);
+          if (!turnstileResult.ok) return rejectTurnstile(res, turnstileResult, 'comment_register');
           if (name.trim().length > 120) return res.status(422).json({ error: 'Name is too long.' });
           if (!isValidEmail(email)) return res.status(422).json({ error: 'Use a valid email address.' });
           if (String(password).length < 8 || String(password).length > 160) {
@@ -470,7 +511,7 @@ function createApp({
           const { body, anonymous_name, anonymous_email, website_url, turnstile } = req.body ?? {};
           if (website_url) return res.json({ ok: true, status: 'pending', message: 'Comment received.' });
           const turnstileResult = await verifyTurnstile(turnstile, 'comment_post', req);
-          if (!turnstileResult.ok) return rejectTurnstile(res, turnstileResult);
+          if (!turnstileResult.ok) return rejectTurnstile(res, turnstileResult, 'comment_post');
           const moderationError = moderateComment(body);
           if (moderationError) return res.status(422).json({ ok: false, error: moderationError });
 
@@ -518,7 +559,7 @@ function createApp({
   app.post('/api/admin/login', loginLimiter, async (req, res) => {
       const { password, turnstile } = req.body ?? {};
       const turnstileResult = await verifyTurnstile(turnstile, 'admin_login', req);
-      if (!turnstileResult.ok) return rejectTurnstile(res, turnstileResult);
+      if (!turnstileResult.ok) return rejectTurnstile(res, turnstileResult, 'admin_login');
       if (typeof password === 'string' && timingSafeEqual(password, config.adminPassword)) {
           const { token, csrf } = createSessionToken();
           res.cookie(ADMIN_SESSION_COOKIE, token, {
@@ -528,8 +569,10 @@ function createApp({
               maxAge: SESSION_TTL_MS,
               path: '/api/admin',
           });
+          logger.info({ event: 'admin_login_succeeded', component: 'auth', action: 'login' });
           return res.json({ ok: true, csrfToken: csrf });
       }
+      logger.error({ event: 'admin_login_rejected', component: 'auth', action: 'login', errorCode: 'AUTH_INVALID' });
       return res.status(401).json({ error: 'Invalid password' });
   });
 
@@ -551,10 +594,9 @@ function createApp({
 
   app.get('/api/admin/projects', authMiddleware, async (req, res) => {
       try {
-          const [rows] = await adminQuery('SELECT id, title, title_id, description, description_id, url, image_url, image_url_fallback, full_width, sort_order FROM projects ORDER BY sort_order ASC, id ASC');
+          const rows = await adminRead('projects', 'SELECT id, title, title_id, description, description_id, url, image_url, image_url_fallback, full_width, sort_order FROM projects ORDER BY sort_order ASC, id ASC');
           res.json(rows);
-      } catch (err) {
-          logger.error({ event: 'admin_projects_fetch_failed', errorCode: 'DATABASE_UNAVAILABLE' });
+      } catch {
           res.status(500).json({ error: 'Failed to fetch projects.' });
       }
   });
@@ -647,10 +689,9 @@ function createApp({
 
   app.get('/api/admin/experience', authMiddleware, async (req, res) => {
       try {
-          const [rows] = await adminQuery('SELECT id, company, role, role_id, date_range, description, description_id, logo_url, logo_url_fallback, url, sort_order FROM experience ORDER BY sort_order ASC, id ASC');
+          const rows = await adminRead('experience', 'SELECT id, company, role, role_id, date_range, description, description_id, logo_url, logo_url_fallback, url, sort_order FROM experience ORDER BY sort_order ASC, id ASC');
           res.json(rows);
-      } catch (err) {
-          logger.error({ event: 'admin_experience_fetch_failed', errorCode: 'DATABASE_UNAVAILABLE' });
+      } catch {
           res.status(500).json({ error: 'Failed to fetch experience.' });
       }
   });
@@ -743,7 +784,7 @@ function createApp({
 
   app.get('/api/admin/comments', authMiddleware, async (_req, res) => {
       try {
-          const [rows] = await pool.query(
+          const rows = await adminRead('comments',
               `SELECT id, user_id, author_name, author_email, avatar_url, body, status, created_at
                FROM comments ORDER BY created_at DESC LIMIT 200`
           );

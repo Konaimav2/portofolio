@@ -174,6 +174,24 @@ test('static image references use portfolio R2 assets only', async () => {
     }
 });
 
+test('admin uses compact workspace navigation, status, and mobile controls', async () => {
+    const [html, css, script] = await Promise.all([
+        read('../admin.html'),
+        read('../admin.css'),
+        read('../admin.js'),
+    ]);
+
+    assert.match(html, /class="admin-sidebar"/);
+    assert.match(html, /class="admin-mobile-nav"/);
+    assert.match(html, /id="dashboard-status"/);
+    assert.match(html, /data-action="refresh"/);
+    assert.match(html, /aria-label="Projects"/);
+    assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*\.admin-sidebar\s*\{[^}]*display:\s*none/s);
+    assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*\.admin-mobile-nav\s*\{[^}]*display:\s*grid/s);
+    assert.match(script, /action === 'refresh'/);
+    assert.match(script, /function renderDashboardMeta\(\)/);
+});
+
 test('Screen 1 contains only environmental text', async () => {
     const html = await read('../index.html');
     const screen = html.slice(html.indexOf('id="home"'), html.indexOf('id="about"'));
@@ -335,6 +353,7 @@ test('Turnstile uses explicit lazy rendering and never reads global response fie
     assert.match(admin, /render\(['"]admin-turnstile['"][\s\S]*action:\s*['"]admin_login['"]/);
     assert.match(admin, /getToken\(['"]admin-turnstile['"]\)/);
     assert.match(admin, /reset\(['"]admin-turnstile['"]\)/);
+    assert.match(admin, /Complete Turnstile verification before signing in/);
 });
 
 test('Turnstile helper isolates widgets and ignores unrendered reset or remove', async () => {
@@ -391,6 +410,28 @@ test('SEO head keeps canonical, hreflang, OG image sizing, and CDN preconnect', 
     }
 });
 
+test('profile copy uses Arraffi AMF and Konaima alias', async () => {
+    const [english, indonesian, manifest] = await Promise.all([
+        read('../index.html'),
+        read('../id/index.html'),
+        read('../site.webmanifest'),
+    ]);
+
+    assert.match(english, /Arraffi AMF — Junior Backend Engineer/);
+    assert.match(english, /"name": "Arraffi AMF"/);
+    assert.match(english, /"alternateName": "Konaima"/);
+    assert.match(english, /I'm Arraffi AMF, known online as Konaima,/);
+    assert.match(english, /<dd>Junior Backend Engineer<\/dd>/);
+
+    assert.match(indonesian, /Arraffi AMF — Junior Backend Engineer/);
+    assert.match(indonesian, /"name": "Arraffi AMF"/);
+    assert.match(indonesian, /"alternateName": "Konaima"/);
+    assert.match(indonesian, /Saya Arraffi AMF, dikenal online sebagai Konaima,/);
+    assert.match(indonesian, /<dd>Junior Backend Engineer<\/dd>/);
+
+    assert.match(manifest, /Arraffi AMF — Junior Backend Engineer/);
+});
+
 test('robots and sitemap stay on canonical domain', async () => {
     const robots = await read('../robots.txt');
     assert.match(robots, /User-agent: Googlebot/);
@@ -412,4 +453,38 @@ test('CSP script-src carries a hash for each inline JSON-LD block', async () => 
         assert.ok(headers.includes(`'sha256-${digest}'`), `missing CSP hash for ${path}`);
     }
     assert.doesNotMatch(headers, /script-src[^;]*'unsafe-inline'/);
+});
+
+test('admin keeps local API host equal to local page host', async () => {
+    const script = await read('../admin.js');
+    assert.match(script, /const isLocalHost = location\.hostname === '127\.0\.0\.1' \|\| location\.hostname === 'localhost';/);
+    assert.match(script, /isLocalHost \? `http:\/\/\$\{location\.hostname\}:3001\/api` : PROD_API/);
+});
+
+test('admin renders workspace before slow section fetches settle', async () => {
+    const script = await read('../admin.js');
+    assert.match(script, /state\.loggedIn = true;\s*password\.value = '';\s*render\(\);\s*await fetchAll\(\);/s);
+});
+
+test('admin editor uses a grouped workbench layout and switch button', async () => {
+    const [script, css] = await Promise.all([read('../admin.js'), read('../admin.css')]);
+    assert.match(script, /class="editor-layout editor-layout-project"/);
+    assert.match(script, /class="editor-main"/);
+    assert.match(script, /class="editor-aside"/);
+    assert.match(script, /class="toggle-row" type="button" role="switch"/);
+    assert.match(script, /data-width-switch/);
+    assert.match(script, /<input[^>]*name="full_width"[^>]*type="hidden"/);
+    assert.match(script, /widthSwitch\.addEventListener\('click'/);
+    assert.match(script, /return `<div class="field"><label><span>\$\{esc\(label\)\}<\/span>\$\{isText/);
+    assert.doesNotMatch(script, /class="check-label"/);
+    assert.doesNotMatch(script, /type="checkbox"/);
+    assert.match(script, /class="[^"]*modal-close[^"]*"[^>]*aria-label="Close editor"/);
+    assert.match(script, /root\.setAttribute\('role', 'dialog'\);/);
+    assert.match(script, /root\.removeAttribute\('role'\);/);
+
+    assert.match(css, /\.edit-form\s*\{[^}]*display:\s*grid[^}]*grid-template-rows:\s*auto\s+minmax\(0,\s*1fr\)\s+auto/s);
+    assert.match(css, /\.editor-layout\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(260px,\s*\.52fr\)/s);
+    assert.match(css, /\.editor-aside\s*\{[^}]*border-left:/s);
+    assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*\.editor-layout\s*\{[^}]*grid-template-columns:\s*1fr/s);
+    assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*\.editor-aside\s*\{[^}]*border-left:\s*0/s);
 });

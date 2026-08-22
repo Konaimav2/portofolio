@@ -31,6 +31,18 @@ test('fetchJSON retries one failed GET request', async () => {
     assert.equal(attempts, 2);
 });
 
+test('fetchJSON bypasses HTTP cache for API reads', async () => {
+    let requestOptions;
+    const client = loadClient(async (_url, options) => {
+        requestOptions = options;
+        return { ok: true, json: async () => ({ ok: true }) };
+    });
+
+    await client.fetchJSON('/api/projects');
+
+    assert.equal(requestOptions.cache, 'no-store');
+});
+
 test('fetchJSON never retries mutation requests', async () => {
     let attempts = 0;
     const client = loadClient(async () => {

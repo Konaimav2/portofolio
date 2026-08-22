@@ -15,7 +15,7 @@
             const attemptsLeft = retries - attempt + 1;
             const timeout = setTimeout(() => controller.abort(), Math.ceil(remaining / attemptsLeft));
             try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
+                const response = await fetch(url, { ...options, cache: 'no-store', signal: controller.signal });
                 const json = await response.json().catch(() => null);
                 if (!response.ok) {
                     const error = new Error(json?.error || `HTTP ${response.status}`);

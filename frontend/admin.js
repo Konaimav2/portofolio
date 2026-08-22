@@ -2,13 +2,14 @@
     const LOCAL_API = 'http://localhost:3001/api';
     const LOCAL_API_ALT = 'http://127.0.0.1:3001/api';
     const PROD_API = 'https://api.arraffi.com/api';
+    const isLocalHost = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
     const params = new URLSearchParams(location.search);
     const requestedApi = params.get('api');
     const allowedApiOverrides = new Set([LOCAL_API, LOCAL_API_ALT, PROD_API]);
     const API = requestedApi && allowedApiOverrides.has(requestedApi)
         ? requestedApi
-        : (location.hostname === '127.0.0.1' || location.hostname === 'localhost' ? LOCAL_API : PROD_API);
-    const TURNSTILE_SITE_KEY = location.hostname === '127.0.0.1' || location.hostname === 'localhost'
+        : (isLocalHost ? `http://${location.hostname}:3001/api` : PROD_API);
+    const TURNSTILE_SITE_KEY = isLocalHost
         ? '1x00000000000000000000AA'
         : '0x4AAAAAADMAtXOh4MijdApa';
     const TURNSTILE_TIMEOUT_MS = 9000;
@@ -19,6 +20,9 @@
         loggedIn: false,
         csrf: '',
         saving: false,
+        refreshing: false,
+        loadError: '',
+        lastSyncedAt: null,
         projects: [],
         experience: [],
         comments: [],
@@ -33,7 +37,7 @@
         if (!raw) return '';
         try {
             const url = new URL(raw, location.origin);
-            if (!['http:', 'https:', 'data:'].includes(url.protocol)) return '';
+            if (!['http:', 'https:'].includes(url.protocol)) return '';
             return url.href;
         } catch { return ''; }
     };
@@ -107,6 +111,7 @@
         button.textContent = 'Checking...';
         try {
             const turnstile = await waitForTurnstileToken();
+            if (!turnstile) throw new Error('Complete Turnstile verification before signing in.');
             const data = await requestJson('/admin/login', {
                 method: 'POST',
                 body: JSON.stringify({ password: password.value, turnstile }),
@@ -115,13 +120,18 @@
             state.csrf = data.csrfToken || '';
             state.loggedIn = true;
             password.value = '';
+            render();
             await fetchAll();
             render();
         } catch (err) {
-            error.textContent = err.message || 'Wrong password.';
+            const message = err.message || 'Wrong password.';
+            error.textContent = message;
             error.classList.remove('hidden');
-            password.value = '';
-            window.PortfolioTurnstile.reset('admin-turnstile');
+            if (/turnstile/i.test(message)) {
+                window.PortfolioTurnstile.reset('admin-turnstile');
+            } else {
+                password.value = '';
+            }
         } finally {
             button.disabled = false;
             button.textContent = 'Sign In';
@@ -144,41 +154,99 @@
         if (projects.status === 'fulfilled') state.projects = projects.value;
         if (experience.status === 'fulfilled') state.experience = experience.value;
         if (comments.status === 'fulfilled') state.comments = comments.value;
+        const failed = [projects, experience, comments].filter((result) => result.status === 'rejected');
+        state.loadError = failed.length ? `Could not refresh ${failed.length === 1 ? 'one section' : `${failed.length} sections`}.` : '';
+        if (!state.loadError) state.lastSyncedAt = new Date();
+        return !state.loadError;
+    }
+
+    async function refreshDashboard() {
+        if (state.saving || state.refreshing) return;
+        state.refreshing = true;
+        render();
+        try {
+            const refreshed = await fetchAll();
+            if (refreshed) showToast('Content refreshed');
+            else showToast(state.loadError, 'error');
+        } finally {
+            state.refreshing = false;
+            render();
+        }
     }
 
     function field(label, name, value = '', type = 'text') {
         const isText = type === 'textarea';
-        return `<div class="field"><label>${esc(label)}</label>${isText
+        return `<div class="field"><label><span>${esc(label)}</span>${isText
             ? `<textarea name="${esc(name)}">${esc(value)}</textarea>`
-            : `<input name="${esc(name)}" type="${esc(type)}" value="${esc(value)}">`}</div>`;
+            : `<input name="${esc(name)}" type="${esc(type)}" value="${esc(value)}">`}</label></div>`;
+    }
+
+    function mediaPreview(value, label) {
+        const source = safeUrl(value);
+        return `<div class="media-preview${source ? ' has-media' : ''}" data-media-preview>
+            <img src="${esc(source)}" alt="${esc(label)} preview">
+            <span>${source ? 'Current media preview' : 'Media preview appears here'}</span>
+        </div>`;
     }
 
     function projectForm(project = {}) {
-        return `
-            ${field('Title (EN)', 'title', project.title)}
-            ${field('Title (ID)', 'title_id', project.title_id)}
-            ${field('Description (EN)', 'description', project.description, 'textarea')}
-            ${field('Description (ID)', 'description_id', project.description_id, 'textarea')}
-            ${field('Project URL', 'url', project.url, 'url')}
-            ${field('Image URL', 'image_url', project.image_url, 'url')}
-            <label class="check-label"><input name="full_width" type="checkbox" ${project.full_width ? 'checked' : ''}>Wide card</label>`;
+        return `<div class="editor-layout editor-layout-project">
+            <div class="editor-main">
+                <section class="editor-section">
+                    <h3 class="editor-section-title">Project details</h3>
+                    <div class="field-grid">
+                        ${field('Title (English)', 'title', project.title)}
+                        ${field('Title (Indonesian)', 'title_id', project.title_id)}
+                        ${field('Description (English)', 'description', project.description, 'textarea')}
+                        ${field('Description (Indonesian)', 'description_id', project.description_id, 'textarea')}
+                    </div>
+                </section>
+            </div>
+            <aside class="editor-aside">
+                <section class="editor-section">
+                    <h3 class="editor-section-title">Media and layout</h3>
+                    ${field('Project URL', 'url', project.url, 'url')}
+                    ${field('Image URL', 'image_url', project.image_url, 'url')}
+                    ${mediaPreview(project.image_url || project.image_url_fallback, project.title || 'Project')}
+                    <button class="toggle-row" type="button" role="switch" aria-checked="${project.full_width ? 'true' : 'false'}" data-width-switch>
+                        <span><strong>Wide project card</strong><small>Span extra room in selected work.</small></span>
+                        <span class="toggle-control" aria-hidden="true"></span>
+                    </button>
+                    <input name="full_width" type="hidden" value="${project.full_width ? '1' : '0'}">
+                </section>
+            </aside>
+        </div>`;
     }
 
     function expForm(exp = {}) {
-        return `
-            ${field('Company', 'company', exp.company)}
-            ${field('Role (EN)', 'role', exp.role)}
-            ${field('Role (ID)', 'role_id', exp.role_id)}
-            ${field('Date range', 'date_range', exp.date_range)}
-            ${field('Description (EN)', 'description', exp.description, 'textarea')}
-            ${field('Description (ID)', 'description_id', exp.description_id, 'textarea')}
-            ${field('Logo URL', 'logo_url', exp.logo_url, 'url')}
-            ${field('Link URL', 'url', exp.url, 'url')}`;
+        return `<div class="editor-layout">
+            <div class="editor-main">
+                <section class="editor-section">
+                    <h3 class="editor-section-title">Experience details</h3>
+                    <div class="field-grid">
+                        ${field('Company', 'company', exp.company)}
+                        ${field('Date range', 'date_range', exp.date_range)}
+                        ${field('Role (English)', 'role', exp.role)}
+                        ${field('Role (Indonesian)', 'role_id', exp.role_id)}
+                        ${field('Description (English)', 'description', exp.description, 'textarea')}
+                        ${field('Description (Indonesian)', 'description_id', exp.description_id, 'textarea')}
+                    </div>
+                </section>
+            </div>
+            <aside class="editor-aside">
+                <section class="editor-section">
+                    <h3 class="editor-section-title">Link and logo</h3>
+                    ${field('Link URL', 'url', exp.url, 'url')}
+                    ${field('Logo URL', 'logo_url', exp.logo_url, 'url')}
+                    ${mediaPreview(exp.logo_url || exp.logo_url_fallback, exp.company || 'Company')}
+                </section>
+            </aside>
+        </div>`;
     }
 
     function valuesFrom(form) {
         const data = Object.fromEntries(new FormData(form).entries());
-        if (form.elements.full_width) data.full_width = form.elements.full_width.checked ? 1 : 0;
+        if (form.elements.full_width) data.full_width = form.elements.full_width.value === '1' ? 1 : 0;
         return data;
     }
 
@@ -221,19 +289,49 @@
         const root = $('#modal-root');
         let submitting = false;
         root.classList.remove('hidden');
+        root.setAttribute('role', 'dialog');
+        root.setAttribute('aria-modal', 'true');
+        root.setAttribute('aria-labelledby', 'editor-title');
         root.innerHTML = `<form class="modal-card edit-form">
-            <div class="modal-title">${esc(title)}</div>
+            <div class="modal-head">
+                <div><h2 id="editor-title" class="modal-title">${esc(title)}</h2><p class="modal-copy">Changes publish after this form saves successfully.</p></div>
+                <button class="modal-close icon-button" type="button" data-action="close" aria-label="Close editor"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
             ${formHtml}
             <div class="btn-row modal-actions">
                 <button class="btn" type="button" data-action="cancel">Cancel</button>
-                <button class="btn btn-primary" type="submit">Save</button>
+                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i>Save changes</button>
             </div>
         </form>`;
+        const form = root.querySelector('form');
+        const mediaInput = form.elements.image_url || form.elements.logo_url;
+        const preview = form.querySelector('[data-media-preview]');
+        if (mediaInput && preview) {
+            const image = preview.querySelector('img');
+            const label = preview.querySelector('span');
+            const refreshPreview = () => {
+                const source = safeUrl(mediaInput.value);
+                image.src = source;
+                preview.classList.toggle('has-media', Boolean(source));
+                label.textContent = source ? 'Current media preview' : 'Media preview appears here';
+            };
+            mediaInput.addEventListener('input', refreshPreview);
+        }
+        const widthSwitch = form.querySelector('[data-width-switch]');
+        const fullWidth = form.elements.full_width;
+        if (widthSwitch && fullWidth) {
+            widthSwitch.addEventListener('click', () => {
+                const wide = widthSwitch.getAttribute('aria-checked') !== 'true';
+                widthSwitch.setAttribute('aria-checked', String(wide));
+                fullWidth.value = wide ? '1' : '0';
+            });
+        }
         root.onclick = (event) => {
             if (submitting) return;
-            if (event.target === root || event.target?.dataset?.action === 'cancel') closeModal();
+            const action = event.target.closest?.('[data-action]')?.dataset?.action;
+            if (event.target === root || action === 'cancel' || action === 'close') closeModal();
         };
-        root.querySelector('form').onsubmit = async (event) => {
+        form.onsubmit = async (event) => {
             event.preventDefault();
             if (submitting) return;
             submitting = true;
@@ -256,8 +354,31 @@
     function closeModal() {
         const root = $('#modal-root');
         root.classList.add('hidden');
+        root.removeAttribute('role');
+        root.removeAttribute('aria-modal');
+        root.removeAttribute('aria-labelledby');
         root.innerHTML = '';
         root.onclick = null;
+    }
+
+    function recordThumb(source, label, icon) {
+        const url = safeUrl(source);
+        return url
+            ? `<img class="record-thumb" src="${esc(url)}" alt="${esc(label)}">`
+            : `<div class="record-thumb thumb-empty" aria-hidden="true"><i class="fa-solid ${esc(icon)}"></i></div>`;
+    }
+
+    function orderControls(kind, item, index, length) {
+        const label = kind === 'projects' ? 'Project' : 'Experience';
+        const up = kind === 'projects' ? 'project-up' : 'exp-up';
+        const down = kind === 'projects' ? 'project-down' : 'exp-down';
+        return `<div class="record-order" aria-label="${label} order controls">
+            <span class="order-index">${String(index + 1).padStart(2, '0')}</span>
+            <div class="order-actions">
+                <button class="order-btn" type="button" data-action="${up}" data-id="${item.id}" aria-label="Move ${label.toLowerCase()} up" title="Move up" ${state.saving || index === 0 ? 'disabled' : ''}><i class="fa-solid fa-chevron-up" aria-hidden="true"></i></button>
+                <button class="order-btn" type="button" data-action="${down}" data-id="${item.id}" aria-label="Move ${label.toLowerCase()} down" title="Move down" ${state.saving || index === length - 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
+            </div>
+        </div>`;
     }
 
     async function saveProject(record, id = null) {
@@ -317,65 +438,96 @@
     }
 
     function renderProjects() {
-        $('#projects-panel').innerHTML = `<div class="add-panel">
-            <button class="add-panel-toggle" type="button" data-action="add-project" ${state.saving ? 'disabled' : ''}>+ Add New Project</button>
-        </div>${state.projects.map((project, index) => `<article class="item">
-            <div class="item-row">
-                <div class="order-actions" aria-label="Project order controls">
-                    <button class="btn order-btn" data-action="project-up" data-id="${project.id}" ${state.saving || index === 0 ? 'disabled' : ''}>↑</button>
-                    <button class="btn order-btn" data-action="project-down" data-id="${project.id}" ${state.saving || index === state.projects.length - 1 ? 'disabled' : ''}>↓</button>
+        const projects = state.projects.map((project, index) => {
+            const media = project.image_url || project.image_url_fallback;
+            return `<article class="record-card">
+                ${orderControls('projects', project, index, state.projects.length)}
+                <div class="record-main">
+                    ${recordThumb(media, project.title, 'fa-image')}
+                    <div class="record-copy">
+                        <div class="record-kicker"><span>Project ${project.full_width ? '· Wide' : ''}</span>${project.image_url_fallback ? '<span class="source-state">R2 fallback</span>' : ''}</div>
+                        <h3 class="record-title">${esc(project.title)}</h3>
+                        <p class="record-sub">${esc(project.description)}</p>
+                    </div>
                 </div>
-                ${safeUrl(project.image_url) ? `<img class="item-thumb" src="${safeUrl(project.image_url)}" alt="${esc(project.title)}">` : '<div class="item-thumb thumb-empty"></div>'}
-                <div class="item-info">
-                    <div class="item-title">${esc(project.title)}${project.full_width ? '<span class="badge">Wide</span>' : ''}</div>
-                    <div class="item-sub">${esc(project.description)}</div>
+                <div class="record-actions">
+                    <button class="btn btn-edit" type="button" data-action="edit-project" data-id="${project.id}" aria-label="Edit ${esc(project.title)}" title="Edit project"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+                    <button class="btn btn-danger btn-edit" type="button" data-action="delete-project" data-id="${project.id}" aria-label="Delete ${esc(project.title)}" title="Delete project"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                 </div>
-                <div class="item-actions">
-                    <button class="btn btn-edit" data-action="edit-project" data-id="${project.id}">✏</button>
-                    <button class="btn btn-danger" data-action="delete-project" data-id="${project.id}">🗑</button>
-                </div>
-            </div>
-        </article>`).join('') || '<div class="empty">No projects yet. Add one above.</div>'}`;
+            </article>`;
+        }).join('');
+        $('#projects-panel').innerHTML = `<div class="panel-head">
+            <div><h2>Selected work</h2><p class="panel-copy">Compact cards shown in portfolio order.</p></div>
+            <button class="btn btn-primary add-button" type="button" data-action="add-project" ${state.saving ? 'disabled' : ''}><i class="fa-solid fa-plus" aria-hidden="true"></i>Add project</button>
+        </div><div class="record-list">${projects || '<div class="empty">No projects yet. Add first project.</div>'}</div>`;
     }
 
     function renderExperience() {
-        $('#experience-panel').innerHTML = `<div class="add-panel">
-            <button class="add-panel-toggle" type="button" data-action="add-exp" ${state.saving ? 'disabled' : ''}>+ Add Experience</button>
-        </div>${state.experience.map((exp, index) => `<article class="item">
-            <div class="item-row">
-                <div class="order-actions" aria-label="Experience order controls">
-                    <button class="btn order-btn" data-action="exp-up" data-id="${exp.id}" ${state.saving || index === 0 ? 'disabled' : ''}>↑</button>
-                    <button class="btn order-btn" data-action="exp-down" data-id="${exp.id}" ${state.saving || index === state.experience.length - 1 ? 'disabled' : ''}>↓</button>
+        const experience = state.experience.map((exp, index) => {
+            const media = exp.logo_url || exp.logo_url_fallback;
+            return `<article class="record-card">
+                ${orderControls('experience', exp, index, state.experience.length)}
+                <div class="record-main">
+                    ${recordThumb(media, exp.company, 'fa-building')}
+                    <div class="record-copy">
+                        <div class="record-kicker"><span>${esc(exp.date_range)}</span>${exp.logo_url_fallback ? '<span class="source-state">R2 fallback</span>' : ''}</div>
+                        <h3 class="record-title">${esc(exp.company)}</h3>
+                        <p class="record-sub">${esc(exp.role)}</p>
+                    </div>
                 </div>
-                ${safeUrl(exp.logo_url) ? `<img class="item-thumb" src="${safeUrl(exp.logo_url)}" alt="${esc(exp.company)}">` : '<div class="item-thumb thumb-empty"></div>'}
-                <div class="item-info">
-                    <div class="item-title">${esc(exp.company)}</div>
-                    <div class="item-sub">${esc(exp.role)} · ${esc(exp.date_range)}</div>
+                <div class="record-actions">
+                    <button class="btn btn-edit" type="button" data-action="edit-exp" data-id="${exp.id}" aria-label="Edit ${esc(exp.company)}" title="Edit experience"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+                    <button class="btn btn-danger btn-edit" type="button" data-action="delete-exp" data-id="${exp.id}" aria-label="Delete ${esc(exp.company)}" title="Delete experience"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                 </div>
-                <div class="item-actions">
-                    <button class="btn btn-edit" data-action="edit-exp" data-id="${exp.id}">✏</button>
-                    <button class="btn btn-danger" data-action="delete-exp" data-id="${exp.id}">🗑</button>
-                </div>
-            </div>
-        </article>`).join('') || '<div class="empty">No experience yet. Add one above.</div>'}`;
+            </article>`;
+        }).join('');
+        $('#experience-panel').innerHTML = `<div class="panel-head">
+            <div><h2>Career path</h2><p class="panel-copy">Keep order aligned with public timeline.</p></div>
+            <button class="btn btn-primary add-button" type="button" data-action="add-exp" ${state.saving ? 'disabled' : ''}><i class="fa-solid fa-plus" aria-hidden="true"></i>Add experience</button>
+        </div><div class="record-list">${experience || '<div class="empty">No experience yet. Add first entry.</div>'}</div>`;
     }
 
     function renderComments() {
         $('#comment-count').textContent = String(state.comments.length);
         $('#comment-count').classList.toggle('hidden', state.comments.length === 0);
-        $('#comments-panel').innerHTML = state.comments.map((comment) => `<article class="item comment-item">
-            <div class="item-row align-start">
-                <div class="item-info">
-                    <div class="item-title">${esc(comment.author_name)} <span class="badge">${esc(comment.status)}</span></div>
-                    <div class="item-sub">${esc(comment.author_email || 'anonymous')} · ${esc(comment.created_at || '')}</div>
-                    <p class="comment-body">${esc(comment.body)}</p>
+        const comments = state.comments.map((comment) => {
+            const approved = comment.status === 'approved';
+            return `<article class="record-card comment-card">
+                <div class="record-main">
+                    <div class="record-copy">
+                        <div class="record-kicker"><span class="comment-status${approved ? ' approved' : ''}">${approved ? 'Approved' : 'Needs review'}</span><span>${esc(comment.created_at || '')}</span></div>
+                        <h3 class="record-title">${esc(comment.author_name || 'Anonymous')}</h3>
+                        <p class="record-sub">${esc(comment.author_email || 'anonymous')}\n${esc(comment.body)}</p>
+                    </div>
                 </div>
-                <div class="item-actions">
-                    ${comment.status !== 'approved' ? `<button class="btn btn-primary" data-action="approve-comment" data-id="${comment.id}">Approve</button>` : ''}
-                    <button class="btn btn-danger" data-action="delete-comment" data-id="${comment.id}">🗑</button>
+                <div class="record-actions">
+                    ${approved ? '' : `<button class="btn btn-primary" type="button" data-action="approve-comment" data-id="${comment.id}"><i class="fa-solid fa-check" aria-hidden="true"></i>Approve</button>`}
+                    <button class="btn btn-danger btn-edit" type="button" data-action="delete-comment" data-id="${comment.id}" aria-label="Delete comment from ${esc(comment.author_name || 'anonymous')}" title="Delete comment"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                 </div>
-            </div>
-        </article>`).join('') || '<div class="empty">No comments waiting.</div>';
+            </article>`;
+        }).join('');
+        $('#comments-panel').innerHTML = `<div class="panel-head">
+            <div><h2>Comment moderation</h2><p class="panel-copy">Approve useful replies. Delete spam or unwanted messages.</p></div>
+        </div><div class="record-list">${comments || '<div class="empty">No comments waiting for review.</div>'}</div>`;
+    }
+
+    function renderDashboardMeta() {
+        const labels = { projects: 'Projects', experience: 'Experience', comments: 'Comments' };
+        const pending = state.comments.filter((comment) => comment.status !== 'approved').length;
+        setText('#workspace-title', labels[state.tab] || 'Portfolio');
+        setText('#project-total', String(state.projects.length));
+        setText('#experience-total', String(state.experience.length));
+        setText('#pending-total', String(pending));
+        const status = $('#dashboard-status');
+        const refresh = document.querySelector('[data-action="refresh"]');
+        if (!status) return;
+        status.classList.toggle('is-error', Boolean(state.loadError));
+        status.classList.toggle('is-loading', state.refreshing);
+        status.textContent = state.refreshing
+            ? 'Refreshing content…'
+            : state.loadError || (state.lastSyncedAt ? 'Synced' : 'Ready');
+        refresh?.classList.toggle('is-spinning', state.refreshing);
+        if (refresh) refresh.disabled = state.saving || state.refreshing;
     }
 
     function render() {
@@ -385,6 +537,7 @@
         document.querySelectorAll('.panel').forEach((panel) => panel.classList.add('hidden'));
         $(`#${state.tab}-panel`)?.classList.remove('hidden');
         if (!state.loggedIn) return;
+        renderDashboardMeta();
         renderProjects();
         renderExperience();
         renderComments();
@@ -401,6 +554,7 @@
         }
         const action = target.dataset.action;
         if (state.saving && action) return;
+        if (action === 'refresh') return refreshDashboard();
         if (action === 'add-project') return editModal('Add Project', projectForm(), (data) => saveProject(data));
         if (action === 'edit-project') {
             const project = state.projects.find((item) => Number(item.id) === id);

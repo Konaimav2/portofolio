@@ -31,3 +31,15 @@ test('production config accepts legacy R2 environment aliases', () => {
     },
   });
 });
+
+test('development config uses the Turnstile test secret instead of a live secret', () => {
+  const config = loadConfig({
+    NODE_ENV: 'development',
+    ADMIN_PASSWORD: 'secure-admin-password',
+    DATABASE_URL: 'mysql://portfolio_user:password@127.0.0.1:3306/portfolio',
+    TURNSTILE_SECRET: 'live-secret-must-not-run-locally',
+  });
+
+  assert.equal(config.turnstileSecret, '1x0000000000000000000000000000000AA');
+  assert.equal(config.turnstileTestMode, true);
+});

@@ -14,6 +14,7 @@ function providerErrorCode(errorCodes) {
 function createTurnstileVerifier(config, fetchImpl = fetch) {
   const secret = String(config.turnstileSecret || '');
   const hostnames = new Set(config.turnstileHostnames || []);
+  const testMode = config.turnstileTestMode === true;
   const timeoutMs = Math.min(config.turnstileTimeoutMs || DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
   const now = config.turnstileNow || Date.now;
 
@@ -38,8 +39,8 @@ function createTurnstileVerifier(config, fetchImpl = fetch) {
       if (!data || data.success !== true) {
         return { ok: false, code: providerErrorCode(data?.['error-codes']) };
       }
-      if (!hostnames.has(data.hostname)) return { ok: false, code: 'TURNSTILE_HOSTNAME_MISMATCH' };
-      if (data.action !== expectedAction) return { ok: false, code: 'TURNSTILE_ACTION_MISMATCH' };
+      if (!testMode && !hostnames.has(data.hostname)) return { ok: false, code: 'TURNSTILE_HOSTNAME_MISMATCH' };
+      if (!testMode && data.action !== expectedAction) return { ok: false, code: 'TURNSTILE_ACTION_MISMATCH' };
 
       const challengeTime = Date.parse(data.challenge_ts);
       if (!Number.isFinite(challengeTime)) return { ok: false, code: 'TURNSTILE_TIMESTAMP_INVALID' };
