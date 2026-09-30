@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f2efe8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d0f14" media="(prefers-color-scheme: dark)">
+    <title>Pay Arraffi with QRIS</title>
+    <meta name="description" content="Client and service payments for Arraffi AMF through QRIS. Verify ArraffiPay before confirming payment.">
+    <meta name="author" content="Arraffi AMF">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://arraffi.com/payment/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Arraffi">
+    <meta property="og:url" content="https://arraffi.com/payment/">
+    <meta property="og:title" content="Pay Arraffi with QRIS">
+    <meta property="og:description" content="Open ArraffiPay's QRIS code for an agreed client or service payment.">
+    <meta property="og:image" content="https://banquet.arraffi.com/portfolio/assets/payment-preview.765b695a549b.webp">
+    <meta property="og:image:secure_url" content="https://banquet.arraffi.com/portfolio/assets/payment-preview.765b695a549b.webp">
+    <meta property="og:image:type" content="image/webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="ArraffiPay client-payment page with QRIS preview">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pay Arraffi with QRIS">
+    <meta name="twitter:description" content="Open ArraffiPay's QRIS code for an agreed client or service payment.">
+    <meta name="twitter:image" content="https://banquet.arraffi.com/portfolio/assets/payment-preview.765b695a549b.webp">
+    <meta name="twitter:image:alt" content="ArraffiPay client-payment page with QRIS preview">
+
+    <link rel="icon" type="image/webp" href="https://banquet.arraffi.com/portfolio/assets/site.webp">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://arraffi.com/payment/#page",
+      "url": "https://arraffi.com/payment/",
+      "name": "Pay Arraffi with QRIS",
+      "description": "Client and service payments for Arraffi AMF through QRIS.",
+      "inLanguage": "en",
+      "about": { "@id": "https://arraffi.com/#person" },
+      "isPartOf": { "@id": "https://arraffi.com/#website" }
+    }
+    </script>
+    <script src="../theme-init.js?v=cinematic-10"></script>
+    <link rel="stylesheet" href="../style.css?v=cinematic-10">
+</head>
+<body class="payment-page">
+    <header class="payment-header">
+        <a class="nav-brand" href="../" aria-label="Back to Arraffi portfolio">Arraffi<span>.</span></a>
+        <span class="payment-context">Client payment</span>
+    </header>
+
+    <main class="payment-main">
+        <section class="payment-layout" aria-labelledby="payment-title">
+            <div class="payment-copy">
+                <p class="chapter-label"><span>QRIS</span> Client payment</p>
+                <h1 id="payment-title">Pay Arraffi with QRIS</h1>
+                <p class="payment-lead">For agreed services, projects, or invoices.</p>
+
+                <dl class="payment-facts">
+                    <div><dt>Recipient</dt><dd>ArraffiPay</dd></div>
+                    <div><dt>Method</dt><dd>QRIS</dd></div>
+                    <div><dt>Amount</dt><dd>Enter the amount agreed with Arraffi in your payment application.</dd></div>
+                </dl>
+                <p class="payment-translation" lang="id">Masukkan nominal yang sudah disepakati di aplikasi pembayaran.</p>
+
+                <div class="payment-actions">
+                    <a class="btn-submit payment-primary" href="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg" target="_blank" rel="noopener noreferrer">Open full QR</a>
+                    <button class="btn-ghost payment-secondary" type="button" id="payment-share">Share payment link</button>
+                </div>
+                <p id="payment-share-status" class="form-status" role="status" aria-live="polite"></p>
+
+                <aside class="payment-warning" aria-label="Payment safety check">
+                    <strong>Verify the recipient</strong>
+                    <p>Verify that your payment application shows <strong>ArraffiPay</strong> before confirming.</p>
+                    <p lang="id">Pastikan nama penerima yang tampil adalah <strong>ArraffiPay</strong> sebelum membayar.</p>
+                </aside>
+
+                <div class="payment-support">
+                    <p>Payment issue? Contact Arraffi before sending payment.</p>
+                    <a href="mailto:arraffi@arraffi.com">Email</a>
+                    <a href="https://t.me/konaima" target="_blank" rel="noopener noreferrer">Telegram</a>
+                </div>
+                <a class="payment-back" href="../">Back to portfolio</a>
+            </div>
+
+            <figure class="payment-visual">
+                <img id="payment-qr" src="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg" alt="ArraffiPay QRIS code for agreed client and service payments" width="1136" height="1600" fetchpriority="high" decoding="async">
+                <figcaption>Scan with any QRIS-compatible payment app.<br><span lang="id">Pindai menggunakan aplikasi pembayaran yang mendukung QRIS.</span></figcaption>
+                <p id="payment-qr-unavailable" class="payment-unavailable" hidden>The QR image is temporarily unavailable. Contact Arraffi before sending payment.</p>
+            </figure>
+        </section>
+    </main>
+
+    <footer class="payment-footer">
+        <span>ArraffiPay · QRIS</span>
+        <a href="../">arraffi.com</a>
+    </footer>
+    <script src="../payment.js?v=cinematic-10" defer></script>
+</body>
+</html>

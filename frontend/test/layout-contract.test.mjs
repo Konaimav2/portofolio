@@ -313,7 +313,7 @@ test('both pages use one current cache version for local assets', async () => {
         const versions = [...html.matchAll(/(?:src|href)="(?:\.\.\/|\.\/)?(?:theme-init|style|loader|turnstile|api-client|app|scene|player)\.(?:css|m?js)\?v=([^"]+)"/g)]
             .map(match => match[1]);
         assert.ok(versions.length >= 7);
-        assert.deepEqual(new Set(versions), new Set(['cinematic-9']));
+        assert.deepEqual(new Set(versions), new Set(['cinematic-10']));
     }
 });
 
@@ -487,4 +487,76 @@ test('admin editor uses a grouped workbench layout and switch button', async () 
     assert.match(css, /\.editor-aside\s*\{[^}]*border-left:/s);
     assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*\.editor-layout\s*\{[^}]*grid-template-columns:\s*1fr/s);
     assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*\.editor-aside\s*\{[^}]*border-left:\s*0/s);
+});
+
+test('payment page is a server-readable QRIS utility with verified recipient copy', async () => {
+    const html = await read('../payment/index.html');
+    assert.match(html, /<html lang="en">/);
+    assert.match(html, /<title>Pay Arraffi with QRIS<\/title>/);
+    assert.match(html, /<link rel="canonical" href="https:\/\/arraffi\.com\/payment\/">/);
+    assert.match(html, /property="og:url" content="https:\/\/arraffi\.com\/payment\/"/);
+    assert.match(html, /property="og:image:width" content="1200"/);
+    assert.match(html, /property="og:image:height" content="630"/);
+    assert.match(html, /payment-preview\.765b695a549b\.webp/);
+    assert.match(html, /payment-qris\.841c36ba666e\.jpg/);
+    assert.match(html, />ArraffiPay</);
+    assert.match(html, /Verify that your payment application shows <strong>ArraffiPay<\/strong> before confirming/);
+    assert.match(html, /Pastikan nama penerima yang tampil adalah <strong>ArraffiPay<\/strong>/);
+    assert.match(html, /id="payment-share"/);
+    assert.match(html, /id="payment-share-status"[^>]*role="status"[^>]*aria-live="polite"/);
+    assert.match(html, /href="https:\/\/banquet\.arraffi\.com\/portfolio\/assets\/payment-qris\.841c36ba666e\.jpg"/);
+    assert.equal((html.match(/href="\.\.\/"/g) || []).length, 3);
+    assert.doesNotMatch(html, /href="\/"/);
+    assert.doesNotMatch(html, /<form\b|<input\b|name="amount"|invoice_id|payment_success|transaction_id/i);
+    assert.doesNotMatch(html, /privacy|terms/i);
+});
+
+test('payment route has canonical redirects, cache policy, sitemap entry, and footer discovery', async () => {
+    const [redirects, headers, sitemap, english, indonesian] = await Promise.all([
+        read('../_redirects'),
+        read('../_headers'),
+        read('../sitemap.xml'),
+        read('../index.html'),
+        read('../id/index.html'),
+    ]);
+    assert.match(redirects, /^\/pay\s+\/payment\/\s+301$/m);
+    assert.match(redirects, /^\/payment\s+\/payment\/\s+301$/m);
+    assert.match(headers, /\/payment\/\s+Cache-Control: public, max-age=0, must-revalidate/s);
+    assert.match(sitemap, /<loc>https:\/\/arraffi\.com\/payment\/<\/loc>/);
+    assert.match(english, /href="\/payment\/">Payment<\/a>/);
+    assert.match(indonesian, /href="\/payment\/">Pembayaran<\/a>/);
+});
+
+test('payment JSON-LD has a matching CSP hash', async () => {
+    const { createHash } = await import('node:crypto');
+    const [headers, payment] = await Promise.all([read('../_headers'), read('../payment/index.html')]);
+    const body = payment.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
+    const digest = createHash('sha256').update(body, 'utf8').digest('base64');
+    assert.ok(headers.includes(`'sha256-${digest}'`), 'missing CSP hash for payment JSON-LD');
+});
+
+test('shared frontend cache version advances consistently after payment styling', async () => {
+    for (const path of ['../index.html', '../id/index.html', '../payment/index.html']) {
+        const html = await read(path);
+        assert.match(html, /style\.css\?v=cinematic-10/);
+    }
+    for (const path of ['../index.html', '../id/index.html']) {
+        const html = await read(path);
+        assert.doesNotMatch(html, /cinematic-9/);
+    }
+});
+
+test('payment utility links keep touch targets at least 44 pixels high', async () => {
+    const css = await read('../style.css');
+    assert.match(css, /\.payment-header \.nav-brand,\s*\.payment-support a,\s*\.payment-footer a\s*\{[^}]*display:\s*inline-flex[^}]*min-height:\s*44px[^}]*align-items:\s*center/s);
+});
+
+test('payment image failure hides the broken image before showing recovery copy', async () => {
+    const css = await read('../style.css');
+    assert.match(css, /\.payment-visual img\[hidden\]\s*\{\s*display:\s*none\s*!important;?\s*\}/);
+});
+
+test('payment verification translations keep normal-text contrast', async () => {
+    const css = await read('../style.css');
+    assert.match(css, /\.payment-warning p \+ p\s*\{[^}]*color:\s*var\(--ink\)/s);
 });
