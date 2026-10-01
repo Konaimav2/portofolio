@@ -313,7 +313,7 @@ test('both pages use one current cache version for local assets', async () => {
         const versions = [...html.matchAll(/(?:src|href)="(?:\.\.\/|\.\/)?(?:theme-init|style|loader|turnstile|api-client|app|scene|player)\.(?:css|m?js)\?v=([^"]+)"/g)]
             .map(match => match[1]);
         assert.ok(versions.length >= 7);
-        assert.deepEqual(new Set(versions), new Set(['cinematic-10']));
+        assert.deepEqual(new Set(versions), new Set(['cinematic-11']));
     }
 });
 
@@ -535,14 +535,14 @@ test('payment JSON-LD has a matching CSP hash', async () => {
     assert.ok(headers.includes(`'sha256-${digest}'`), 'missing CSP hash for payment JSON-LD');
 });
 
-test('shared frontend cache version advances consistently after payment styling', async () => {
+test('shared frontend cache version advances consistently after viewer styling', async () => {
     for (const path of ['../index.html', '../id/index.html', '../payment/index.html']) {
         const html = await read(path);
-        assert.match(html, /style\.css\?v=cinematic-10/);
+        assert.match(html, /style\.css\?v=cinematic-11/);
     }
     for (const path of ['../index.html', '../id/index.html']) {
         const html = await read(path);
-        assert.doesNotMatch(html, /cinematic-9/);
+        assert.doesNotMatch(html, /cinematic-10/);
     }
 });
 
@@ -559,4 +559,79 @@ test('payment image failure hides the broken image before showing recovery copy'
 test('payment verification translations keep normal-text contrast', async () => {
     const css = await read('../style.css');
     assert.match(css, /\.payment-warning p \+ p\s*\{[^}]*color:\s*var\(--ink\)/s);
+});
+
+test('payment QR has two progressive image-viewer triggers', async () => {
+    const html = await read('../payment/index.html');
+    assert.equal((html.match(/data-payment-viewer-open/g) || []).length, 2);
+    assert.equal((html.match(/data-payment-viewer-open[^>]*href="https:\/\/banquet\.arraffi\.com\/portfolio\/assets\/payment-qris\.841c36ba666e\.jpg"/g) || []).length, 2);
+    assert.match(html, /data-payment-viewer-open[^>]*aria-label="Open ArraffiPay QRIS image viewer"/);
+    assert.match(html, /class="payment-viewer-hint"[^>]*>Click to enlarge</);
+    assert.match(html, />View full QR<\/a>/);
+});
+
+test('payment viewer uses a labelled native dialog with complete controls', async () => {
+    const html = await read('../payment/index.html');
+    assert.match(html, /<dialog id="payment-viewer"[^>]*aria-labelledby="payment-viewer-title"/);
+    assert.match(html, /id="payment-viewer-title"[^>]*>ArraffiPay QRIS</);
+    assert.match(html, /id="payment-viewer-stage"/);
+    assert.match(html, /id="payment-viewer-image"/);
+    assert.match(html, /id="payment-viewer-zoom-out"/);
+    assert.match(html, /id="payment-viewer-zoom"[^>]*role="status"[^>]*aria-live="polite"/);
+    assert.match(html, /id="payment-viewer-zoom-in"/);
+    assert.match(html, /id="payment-viewer-reset"/);
+    assert.match(html, /id="payment-viewer-close"/);
+    assert.match(html, /class="payment-viewer-original"[^>]*href="https:\/\/banquet\.arraffi\.com\/portfolio\/assets\/payment-qris\.841c36ba666e\.jpg"/);
+});
+
+test('payment viewer leaves social-preview metadata unchanged', async () => {
+    const html = await read('../payment/index.html');
+    assert.match(html, /name="twitter:card" content="summary_large_image"/);
+    assert.match(html, /payment-preview\.765b695a549b\.webp/);
+    assert.match(html, /property="og:image:width" content="1200"/);
+    assert.match(html, /property="og:image:height" content="630"/);
+});
+
+test('payment viewer CSS owns gestures, modality, and hidden state', async () => {
+    const css = await read('../style.css');
+    assert.match(css, /\.payment-viewer-stage\s*\{[^}]*touch-action:\s*none/s);
+    assert.match(css, /\.payment-viewer:not\(\[open\]\)\s*\{[^}]*display:\s*none/s);
+    assert.match(css, /\.payment-viewer-image\[hidden\]\s*\{[^}]*display:\s*none\s*!important/s);
+    assert.match(css, /body\.payment-viewer-open\s*\{[^}]*overflow:\s*hidden/s);
+    assert.match(css, /\.payment-viewer-control\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/s);
+    assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.payment-viewer-image\s*\{[^}]*transition:\s*none/s);
+});
+
+test('payment viewer fits the intrinsic QR dimensions before applying zoom', async () => {
+    const script = await read('../payment.js');
+    const css = await read('../style.css');
+    assert.match(
+        script,
+        /viewerFitSize\(\s*image\.naturalWidth,\s*image\.naturalHeight,\s*stage\.clientWidth,\s*stage\.clientHeight,\s*32\s*\)/s
+    );
+    assert.match(script, /image\.style\.width\s*=\s*`\$\{size\.width\}px`/);
+    assert.match(script, /image\.style\.height\s*=\s*`\$\{size\.height\}px`/);
+    assert.ok((script.match(/syncBaseSize\(\)/g) || []).length >= 3);
+    assert.match(css, /\.payment-viewer-image\s*\{[^}]*max-width:\s*none[^}]*max-height:\s*none/s);
+    assert.doesNotMatch(css, /\.payment-viewer-image\s*\{[^}]*max-height:\s*calc\(100% - 32px\)/s);
+});
+
+test('payment viewer enables safe areas and gates hover feedback to precise pointers', async () => {
+    const html = await read('../payment/index.html');
+    const css = await read('../style.css');
+    assert.match(html, /name="viewport" content="[^"]*viewport-fit=cover[^"]*"/);
+    assert.doesNotMatch(html, /name="viewport" content="[^"]*(?:user-scalable=no|maximum-scale=1)[^"]*"/);
+    assert.match(
+        css,
+        /@media \(hover:\s*hover\) and \(pointer:\s*fine\)\s*\{[\s\S]*\.payment-visual:hover[\s\S]*\.payment-viewer-control:hover[\s\S]*\.payment-viewer-original:hover[\s\S]*\}/
+    );
+    assert.doesNotMatch(css, /\.payment-viewer-control:hover,\s*\.payment-viewer-control:focus-visible/);
+});
+
+test('viewer release advances shared frontend cache version consistently', async () => {
+    for (const path of ['../index.html', '../id/index.html', '../payment/index.html']) {
+        const html = await read(path);
+        assert.match(html, /cinematic-11/);
+        assert.doesNotMatch(html, /cinematic-10/);
+    }
 });

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#f2efe8" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0d0f14" media="(prefers-color-scheme: dark)">
     <title>Pay Arraffi with QRIS</title>
@@ -43,8 +43,8 @@
       "isPartOf": { "@id": "https://arraffi.com/#website" }
     }
     </script>
-    <script src="../theme-init.js?v=cinematic-10"></script>
-    <link rel="stylesheet" href="../style.css?v=cinematic-10">
+    <script src="../theme-init.js?v=cinematic-11"></script>
+    <link rel="stylesheet" href="../style.css?v=cinematic-11">
 </head>
 <body class="payment-page">
     <header class="payment-header">
@@ -67,7 +67,7 @@
                 <p class="payment-translation" lang="id">Masukkan nominal yang sudah disepakati di aplikasi pembayaran.</p>
 
                 <div class="payment-actions">
-                    <a class="btn-submit payment-primary" href="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg" target="_blank" rel="noopener noreferrer">Open full QR</a>
+                    <a class="btn-submit payment-primary" data-payment-viewer-open href="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg">View full QR</a>
                     <button class="btn-ghost payment-secondary" type="button" id="payment-share">Share payment link</button>
                 </div>
                 <p id="payment-share-status" class="form-status" role="status" aria-live="polite"></p>
@@ -86,18 +86,48 @@
                 <a class="payment-back" href="../">Back to portfolio</a>
             </div>
 
-            <figure class="payment-visual">
-                <img id="payment-qr" src="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg" alt="ArraffiPay QRIS code for agreed client and service payments" width="1136" height="1600" fetchpriority="high" decoding="async">
-                <figcaption>Scan with any QRIS-compatible payment app.<br><span lang="id">Pindai menggunakan aplikasi pembayaran yang mendukung QRIS.</span></figcaption>
-                <p id="payment-qr-unavailable" class="payment-unavailable" hidden>The QR image is temporarily unavailable. Contact Arraffi before sending payment.</p>
-            </figure>
+            <a class="payment-visual payment-viewer-trigger" data-payment-viewer-open href="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg" aria-label="Open ArraffiPay QRIS image viewer">
+                <figure class="payment-visual-content">
+                    <span class="payment-viewer-hint">Click to enlarge</span>
+                    <img id="payment-qr" src="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg" alt="ArraffiPay QRIS code for agreed client and service payments" width="1136" height="1600" fetchpriority="high" decoding="async">
+                    <figcaption>Scan with any QRIS-compatible payment app.<br><span lang="id">Pindai menggunakan aplikasi pembayaran yang mendukung QRIS.</span></figcaption>
+                    <p id="payment-qr-unavailable" class="payment-unavailable" hidden>The QR image is temporarily unavailable. Contact Arraffi before sending payment.</p>
+                </figure>
+            </a>
         </section>
     </main>
+
+    <dialog id="payment-viewer" class="payment-viewer" aria-labelledby="payment-viewer-title">
+        <div class="payment-viewer-shell">
+            <header class="payment-viewer-toolbar">
+                <h2 id="payment-viewer-title">ArraffiPay QRIS</h2>
+                <div class="payment-viewer-controls" role="toolbar" aria-label="Image viewer controls">
+                    <button class="payment-viewer-control" type="button" id="payment-viewer-zoom-out" aria-label="Zoom out">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M8 11h6M16.5 16.5 21 21"></path></svg>
+                    </button>
+                    <output id="payment-viewer-zoom" class="payment-viewer-zoom" role="status" aria-live="polite">100%</output>
+                    <button class="payment-viewer-control" type="button" id="payment-viewer-zoom-in" aria-label="Zoom in">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M8 11h6M11 8v6M16.5 16.5 21 21"></path></svg>
+                    </button>
+                    <button class="payment-viewer-control payment-viewer-reset" type="button" id="payment-viewer-reset">Reset</button>
+                    <a class="payment-viewer-original" href="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg" target="_blank" rel="noopener noreferrer">Open original</a>
+                    <button class="payment-viewer-control" type="button" id="payment-viewer-close" aria-label="Close image viewer">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+                    </button>
+                </div>
+            </header>
+            <div id="payment-viewer-stage" class="payment-viewer-stage" aria-describedby="payment-viewer-hint">
+                <img id="payment-viewer-image" class="payment-viewer-image" src="https://banquet.arraffi.com/portfolio/assets/payment-qris.841c36ba666e.jpg" alt="Full-resolution ArraffiPay QRIS code" width="1136" height="1600" draggable="false">
+                <p id="payment-viewer-error" class="payment-viewer-error" hidden>The full-resolution QR image is unavailable. Close the viewer and contact Arraffi before sending payment.</p>
+            </div>
+            <p id="payment-viewer-hint" class="payment-viewer-instructions">Drag to move · Scroll or pinch to zoom</p>
+        </div>
+    </dialog>
 
     <footer class="payment-footer">
         <span>ArraffiPay · QRIS</span>
         <a href="../">arraffi.com</a>
     </footer>
-    <script src="../payment.js?v=cinematic-10" defer></script>
+    <script src="../payment.js?v=cinematic-11" defer></script>
 </body>
 </html>
